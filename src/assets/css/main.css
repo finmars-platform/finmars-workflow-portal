@@ -1,0 +1,69 @@
+@import 'material-icons.css';
+@import './base-theme.css';
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@import 'core/fm.css';
+
+.fm_list {
+	background: var(--base-backgroundColor);
+	max-height: 95vh;
+}
+.fm_list_item {
+	display: flex;
+	align-items: center;
+	height: 36px;
+	padding: 0 16px;
+	transition: 0.3s;
+	white-space: nowrap;
+	color: var(--primary-color);
+}
+.fm_list_item:not([disabled]) {
+	cursor: pointer;
+}
+
+.fm_list_item + .fm_list_item {
+	border-top: 1px solid #e0e0e0;
+}
+
+input:focus-visible {
+	outline-offset: 0px;
+	outline: none;
+}
+
+input[type="file"] {
+	display: none;
+}
+
+/*region Scrollbar*/
+::-webkit-scrollbar-thumb, .split_panel_main::-webkit-scrollbar-thumb {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb, .split_panel_main::-webkit-scrollbar-thumb {
+	background-color: #85736E;
+	border-radius: 10px;
+	border: 2px solid var(--base-backgroundColor);
+}
+::-webkit-scrollbar-thumb:active, .split_panel_main:active::-webkit-scrollbar-thumb {
+	background-color: rgb(152, 90, 70);
+}
+::-webkit-scrollbar-thumb:hover, .split_panel_main::-webkit-scrollbar-thumb {
+	border: 0;
+}
+
+::-webkit-scrollbar:hover, .split_panel_main::-webkit-scrollbar {
+	width: 7px;
+}
+::-webkit-scrollbar-track, .split_panel_main::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-track:hover, .split_panel_main::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar, .split_panel_main::-webkit-scrollbar {
+	height: 8px;
+	width: 7px;
+}
+/*endregion*/

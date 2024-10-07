@@ -1,0 +1,149 @@
+# https://blog.callr.tech/building-docker-images-with-gitlab-ci-best-practices/
+
+stages:
+  - versioning
+  - build
+  - push
+  - pushVersion
+
+default:
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    - docker info
+    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin registry.finmars.com
+
+variables:
+  # When using dind service, you must instruct docker to talk with the
+  # daemon started inside of the service. The daemon is available with
+  # a network connection instead of the default /var/run/docker.sock socket.
+  #
+  # The 'docker' hostname is the alias of the service container as described at
+  # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services
+  #
+  # If you're using GitLab Runner 12.7 or earlier with the Kubernetes executor and Kubernetes 1.6 or earlier,
+  # the variable must be set to tcp://localhost:2375 because of how the
+  # Kubernetes executor connects services to the job container
+  # DOCKER_HOST: tcp://localhost:2375
+  #
+  DOCKER_HOST: tcp://docker:2375
+  #
+  # This instructs Docker not to start over TLS.
+  DOCKER_TLS_CERTDIR: ""
+
+# This new job will handle the versioning mechanism
+Versioning:
+  image: python:3.9
+  stage: versioning
+  before_script:
+    - pip install haikunator
+  script:
+    - |
+      if [[ $CI_COMMIT_REF_NAME == *"-rc" || $CI_COMMIT_REF_NAME == *"-stable" ]]; then
+
+        # Fancy Name Generation using Haikunator
+        FANCY_NAME=$(python -c 'from haikunator import Haikunator; print(Haikunator().haikunate(token_length=0))')
+
+        # Construct full version name
+        FULL_VERSION_NAME="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID-$FANCY_NAME"
+
+        # Export the generated version name for later stages to use
+        echo "IMAGE_TAG=$(echo $FULL_VERSION_NAME)" >> build.env
+
+      fi
+  artifacts:
+    reports:
+      dotenv: build.env
+  only:
+    - /^.*-(rc|stable)$/
+
+Build:
+  stage: build
+  script:
+    # fetches the latest image (not failing if image is not found)
+    - IMAGE_TAG=${IMAGE_TAG:-$CI_COMMIT_REF_NAME}
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --pull --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$IMAGE_TAG .
+    - docker push $CI_REGISTRY_IMAGE:$IMAGE_TAG
+
+Push Version:
+  stage: pushVersion
+  image: python:3.9
+  before_script:
+      - apt-get update
+      - apt install curl git jq -y
+  script:
+      - |
+
+          if [[ "$CI_COMMIT_REF_NAME" == *"-rc" ]]; then
+              CHANNEL="rc"
+          elif [[ "$CI_COMMIT_REF_NAME" == *"-stable" ]]; then
+              CHANNEL="stable"
+          else
+              CHANNEL="unknown"
+          fi
+
+          NOTES=$(git log -1 --pretty=%B)
+          JSON_PAYLOAD=$(jq -n \
+            --arg app "$CI_PROJECT_NAME" \
+            --arg version "$IMAGE_TAG" \
+            --arg build_number "$CI_PIPELINE_ID" \
+            --arg notes "$NOTES" \
+            --arg channel "$CHANNEL" \
+            '{app: $app, version: $version, build_number: $build_number, notes: $notes, channel: $channel}')
+
+          echo "----- Build Payload -----"
+          echo "$JSON_PAYLOAD"
+          echo "-------------------------"
+
+          response=$(curl -s -w "\n%{http_code}" --request POST https://license.finmars.com/api/v1/version/ --header "Content-Type: application/json" --data "$JSON_PAYLOAD")
+
+          # Extract the status code from the last line of output
+          status_code=$(echo "$response" | tail -n1)
+
+          # Remove the last line (status code) to isolate the response body
+          response_body=$(echo "$response" | head -n-1)
+
+          if [[ "$status_code" -ne "201" ]]; then
+            echo "Build failed. Status Code: $status_code"
+            echo "Response Body: $response_body"
+            exit 1
+          else
+            echo "Build succeeded."
+          fi
+  only:
+    - /^.*-(rc|stable)$/
+    - tags
+
+
+Push latest:
+  variables:
+    # We are just playing with Docker here.
+    # We do not need GitLab to clone the source code.
+    GIT_STRATEGY: none
+  stage: push
+  only:
+    # Only "master" should be tagged "latest"
+    - master
+  script:
+    # Because we have no guarantee that this job will be picked up by the same runner
+    # that built the image in the previous step, we pull it again locally
+    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    # Then we tag it "latest"
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:latest
+    # Annnd we push it.
+    - docker push $CI_REGISTRY_IMAGE:latest
+
+Push tag:
+  variables:
+    # Again, we do not need the source code here. Just playing with Docker.
+    GIT_STRATEGY: none
+  stage: push
+  only:
+    # We want this job to be run on tags only.
+    - tags
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME

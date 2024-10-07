@@ -1,0 +1,29 @@
+/*v-tooltip directive*/
+
+.v-popper--theme-tooltip {
+	.v-popper__wrapper {
+		.v-popper__inner {
+			padding: 3px 6px;
+			border-radius: 4px;
+			color: rgba(255, 255, 255, 0.8);
+			background-color: rgba(100, 100, 100, 0.8);
+			font-size: 11px;
+		}
+		.v-popper__arrow-outer {
+			border-color: rgba(100, 100, 100, 0.8);
+		}
+	}
+}
+
+.v-popper--theme-error-tooltip {
+	.v-popper__wrapper {
+		.v-popper__inner {
+			background-color: rgba(240, 90, 34, 0.8);
+			font-size: 13px;
+		}
+		.v-popper__arrow-outer {
+			border-color: rgba(240, 90, 34, 0.8);
+		}
+	}
+
+}

@@ -1,0 +1,49 @@
+{
+	"private": true,
+	"scripts": {
+		"build": "nuxt build ",
+		"dev": "nuxt --rootDir=./w/ dev",
+		"dev-local": "PORT=3004 NUXT_APP_BUILD_ASSETS_DIR=/realm00000/w/_nuxt/ API_HOST=http://0.0.0.0:8084 AUTH_HOST=http://0.0.0.0:8083/authorizer nuxt --rootDir=./w/ dev",
+		"start": "PORT=8080 node .output/server/index.mjs",
+		"generate": "nuxt generate",
+		"preview": "nuxt preview",
+		"test": "vitest",
+		"coverage": "vitest run --coverage"
+	},
+	"devDependencies": {
+		"@nuxtjs/tailwindcss": "^6.12.0",
+		"eslint": "^8.24.0",
+		"eslint-plugin-vue": "^9.6.0",
+		"happy-dom": "^10.5.1",
+		"jsdom": "^20.0.3",
+		"nuxt": "^3.13.2",
+		"postcss-mixins": "^10.0.1",
+		"prettier": "2.6.2",
+		"unplugin-auto-import": "^0.16.6",
+		"unplugin-vue-components": "^0.25.1",
+		"vite-plugin-commonjs": "^0.10.1"
+	},
+	"dependencies": {
+		"@chenfengyuan/vue-qrcode": "^2.0.0",
+		"@finmars/ui": "^1.0.5",
+		"@formbricks/js": "1.1.2",
+		"@kyvg/vue3-notification": "^2.4.1",
+		"@pinia/nuxt": "^0.5.1",
+		"click-outside-vue3": "^4.0.1",
+		"dayjs": "^1.11.7",
+		"floating-vue": "^5.2.2",
+		"keycloak-js": "^21.1.2",
+		"pdfjs-dist": "^4.0.269",
+		"pinia": "^2.0.24",
+		"rete": "^2.0.5",
+		"rete-area-plugin": "^2.1.1",
+		"rete-connection-plugin": "^2.0.5",
+		"rete-render-utils": "^2.0.3",
+		"rete-vue-plugin": "^2.1.1",
+		"rete-vue-render-plugin": "^0.5.2",
+		"swiper": "^10.0.4",
+		"vue": "^3.2.39",
+		"vue-matomo": "^4.2.0",
+		"vue3-ace-editor": "^2.2.2"
+	}
+}

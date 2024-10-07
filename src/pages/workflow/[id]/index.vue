@@ -1,0 +1,565 @@
+<template>
+
+	<div class="workflow-detail-page" v-if="workflow">
+
+		<!-- Left side: Rete.js Workflow Graph -->
+		<div class="workflow-graph-section">
+			<div id="editor" class="editor"></div>
+		</div>
+
+		<!-- Divider for Resizing -->
+		<div class="resizer" @mousedown="initResize"></div>
+
+		<!-- Right side: Workflow Details -->
+		<div class="workflow-detail-section">
+			<h1>Workflow</h1>
+
+			<div style="display: flex">
+
+				<fm-btn @click="refresh()">
+					Refresh
+				</fm-btn>
+				<fm-btn @click="openRelaunchDialog()">
+					Relaunch
+				</fm-btn>
+				<fm-btn @click="cancelWorkflow()" v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
+					Cancel
+				</fm-btn>
+
+				<fm-btn @click="activeTask = null" v-if="activeTask">
+					Show Workflow
+				</fm-btn>
+
+
+			</div>
+
+			<div class="workflow-detail-content-section" v-if="!activeTask">
+
+				<table>
+					<tbody>
+					<tr>
+						<td>ID</td>
+						<td>{{ workflow.id }}</td>
+					</tr>
+					<tr>
+						<td>User Code</td>
+						<td>{{ workflow.user_code }}</td>
+					</tr>
+					<tr>
+						<td>Status</td>
+						<td>{{ workflow.status }}</td>
+					</tr>
+					<tr>
+						<td>Created</td>
+						<td>{{ $formatDate(workflow.created) }}</td>
+					</tr>
+					<tr>
+						<td>Modified</td>
+						<td>{{ $formatDate(workflow.modified) }}</td>
+					</tr>
+
+					</tbody>
+				</table>
+
+				<h3>Payload</h3>
+				<v-ace-editor
+					v-model:value="workflowPayloadPretty"
+					@init="editorInit"
+					lang="json"
+					theme="monokai"
+					style="height: 300px;width: 100%;"/>
+
+				<h3>Tasks</h3>
+				<ul>
+					<div v-for="task in workflow.tasks" :key="task.id" @click="activeTask = task" class="task-item">
+						{{ task.id }} {{ task.name }}
+					</div>
+
+				</ul>
+
+			</div>
+
+			<div v-if="activeTask" class="active-task-section">
+				Active Task
+
+				<div>
+					ID: {{ activeTask.id }}
+				</div>
+				<strong>{{ activeTask.name }}</strong> - Status: {{ activeTask.status }}
+				<div>
+					Celery Task ID: {{ activeTask.celery_task_id }}
+				</div>
+
+				<h2>Log</h2>
+				<pre class="log-container">{{ activeTask.log }}</pre>
+
+				<h2>Payload</h2>
+				<v-ace-editor
+					v-model:value="activeTask.payloadPretty"
+					@init="editorInit"
+					lang="json"
+					theme="monokai"
+					style="height: 300px;width: 100%;"/>
+
+				<h2>Result</h2>
+				<v-ace-editor
+					v-model:value="activeTask.resultPretty"
+					@init="editorInit"
+					lang="json"
+					theme="monokai"
+					style="height: 300px;width: 100%;"/>
+
+			</div>
+
+			<fm-btn>
+				<a href="/flower" target="_blank">View in Flower</a>
+			</fm-btn>
+
+		</div>
+
+
+	</div>
+
+	<div v-if="!workflow">
+		Loading...
+	</div>
+
+	<fm-base-modal
+		title="Relaunch Workflow"
+		v-model="isRelaunchDialogOpen"
+	>
+
+		<p>
+			Note that a new workflow will be created, so the current one will not be changed and will still be available
+			in your history.
+		</p>
+
+
+		<p style="margin-top: 1rem">Payload</p>
+		<v-ace-editor
+			v-model:value="relaunchPayload"
+			@init="editorInit"
+			lang="json"
+			theme="monokai"
+			style="height: 300px;width: 100%;"/>
+
+		<template #footer>
+			<div class="flex flex-row justify-between">
+				<fm-btn type="text" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</fm-btn>
+
+				<fm-btn type="filled" @click="relaunch($event)">Relaunch</fm-btn>
+			</div>
+		</template>
+	</fm-base-modal>
+
+</template>
+
+<script setup>
+
+import {VAceEditor} from 'vue3-ace-editor';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-monokai';
+
+
+import {onMounted, ref} from 'vue';
+import {ClassicPreset, NodeEditor} from "rete";
+import {AreaExtensions, AreaPlugin} from 'rete-area-plugin';
+import {Presets, VuePlugin} from 'rete-vue-plugin';
+
+import WorkflowNode from "../../../components/WorkflowNode.vue";
+
+
+const router = useRouter();
+const route = useRoute();
+const store = useStore()
+
+definePageMeta({
+	middleware: "auth",
+});
+
+let isRelaunchDialogOpen = ref(false);
+let relaunchPayload = ref('')
+
+let workflowPayloadPretty = ref('')
+let workflow = ref({});
+let editor;
+let editorArea;
+
+let activeTask = ref(null)
+
+async function getWorkflow() {
+
+	workflow.value = await useApi('workflow.get', {params: {id: route.params.id}});
+
+	workflowPayloadPretty.value = JSON.stringify(workflow.value.payload, null, 4)
+
+	workflow.value.tasks.forEach((item) => {
+
+		item.payloadPretty = JSON.stringify(item.payload, null, 4)
+		item.resultPretty = JSON.stringify(item.result, null, 4)
+
+	})
+
+	await initGraph();
+}
+
+async function init() {
+
+	await getWorkflow()
+
+}
+
+function editorInit(payloadEditor) {
+	payloadEditor.setHighlightActiveLine(false);
+	payloadEditor.setShowPrintMargin(false);
+	payloadEditor.setFontSize(14)
+	payloadEditor.setBehavioursEnabled(true);
+
+	// payloadEditor.focus();
+	payloadEditor.navigateFileStart();
+}
+
+async function initGraph() {
+
+	await editor.clear();
+
+	// Example: Create and add a node to the editor
+	async function createNode(id, name, x, y) {
+		const node = await new ClassicPreset.Node(name)
+		node.position = [x, y];
+		node.name = name;
+
+		node.id = id;
+
+		return node;
+	}
+
+	// Example: Create and add nodes
+
+	const nodeMap = new Map();  // Map to hold node references by node_id
+	const taskMap = new Map();  // Map to hold node references by node_id
+
+	if (workflow.value.workflow_template_object) {
+
+		const nodes = workflow.value.workflow_template_object.data.workflow.nodes;
+		const tasks = workflow.value.tasks;
+
+
+		// Iterate over nodes to render them in their defined positions
+		for (const node of nodes) {
+			console.log('node', node);
+
+			await editor.addNode(node);
+
+			await editorArea.translate(node.id, {x: node.position.x, y: node.position.y});
+
+			nodeMap.set(node.id, node);
+
+		}
+
+		for (const task of tasks) {
+			// Retrieve the node associated with this task by `node_id`
+			const node = nodeMap.get(task.node_id);
+
+			if (node) {
+				// Attach relevant task information to the node, e.g., status, logs, etc.
+				node.data = {
+					...node.data,
+					status: task.status,
+					log: task.log,
+					taskId: task.id,
+					userCode: task.name,
+					nodeId: task.node_id
+				};
+
+				taskMap.set(task.id, task);
+
+				console.log(`Linked task to node:`, {taskId: task.id, nodeId: task.node_id});
+			}
+		}
+
+		// Render connections after all nodes are created
+		for (const connectionItem of workflow.value.workflow_template_object.data.workflow.connections) {
+
+			const sourceNode = await editor.getNode(connectionItem.source);
+			const targetNode = await editor.getNode(connectionItem.target);
+
+			const connection = new ClassicPreset.Connection(sourceNode, connectionItem.sourceOutput, targetNode, connectionItem.targetInput)
+
+			await editor.addConnection(
+				connection
+			);
+		}
+
+	} else {
+
+		await workflow.value.tasks.forEach(async (item, index) => {
+
+			const node = await createNode(item.name, 100, 100);
+
+			await editor.addNode(node);
+
+			console.log('node', node);
+
+			await editorArea.translate(node.id, {x: 100 * index, y: 100});
+
+		})
+
+	}
+
+	editorArea.addPipe(async context => {
+
+		// console.log('context', context);
+
+		if (context.type === 'nodepicked') {
+
+			const node = await editor.getNode(context.data.id);
+
+			console.log('node', node);
+			console.log('taskMap', taskMap);
+
+			activeTask.value = taskMap.get(node.data.taskId)
+			// node.position = context.data.position
+
+			// console.log('editorArea.context', context)
+			console.log('activeTask', activeTask.value)
+
+		}
+		return context
+	})
+
+
+	AreaExtensions.zoomAt(editorArea, editor.getNodes());
+
+}
+
+
+// Load workflow details on page load
+
+async function refresh() {
+	await init();
+}
+
+async function openRelaunchDialog() {
+
+	isRelaunchDialogOpen.value = true;
+
+	relaunchPayload.value = JSON.stringify(workflow.value.payload, null, 4)
+
+}
+
+async function relaunch() {
+
+	const result = await useApi('runWorkflow.post', {
+		body: JSON.stringify({
+			user_code: workflow.value.user_code,
+			payload: relaunchPayload.value ? JSON.parse(relaunchPayload.value) : {},
+		})
+	})
+
+	isRelaunchDialogOpen.value = false;
+
+	router.push(`/${store.realm_code}/${store.space_code}/w/workflow/${result.id}`)
+
+
+}
+
+async function cancelWorkflow() {
+	let isConfirm = await useConfirm({
+		text: `Are you sure you want to cancel Workflow?`,
+	})
+	if (!isConfirm) return false
+
+	const result = await useApi('cancelWorkflow.post', {
+		params: {id: route.params.id},
+		body: JSON.stringify({})
+	})
+
+	await refresh();
+
+}
+
+async function setupGraph() {
+
+	const container = document.getElementById('editor');
+
+	// Initialize the Rete.js editor
+	editor = new NodeEditor('demo@0.1.0', container);
+
+	editorArea = new AreaPlugin(container);
+	const render = new VuePlugin();
+
+	// Apply "classic" preset for default node appearance
+	render.addPreset(Presets.classic.setup({
+		customize: {
+			node(context) {
+				console.log(context.payload, WorkflowNode);
+				// if (context.payload.label === "WorkflowNode") {
+				// 	return WorkflowNode;
+				// }
+				// return Presets.classic.Node;
+				return WorkflowNode;
+			}
+		}
+	}));
+
+	editor.use(editorArea);
+	editorArea.use(render);
+}
+
+// Rete.js Setup
+onMounted(async () => {
+
+	await setupGraph();
+	await init();
+
+
+});
+
+let initialX = 0;  // Track the initial mouse position
+
+function initResize(event) {
+	initialX = event.clientX;  // Record the initial position of the mouse
+
+	// Attach the event listeners for resizing
+	document.addEventListener('mousemove', resize);
+	document.addEventListener('mouseup', stopResize);
+
+	// Prevent default dragging behavior
+	event.preventDefault();
+}
+
+function resize(event) {
+	// Calculate the change in the mouse position
+	const deltaX = event.clientX - initialX;
+
+	// Calculate the new width for the left section
+	const leftSection = document.querySelector('.workflow-graph-section');
+	const rightSection = document.querySelector('.workflow-detail-section');
+
+	// Get the current width of the left section in pixels
+	const leftSectionWidth = leftSection.getBoundingClientRect().width;
+
+	// Calculate the new width of the left section (adding deltaX)
+	let newLeftWidth = leftSectionWidth + deltaX;
+
+	// Ensure the new width is within reasonable bounds (e.g., between 10% and 90% of the total width)
+	const totalWidth = leftSection.parentNode.getBoundingClientRect().width;
+	if (newLeftWidth < totalWidth * 0.1) newLeftWidth = totalWidth * 0.1;
+	if (newLeftWidth > totalWidth * 0.9) newLeftWidth = totalWidth * 0.9;
+
+	// Set the new widths
+	leftSection.style.flex = `0 0 ${newLeftWidth}px`;
+	rightSection.style.flex = `0 0 ${totalWidth - newLeftWidth}px`;
+
+	// Update initialX for the next movement
+	initialX = event.clientX;
+}
+
+function stopResize() {
+	document.removeEventListener('mousemove', resize);
+	document.removeEventListener('mouseup', stopResize);
+}
+
+</script>
+
+<style lang="postcss" scoped>
+.workflow-detail-page {
+	display: flex;
+	height: 100vh;
+	position: relative;
+}
+
+/* Left side for Rete.js Editor */
+.workflow-detail-page {
+	display: flex;
+	height: 100vh;
+	position: relative;
+}
+
+.workflow-graph-section {
+	flex: 0 0 70%; /* Initial width for the left side */
+	background-color: #f0f0f0;
+	padding: 10px;
+	transition: width 0.2s ease;
+}
+
+.resizer {
+	width: 5px; /* Increase the width to make it easier to hover over */
+	cursor: col-resize;
+	background-color: #ccc;
+	position: relative;
+	flex: 0 0 5px; /* Initial width for the right side */
+	z-index: 1; /* Ensure the resizer is above other content */
+}
+
+.resizer:hover {
+	background-color: #aaa; /* Darken the color slightly when hovered */
+}
+
+
+#editor {
+	width: 100%;
+	height: 100%;
+	border: 1px solid #ccc;
+}
+
+/* Right side for Workflow Details */
+.workflow-detail-section {
+	flex: 0 0 29%; /* Initial width for the right side */
+	background-color: #fff;
+	padding: 4px;
+	border-left: 1px solid #ccc;
+	overflow-y: auto;
+	transition: width 0.2s ease;
+}
+
+
+h2, h3 {
+	margin-top: 0;
+}
+
+table {
+	width: 100%;
+	margin-bottom: 20px;
+}
+
+table td {
+	padding: 8px;
+}
+
+ul {
+	list-style-type: none;
+	padding-left: 0;
+}
+
+li {
+	margin-bottom: 10px;
+}
+
+.task-item {
+	border: 1px solid #ddd;
+	margin: 4px;
+	cursor: pointer;
+	padding: 4px 8px;
+
+	&:hover {
+		background: #ddd;
+	}
+}
+
+.active-task-section {
+	margin: 4px;
+	margin-top: 16px;
+	margin-left: 8px;
+	padding: 4px 8px;
+	border: 1px solid #ddd;
+}
+
+
+.log-container {
+	padding: 4px;
+	background: #000;
+	color: #fff;
+}
+</style>
