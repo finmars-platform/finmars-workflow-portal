@@ -5,9 +5,27 @@
 		:style="nodeStyles()"
 		data-testid="node"
 	>
-		<div class="title" data-testid="title">{{data.data.taskId}} {{ data.label }}</div>
+		<div class="title" data-testid="title">{{ data.data.node.name }}</div>
 		<div>
-			{{data.data.user_code}}
+			<div>Node User Code: {{ data.data.node.user_code }}</div>
+			<div>Workflow User Code: {{ data.data.workflow.user_code }}</div>
+			<div>Workflow Name {{ data.data.workflow.name }}</div>
+
+			<div>{{ data.data.node.notes }}</div>
+
+			<!-- Source Code Editor for the node -->
+
+			<div v-if="data.data.node.type === 'source_code' || data.data.node.type === 'condition'">
+				<p>Source Code:</p>
+				<v-ace-editor
+					v-model:value="data.data.source_code"
+					@init="sourceCodeEditorInit"
+					lang="python"
+					theme="monokai"
+					style="height: 200px; width: 100%;"
+				/>
+			</div>
+
 		</div>
 		<!-- Outputs-->
 		<div
@@ -79,8 +97,12 @@
 </template>
 
 <script lang="js">
-import { ref, defineComponent } from 'vue'
-import { Ref } from 'rete-vue-plugin'
+import {defineComponent} from 'vue'
+import {Ref} from 'rete-vue-plugin'
+import {VAceEditor} from 'vue3-ace-editor';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/theme-monokai';
 
 function sortByIndex(entries) {
 	entries.sort((a, b) => {
@@ -109,9 +131,18 @@ export default defineComponent({
 		},
 		outputs() {
 			return sortByIndex(Object.entries(this.data.outputs))
+		},
+		sourceCodeEditorInit(editor) {
+			editor.setHighlightActiveLine(false)
+			editor.setShowPrintMargin(false)
+			editor.setFontSize(14)
+			editor.setBehavioursEnabled(true)
+			editor.focus()
+			editor.navigateFileStart()
 		}
 	},
 	components: {
+		VAceEditor,
 		Ref
 	}
 })

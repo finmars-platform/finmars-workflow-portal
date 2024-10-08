@@ -490,7 +490,6 @@ function stopResize() {
 	background-color: #ccc;
 	position: relative;
 	flex: 0 0 5px; /* Initial width for the right side */
-	z-index: 1; /* Ensure the resizer is above other content */
 }
 
 .resizer:hover {
@@ -561,5 +560,8 @@ li {
 	padding: 4px;
 	background: #000;
 	color: #fff;
+	white-space: pretty;
+	max-height: 200px;
+	overflow: auto;
 }
 </style>

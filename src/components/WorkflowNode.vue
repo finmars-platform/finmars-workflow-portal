@@ -5,9 +5,13 @@
 		:style="nodeStyles()"
 		data-testid="node"
 	>
-		<div class="title" data-testid="title">{{data.data.taskId}} {{ data.label }}</div>
+		<div class="title" data-testid="title">{{data.data.taskId}} {{data.data.node.name}}</div>
 		<div>
-			{{data.data.user_code}}
+			<div>Node User Code: {{data.data.node.user_code}}</div>
+			<div>Workflow User Code: {{data.data.workflow.user_code}}</div>
+			<div>Workflow Name {{data.data.workflow.name}}</div>
+
+			<div>{{data.data.node.notes}}</div>
 		</div>
 		<div>
 			{{data.data.status}}

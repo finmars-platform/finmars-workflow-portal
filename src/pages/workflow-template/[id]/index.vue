@@ -67,12 +67,72 @@
 
 
 				<div>
-					<label for="workflow-select">Add Workflow Block</label>
-					<select v-model="selectedWorkflow" id="workflow-select" style="border: 1px solid #ddd; width: 100%;">
-						<option v-for="workflow in availableWorkflows" :key="workflow.user_code" :value="workflow">
-							{{ workflow.user_code }}
+
+					<div style="margin-top: 10px;">
+						<label for="node-user-code">Node Name (Unique Step Name):</label>
+						<input id="node-user-code" v-model="nodeName" type="text" placeholder="e.g., Step 1"
+							   style="width: 100%;"/>
+					</div>
+
+					<div style="margin-top: 10px;">
+						<label for="node-user-code">Node User Code (Unique Step Name ASCII only):</label>
+						<input id="node-user-code" v-model="nodeUserCode" type="text" placeholder="e.g., step1"
+							   style="width: 100%;"/>
+					</div>
+
+					<div style="margin-top: 10px;">
+						<label for="node-user-code">Node Notes:</label>
+						<input id="node-user-code" v-model="nodeNotes" type="text"
+							   placeholder="This task is going to do..." style="width: 100%;"/>
+					</div>
+
+					<label for="workflow-select">Select Node Type</label>
+					<select v-model="nodeType" id="workflow-select" style="border: 1px solid #ddd; width: 100%;">
+						<option :key="'workflow'" :value="'workflow'">
+							Workflow (external module)
+						</option>
+						<option :key="'source_code'" :value="'source_code'">
+							Source Code
+						</option>
+						<option :key="'condition'" :value="'condition'">
+							Condition
 						</option>
 					</select>
+
+
+					<div v-if="nodeType === 'workflow'">
+						<label for="workflow-select">Add Workflow Block</label>
+						<select v-model="selectedWorkflow" id="workflow-select"
+								style="border: 1px solid #ddd; width: 100%;">
+							<option v-for="workflow in availableWorkflows" :key="workflow.user_code" :value="workflow">
+								{{ workflow.user_code }}
+							</option>
+						</select>
+					</div>
+
+
+					<div v-if="nodeType === 'source_code'" style="margin-top: 10px;">
+						<label for="node-source-code">Enter Source Code:</label>
+						<v-ace-editor
+							v-model:value="sourceCode"
+							@init="payloadEditorInit"
+							lang="python"
+							theme="monokai"
+							style="height: 150px; width: 100%;"
+						/>
+					</div>
+
+					<div v-if="nodeType === 'condition'" style="margin-top: 10px;">
+						<label for="node-condition-code">Enter Condition Logic (must return {"result": True} or {"result": False}):</label>
+						<v-ace-editor
+							v-model:value="conditionCode"
+							@init="payloadEditorInit"
+							lang="python"
+							theme="monokai"
+							style="height: 150px; width: 100%;"
+						/>
+					</div>
+
 					<fm-btn @click="addBlock()">Add Block</fm-btn>
 				</div>
 
@@ -80,7 +140,7 @@
 				<ul>
 					<div v-for="block in blocks" :key="block.id"
 						 style="display: flex; align-items: center; border: 1px solid #ddd; margin: 4px; padding: 4px 8px; justify-content: space-between">
-						{{ block.name }}
+						{{ block.node.user_code }} {{ block.name }}
 						<fm-btn @click="removeBlock(block.id)">Remove</fm-btn>
 					</div>
 				</ul>
@@ -126,6 +186,7 @@
 
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/theme-monokai';
 
 import {onMounted, ref} from 'vue';
@@ -135,6 +196,7 @@ import {ConnectionPlugin, Presets as ConnectionPresets} from "rete-connection-pl
 import {Presets, VuePlugin} from 'rete-vue-plugin';
 
 import WorkflowNode from "~/components/WorkflowNode.vue";
+import WorkflowTemplateNode from "~/components/WorkflowTemplateNode.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -150,6 +212,22 @@ let defaultPayload = ref('')
 
 const selectedWorkflow = ref(null);
 let availableWorkflows = ref([]);
+let nodeUserCode = ref("");
+let nodeName = ref("");
+let nodeType = ref("workflow");
+let nodeNotes = ref("");
+let sourceCode = ref(`
+def main(self, *args, **kwargs):
+    self.log("Hello World")
+
+    return {"status": "success"}
+`);
+let conditionCode = ref(`
+def main(self, *args, **kwargs):
+    self.log("Hello World")
+
+    return {"result": True}
+`);
 
 async function getWorkflows() {
 	availableWorkflows.value = await useApi('definitionList.get')
@@ -164,25 +242,102 @@ let editorArea;
 const blocks = ref([]);
 
 async function addBlock() {
-	if (!selectedWorkflow.value) return;
-	const {name, user_code} = selectedWorkflow.value;
-	const node = await createNode(name, user_code, 100, 100);
+
+
+
+	// Ensure the `node_user_code` is provided and unique
+	if (!nodeUserCode.value) {
+		alert("Please enter a unique Node User Code");
+		return;
+	}
+
+	if (!nodeName.value) {
+		alert("Please enter a unique Node User Code");
+		return;
+	}
+
+	const existingNode = blocks.value.find(block => block.node_user_code === nodeUserCode.value);
+	if (existingNode) {
+		alert("Node User Code must be unique. Please choose a different code.");
+		return;
+	}
+
+	let workflow = {}
+
+	if (selectedWorkflow.value) {
+		workflow.name = selectedWorkflow.value.name
+		workflow.user_code = selectedWorkflow.value.user_code
+	}
+
+	let source_code = ''
+
+	if (sourceCode.value) {
+		source_code = sourceCode.value
+	} else {
+		source_code = conditionCode.value
+	}
+
+	// Create a new node with the provided user_code and node_user_code
+	const node = await createNode(workflow, nodeUserCode.value, nodeName.value, nodeType.value, nodeNotes.value, source_code, 100, 100);
 	await editor.addNode(node);
-	blocks.value.push({id: node.id, name, user_code});
+	blocks.value.push({id: node.id,  node: {name: nodeName.value, user_code: nodeUserCode.value}});
+
+	// Reset `nodeUserCode` for future additions
+	nodeUserCode.value = "";
+	nodeNotes.value = "";
+	nodeName.value = "";
+	sourceCode.value = `
+def main(self, *args, **kwargs):
+    self.log("Hello World")
+
+    return {"status": "success"}
+`;
+	conditionCode.value = `
+def main(self, *args, **kwargs):
+    self.log("Hello World")
+
+    return True
+`;
 }
 
-async function createNode(name, user_code, x, y) {
+
+async function createNode(workflow, node_user_code, node_name, node_type, node_notes, node_source_code, x, y) {
 	const node = await new ClassicPreset.Node(name);
 	node.position = [x, y];
-	node.name = name;
-	node.data = {user_code}; // store the user_code in node data
-	// node.addOutput(new ClassicPreset.Output('out', 'Output', new ClassicPreset.Socket("socket")));
+	node.name = node_name;
+	node.data = {
+		node: {
+			// System defined user code (like `com.finmars.example-etl:download`)
+			user_code: node_user_code, // Custom defined by the user, like "step1"
+			name: node_name, // Custom defined by the user, like "step1"
+			notes: node_notes,
+			type: node_type
+		},
+		workflow: {
+			name: workflow.name,
+			user_code: workflow.user_code
+		},
+		source_code: node_source_code
 
-	const outputSocket = new ClassicPreset.Socket("socket");
-	node.addOutput('out', new ClassicPreset.Input(outputSocket));
+	};
 
+	// Add sockets for input and output connections
 	const inputSocket = new ClassicPreset.Socket("socket");
-	node.addInput('in', new ClassicPreset.Input(inputSocket));
+	node.addInput("in", new ClassicPreset.Input(inputSocket));
+
+	// Add output sockets
+	if (node_type === 'condition') {
+		// Conditional nodes have two outputs: true and false
+		const outputTrueSocket = new ClassicPreset.Socket("socket_true");
+		const outputFalseSocket = new ClassicPreset.Socket("socket_false");
+		node.addOutput("out_true", new ClassicPreset.Output(outputTrueSocket, 'socket_true', false));
+		node.addOutput("out_false", new ClassicPreset.Output(outputFalseSocket, 'socket_false', false));
+	} else {
+		// Normal nodes have a single output
+		const outputSocket = new ClassicPreset.Socket("socket");
+		node.addOutput("out", new ClassicPreset.Output(outputSocket));
+	}
+
 	return node;
 }
 
@@ -242,12 +397,11 @@ async function initGraph() {
 		blocks.value = []
 
 
-
 		for (const node of workflow.value.data.workflow.nodes) {
 
 			console.log('node', node);
 
-			blocks.value.push({id: node.id, name: node.name, user_code: node.data.user_code});
+			blocks.value.push({id: node.id, name: node.name, node: node.data.node});
 
 			await editor.addNode(node);
 
@@ -410,7 +564,7 @@ async function setupGraph() {
 				// 	return WorkflowNode;
 				// }
 				// return Presets.classic.Node;
-				return WorkflowNode;
+				return WorkflowTemplateNode;
 			}
 		}
 	}));
