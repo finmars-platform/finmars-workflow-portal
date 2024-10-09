@@ -38,7 +38,10 @@ export default {
 		get: prefix + '/schedule/'
 	},
 	schedule: {
-		get: prefix + '/schedule/{id}/'
+		get: prefix + '/schedule/{id}/',
+		put: prefix + '/schedule/{id}/',
+		patch: prefix + '/schedule/{id}/',
+		delete: prefix + '/schedule/{id}/',
 	},
 
 

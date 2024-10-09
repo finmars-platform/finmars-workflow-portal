@@ -1,187 +1,190 @@
 <template>
 
-	<div class="workflow-detail-page" v-if="workflow">
+	<div>
+		<div class="workflow-detail-page" v-if="workflow">
 
-		<!-- Left side: Rete.js Workflow Graph -->
-		<div class="workflow-graph-section">
-			<div id="editor" class="editor"></div>
-		</div>
-
-		<!-- Divider for Resizing -->
-		<div class="resizer" @mousedown="initResize"></div>
-
-		<!-- Right side: Workflow Details -->
-		<div class="workflow-detail-section">
-			<h1>Workflow</h1>
-
-			<div style="display: flex">
-
-				<fm-btn @click="refresh()">
-					Refresh
-				</fm-btn>
-				<fm-btn @click="openRelaunchDialog()">
-					Relaunch
-				</fm-btn>
-				<fm-btn @click="cancelWorkflow()" v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
-					Cancel
-				</fm-btn>
-
-				<fm-btn @click="activeTask = null" v-if="activeTask">
-					Show Workflow
-				</fm-btn>
-
-
+			<!-- Left side: Rete.js Workflow Graph -->
+			<div class="workflow-graph-section">
+				<div id="editor" class="editor"></div>
 			</div>
 
-			<div>
-				<fm-btn @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
-					Pause
-				</fm-btn>
-				<fm-btn @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
-					Resume
-				</fm-btn>
-			</div>
+			<!-- Divider for Resizing -->
+			<div class="resizer" @mousedown="initResize"></div>
 
-			<div class="workflow-detail-content-section" v-if="!activeTask">
+			<!-- Right side: Workflow Details -->
+			<div class="workflow-detail-section">
+				<h1>Workflow</h1>
 
-				<table>
-					<tbody>
-					<tr>
-						<td>ID</td>
-						<td>{{ workflow.id }}</td>
-					</tr>
-					<tr>
-						<td>User Code</td>
-						<td>{{ workflow.user_code }}</td>
-					</tr>
-					<tr>
-						<td>Status</td>
-						<td>{{ workflow.status }}</td>
-					</tr>
-					<tr>
-						<td>Created</td>
-						<td>{{ $formatDate(workflow.created) }}</td>
-					</tr>
-					<tr>
-						<td>Modified</td>
-						<td>{{ $formatDate(workflow.modified) }}</td>
-					</tr>
+				<div style="display: flex">
 
-					</tbody>
-				</table>
+					<fm-btn @click="refresh()">
+						Refresh
+					</fm-btn>
+					<fm-btn @click="openRelaunchDialog()">
+						Relaunch
+					</fm-btn>
+					<fm-btn @click="cancelWorkflow()" v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
+						Cancel
+					</fm-btn>
 
-				<h3>Payload</h3>
-				<v-ace-editor
-					v-model:value="workflowPayloadPretty"
-					@init="editorInit"
-					lang="json"
-					theme="monokai"
-					style="height: 300px;width: 100%;"/>
+					<fm-btn @click="activeTask = null" v-if="activeTask">
+						Show Workflow
+					</fm-btn>
 
-				<h3>Tasks</h3>
-				<ul>
-					<div v-for="task in workflow.tasks" :key="task.id" @click="activeTask = task" class="task-item">
-						{{ task.id }} {{ task.name }}
+
+				</div>
+
+				<div>
+					<fm-btn @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
+						Pause
+					</fm-btn>
+					<fm-btn @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
+						Resume
+					</fm-btn>
+				</div>
+
+				<div class="workflow-detail-content-section" v-if="!activeTask">
+
+					<table>
+						<tbody>
+						<tr>
+							<td>ID</td>
+							<td>{{ workflow.id }}</td>
+						</tr>
+						<tr>
+							<td>User Code</td>
+							<td>{{ workflow.user_code }}</td>
+						</tr>
+						<tr>
+							<td>Status</td>
+							<td>{{ workflow.status }}</td>
+						</tr>
+						<tr>
+							<td>Created</td>
+							<td>{{ $formatDate(workflow.created) }}</td>
+						</tr>
+						<tr>
+							<td>Modified</td>
+							<td>{{ $formatDate(workflow.modified) }}</td>
+						</tr>
+
+						</tbody>
+					</table>
+
+					<h3>Payload</h3>
+					<v-ace-editor
+						v-model:value="workflowPayloadPretty"
+						@init="editorInit"
+						lang="json"
+						theme="monokai"
+						style="height: 300px;width: 100%;"/>
+
+					<h3>Tasks</h3>
+					<ul>
+						<div v-for="task in workflow.tasks" :key="task.id" @click="activeTask = task" class="task-item">
+							{{ task.id }} {{ task.name }}
+						</div>
+
+					</ul>
+
+				</div>
+
+				<div v-if="activeTask" class="active-task-section">
+					Active Task
+
+					<div>
+						ID: {{ activeTask.id }}
+					</div>
+					<strong>{{ activeTask.name }}</strong> - Status: {{ activeTask.status }}
+					<div>
+						Celery Task ID: {{ activeTask.celery_task_id }}
 					</div>
 
-				</ul>
+					<h2>Log</h2>
+					<pre class="log-container">{{ activeTask.log }}</pre>
+
+					<h2>Payload</h2>
+					<v-ace-editor
+						v-model:value="activeTask.payloadPretty"
+						@init="editorInit"
+						lang="json"
+						theme="monokai"
+						style="height: 300px;width: 100%;"/>
+
+					<h2>Result</h2>
+					<v-ace-editor
+						v-model:value="activeTask.resultPretty"
+						@init="editorInit"
+						lang="json"
+						theme="monokai"
+						style="height: 300px;width: 100%;"/>
+
+				</div>
+
+				<fm-btn>
+					<a href="/flower" target="_blank">View in Flower</a>
+				</fm-btn>
 
 			</div>
 
-			<div v-if="activeTask" class="active-task-section">
-				Active Task
-
-				<div>
-					ID: {{ activeTask.id }}
-				</div>
-				<strong>{{ activeTask.name }}</strong> - Status: {{ activeTask.status }}
-				<div>
-					Celery Task ID: {{ activeTask.celery_task_id }}
-				</div>
-
-				<h2>Log</h2>
-				<pre class="log-container">{{ activeTask.log }}</pre>
-
-				<h2>Payload</h2>
-				<v-ace-editor
-					v-model:value="activeTask.payloadPretty"
-					@init="editorInit"
-					lang="json"
-					theme="monokai"
-					style="height: 300px;width: 100%;"/>
-
-				<h2>Result</h2>
-				<v-ace-editor
-					v-model:value="activeTask.resultPretty"
-					@init="editorInit"
-					lang="json"
-					theme="monokai"
-					style="height: 300px;width: 100%;"/>
-
-			</div>
-
-			<fm-btn>
-				<a href="/flower" target="_blank">View in Flower</a>
-			</fm-btn>
 
 		</div>
 
+		<div v-if="!workflow">
+			Loading...
+		</div>
+
+		<fm-base-modal
+			title="Relaunch Workflow"
+			v-model="isRelaunchDialogOpen"
+		>
+
+			<p>
+				Note that a new workflow will be created, so the current one will not be changed and will still be available
+				in your history.
+			</p>
+
+
+			<p style="margin-top: 1rem">Payload</p>
+			<v-ace-editor
+				v-model:value="relaunchPayload"
+				@init="editorInit"
+				lang="json"
+				theme="monokai"
+				style="height: 300px;width: 100%;"/>
+
+			<template #footer>
+				<div class="flex flex-row justify-between">
+					<fm-btn type="text" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</fm-btn>
+
+					<fm-btn type="filled" @click="relaunch($event)">Relaunch</fm-btn>
+				</div>
+			</template>
+		</fm-base-modal>
+
+		<fm-base-modal
+			title="Resume Workflow"
+			v-model="isResumeDialogOpen"
+		>
+
+			<p style="margin-top: 1rem">Payload</p>
+			<v-ace-editor
+				v-model:value="resumePayload"
+				@init="editorInit"
+				lang="json"
+				theme="monokai"
+				style="height: 300px;width: 100%;"/>
+
+			<template #footer>
+				<div class="flex flex-row justify-between">
+					<fm-btn type="text" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</fm-btn>
+
+					<fm-btn type="filled" @click="resumeWorkflow($event)">Relaunch</fm-btn>
+				</div>
+			</template>
+		</fm-base-modal>
 
 	</div>
-
-	<div v-if="!workflow">
-		Loading...
-	</div>
-
-	<fm-base-modal
-		title="Relaunch Workflow"
-		v-model="isRelaunchDialogOpen"
-	>
-
-		<p>
-			Note that a new workflow will be created, so the current one will not be changed and will still be available
-			in your history.
-		</p>
-
-
-		<p style="margin-top: 1rem">Payload</p>
-		<v-ace-editor
-			v-model:value="relaunchPayload"
-			@init="editorInit"
-			lang="json"
-			theme="monokai"
-			style="height: 300px;width: 100%;"/>
-
-		<template #footer>
-			<div class="flex flex-row justify-between">
-				<fm-btn type="text" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</fm-btn>
-
-				<fm-btn type="filled" @click="relaunch($event)">Relaunch</fm-btn>
-			</div>
-		</template>
-	</fm-base-modal>
-
-	<fm-base-modal
-		title="Resume Workflow"
-		v-model="isResumeDialogOpen"
-	>
-
-		<p style="margin-top: 1rem">Payload</p>
-		<v-ace-editor
-			v-model:value="resumePayload"
-			@init="editorInit"
-			lang="json"
-			theme="monokai"
-			style="height: 300px;width: 100%;"/>
-
-		<template #footer>
-			<div class="flex flex-row justify-between">
-				<fm-btn type="text" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</fm-btn>
-
-				<fm-btn type="filled" @click="resumeWorkflow($event)">Relaunch</fm-btn>
-			</div>
-		</template>
-	</fm-base-modal>
 
 </template>
 
@@ -652,5 +655,106 @@ li {
 	white-space: pretty;
 	max-height: 200px;
 	overflow: auto;
+}
+
+.workflow-detail-section {
+	flex: 0 0 30%; /* Adjusted width */
+	background-color: #ffffff;
+	padding: 20px; /* Increased padding for a cleaner layout */
+	border-left: 1px solid #ddd; /* Separate left and right sections visually */
+	overflow-y: auto;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add slight shadow for depth */
+}
+
+.workflow-detail-section h1 {
+	font-size: 1.8rem;
+	font-weight: bold;
+	margin-bottom: 20px;
+	color: var(--primary-color); /* Assuming there's a defined primary color */
+}
+
+.action-buttons,
+.pause-resume-buttons {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 20px; /* Ensure buttons are separated from other content */
+}
+
+.action-buttons fm-btn,
+.pause-resume-buttons fm-btn {
+	padding: 10px 15px;
+	background-color: #007bff; /* Primary button color */
+	color: white;
+	border-radius: 5px;
+	transition: background-color 0.3s;
+}
+
+.action-buttons fm-btn:hover,
+.pause-resume-buttons fm-btn:hover {
+	background-color: #0056b3; /* Darken button on hover */
+}
+
+.workflow-detail-content-section table {
+	width: 100%;
+	margin-bottom: 20px;
+	border-collapse: collapse; /* Clean table borders */
+}
+
+.workflow-detail-content-section table td {
+	padding: 10px; /* Increased padding for better readability */
+	border-bottom: 1px solid #ddd;
+	text-align: left;
+}
+
+.workflow-detail-content-section table th {
+	background-color: #f5f5f5;
+	font-weight: bold;
+}
+
+.workflow-detail-content-section h3 {
+	font-size: 1.5rem;
+	font-weight: bold;
+	margin-top: 20px;
+	color: var(--primary-color); /* Consistent heading color */
+}
+
+.task-list {
+	margin-top: 10px;
+}
+
+.task-item {
+	padding: 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.task-item:hover {
+	background-color: #f1f1f1;
+}
+
+.active-task-section {
+	margin-top: 20px;
+	padding: 15px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background-color: #f9f9f9;
+}
+
+.log-container {
+	background-color: #000;
+	color: #fff;
+	padding: 10px;
+	overflow-y: auto;
+	max-height: 200px;
+	border-radius: 4px;
+	font-family: monospace; /* For log readability */
+}
+
+.modal-footer {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 20px;
 }
 </style>

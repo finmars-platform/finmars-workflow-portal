@@ -1,54 +1,57 @@
 <template>
-	<div>
 
-		<table>
+	<div class="workflow-table-container">
+
+		<!-- Workflow Definitions Table -->
+		<table class="workflow-table">
 			<thead>
 			<tr>
 				<th>Name</th>
 				<th>User Code</th>
 				<th>Is Manager</th>
-				<th></th>
+				<th>Actions</th>
 			</tr>
 			</thead>
 			<tbody>
-			<tr v-for="item in definitions">
+			<tr v-for="item in definitions" :key="item.user_code">
 				<td>{{ item.name }}</td>
 				<td>{{ item.user_code }}</td>
-				<td>{{ item.is_manager }}</td>
-				<th>
-					<fm-btn @click="openRunWorkflowDialog($event, item)">Run</fm-btn>
-				</th>
+				<td>{{ item.is_manager ? 'Yes' : 'No' }}</td>
+				<td>
+					<fm-btn class="run-btn" @click="openRunWorkflowDialog($event, item)">Run</fm-btn>
+				</td>
 			</tr>
 			</tbody>
 		</table>
 
-	</div>
+		<!-- Run Workflow Modal -->
+		<fm-base-modal
+			title="Run Workflow"
+			v-model="isRunWorkflowDialog"
+			class="run-workflow-modal"
+		>
+			<h3>{{ activeWorkflowItem?.user_code }}</h3>
 
-
-	<fm-base-modal
-		title="Run Workflow"
-		v-model="isRunWorkflowDialog"
-	>
-
-		<h2>{{ activeWorkflowItem?.user_code }}</h2>
-
-
-		<p style="margin-top: 1rem">Payload</p>
-		<v-ace-editor
-			v-model:value="activeWorkflowPayload"
-			@init="editorInit"
-			lang="json"
-			theme="monokai"
-			style="height: 300px;width: 600px;"/>
-
-		<template #footer>
-			<div class="flex flex-row justify-between">
-				<fm-btn type="text" @click="isRunWorkflowDialog = !isRunWorkflowDialog">Cancel</fm-btn>
-
-				<fm-btn type="filled" @click="runWorkflow($event, activeWorkflowItem)">Run</fm-btn>
+			<div class="payload-editor-container">
+				<p>Payload:</p>
+				<v-ace-editor
+					v-model:value="activeWorkflowPayload"
+					@init="editorInit"
+					lang="json"
+					theme="monokai"
+					class="payload-editor"
+				/>
 			</div>
-		</template>
-	</fm-base-modal>
+
+			<template #footer>
+				<div class="modal-footer">
+					<fm-btn type="text" @click="isRunWorkflowDialog = !isRunWorkflowDialog">Cancel</fm-btn>
+					<fm-btn type="filled" @click="runWorkflow($event, activeWorkflowItem)">Run</fm-btn>
+				</div>
+			</template>
+		</fm-base-modal>
+
+	</div>
 
 </template>
 
@@ -65,12 +68,10 @@ definePageMeta({
 });
 
 let isRunWorkflowDialog = ref(false);
-let activeWorkflowItem = ref(null)
-let activeWorkflowPayload = ref('')
+let activeWorkflowItem = ref(null);
+let activeWorkflowPayload = ref('');
 
 function openRunWorkflowDialog($event, item) {
-	// alert("Run Workflow " + item.user_code)
-
 	isRunWorkflowDialog.value = true;
 	activeWorkflowItem.value = item;
 
@@ -78,19 +79,16 @@ function openRunWorkflowDialog($event, item) {
 		activeWorkflowPayload.value = JSON.stringify(item.default_payload, null, 4);
 	}
 
-	console.log('openRunWorkflowDialog', activeWorkflowItem)
-	console.log('isRunWorkflowDialog', isRunWorkflowDialog)
-
+	console.log('openRunWorkflowDialog', activeWorkflowItem);
 }
 
 async function runWorkflow($event, item) {
-
 	const result = await useApi('runWorkflow.post', {
 		body: JSON.stringify({
 			user_code: item.user_code,
 			payload: activeWorkflowPayload.value ? JSON.parse(activeWorkflowPayload.value) : {},
 		})
-	})
+	});
 
 	console.log('result', result);
 
@@ -98,26 +96,90 @@ async function runWorkflow($event, item) {
 
 	useNotify({
 		type: 'success',
-		title: 'Workflow is Executed ' + item.user_code,
-		text: 'Task ID: ' + result.id
-	})
+		title: 'Workflow Executed',
+		text: `Task ID: ${result.id}`
+	});
 }
 
 function editorInit(editor) {
 	editor.setHighlightActiveLine(false);
 	editor.setShowPrintMargin(false);
-	editor.setFontSize(14)
+	editor.setFontSize(14);
 	editor.setBehavioursEnabled(true);
-
 	editor.focus();
 	editor.navigateFileStart();
 }
 
-const definitions = await useApi('definitionList.get')
+const definitions = await useApi('definitionList.get');
 console.log('definitions', definitions);
 
 </script>
 
 <style scoped lang="postcss">
+.workflow-table-container {
+	margin: 20px;
+}
+
+.workflow-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.workflow-table th, .workflow-table td {
+	padding: 12px;
+	text-align: left;
+	border-bottom: 1px solid #ddd;
+}
+
+.workflow-table th {
+	background-color: #f0f0f0;
+	font-weight: bold;
+}
+
+.workflow-table tr:nth-child(even) {
+	background-color: #f9f9f9;
+}
+
+.workflow-table tr:hover {
+	background-color: #f1f1f1;
+}
+
+.run-btn {
+	background-color: #007bff;
+	color: white;
+	border-radius: 4px;
+	padding: 8px 12px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.run-btn:hover {
+	background-color: #0056b3;
+}
+
+.run-workflow-modal {
+	max-width: 700px;
+	width: 100%;
+}
+
+.payload-editor-container {
+	margin-top: 1rem;
+}
+
+.payload-editor {
+	width: 100%;
+	height: 300px;
+	border: 1px solid #ddd;
+}
+
+.modal-footer {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 1rem;
+}
+
+.modal-footer fm-btn {
+	padding: 10px 20px;
+}
 
 </style>

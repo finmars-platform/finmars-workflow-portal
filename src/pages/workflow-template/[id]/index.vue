@@ -11,21 +11,20 @@
 		<div class="workflow-detail-section">
 			<h2>Workflow Template Details</h2>
 
-			<div style="display: flex">
-
-				<fm-btn @click="refresh()">
+			<div class="button-group">
+				<fm-btn @click="refresh()" class="action-btn">
 					Refresh
 				</fm-btn>
-				<fm-btn @click="openLaunchDialog()">
+				<fm-btn @click="openLaunchDialog()" class="action-btn">
 					Launch
 				</fm-btn>
-
-				<fm-btn @click="save()">
+				<fm-btn @click="save()" class="action-btn">
 					Save
 				</fm-btn>
 			</div>
 
-			<table>
+			<!-- Workflow Information Table -->
+			<table class="workflow-info-table">
 				<tbody>
 				<tr>
 					<td>ID</td>
@@ -50,137 +49,98 @@
 				</tbody>
 			</table>
 
-			<div style="margin: 10px 0">
-
-				<p style="margin-top: 1rem">Default Payload</p>
+			<!-- Default Payload Section -->
+			<div class="payload-section">
+				<h3>Default Payload</h3>
 				<v-ace-editor
 					v-model:value="defaultPayload"
 					@init="payloadEditorInit"
 					lang="json"
 					theme="monokai"
 					style="height: 300px;width: 100%;"/>
-
 			</div>
 
+			<!-- Workflow Designer Section -->
 			<div class="workflow-template-designer-section">
 				<h2>Workflow Designer</h2>
 
-
-				<div>
-
-					<div style="margin-top: 10px;">
-						<label for="node-user-code">Node Name (Unique Step Name):</label>
-						<input id="node-user-code" v-model="nodeName" type="text" placeholder="e.g., Step 1"
-							   style="width: 100%;"/>
-					</div>
-
-					<div style="margin-top: 10px;">
-						<label for="node-user-code">Node User Code (Unique Step Name ASCII only):</label>
-						<input id="node-user-code" v-model="nodeUserCode" type="text" placeholder="e.g., step1"
-							   style="width: 100%;"/>
-					</div>
-
-					<div style="margin-top: 10px;">
-						<label for="node-user-code">Node Notes:</label>
-						<input id="node-user-code" v-model="nodeNotes" type="text"
-							   placeholder="This task is going to do..." style="width: 100%;"/>
-					</div>
-
-					<label for="workflow-select">Select Node Type</label>
-					<select v-model="nodeType" id="workflow-select" style="border: 1px solid #ddd; width: 100%;">
-						<option :key="'workflow'" :value="'workflow'">
-							Workflow (external module)
-						</option>
-						<option :key="'source_code'" :value="'source_code'">
-							Source Code
-						</option>
-						<option :key="'condition'" :value="'condition'">
-							Condition
-						</option>
-					</select>
-
-
-					<div v-if="nodeType === 'workflow'">
-						<label for="workflow-select">Add Workflow Block</label>
-						<select v-model="selectedWorkflow" id="workflow-select"
-								style="border: 1px solid #ddd; width: 100%;">
-							<option v-for="workflow in availableWorkflows" :key="workflow.user_code" :value="workflow">
-								{{ workflow.user_code }}
-							</option>
-						</select>
-					</div>
-
-
-					<div v-if="nodeType === 'source_code'" style="margin-top: 10px;">
-						<label for="node-source-code">Enter Source Code:</label>
-						<v-ace-editor
-							v-model:value="sourceCode"
-							@init="payloadEditorInit"
-							lang="python"
-							theme="monokai"
-							style="height: 150px; width: 100%;"
-						/>
-					</div>
-
-					<div v-if="nodeType === 'condition'" style="margin-top: 10px;">
-						<label for="node-condition-code">Enter Condition Logic (must return {"result": True} or {"result": False}):</label>
-						<v-ace-editor
-							v-model:value="conditionCode"
-							@init="payloadEditorInit"
-							lang="python"
-							theme="monokai"
-							style="height: 150px; width: 100%;"
-						/>
-					</div>
-
-					<fm-btn @click="addBlock()">Add Block</fm-btn>
+				<!-- Node Name -->
+				<div class="input-group">
+					<label for="node-user-code">Node Name (Unique Step Name):</label>
+					<input id="node-user-code" v-model="nodeName" type="text" placeholder="e.g., Step 1"
+						   class="input-field"/>
 				</div>
 
-				<!-- Display existing blocks (from editor) -->
-				<ul>
-					<div v-for="block in blocks" :key="block.id"
-						 style="display: flex; align-items: center; border: 1px solid #ddd; margin: 4px; padding: 4px 8px; justify-content: space-between">
-						{{ block.node.user_code }} {{ block.name }}
+				<!-- Node User Code -->
+				<div class="input-group">
+					<label for="node-user-code">Node User Code (Unique Step Name ASCII only):</label>
+					<input id="node-user-code" v-model="nodeUserCode" type="text" placeholder="e.g., step1"
+						   class="input-field"/>
+				</div>
+
+				<!-- Node Notes -->
+				<div class="input-group">
+					<label for="node-notes">Node Notes:</label>
+					<input id="node-notes" v-model="nodeNotes" type="text"
+						   placeholder="This task is going to do..." class="input-field"/>
+				</div>
+
+				<!-- Node Type Selector -->
+				<div class="input-group">
+					<label for="workflow-select">Select Node Type</label>
+					<select v-model="nodeType" id="workflow-select" class="input-field">
+						<option value="workflow">Workflow (external module)</option>
+						<option value="source_code">Source Code</option>
+						<option value="condition">Condition</option>
+					</select>
+				</div>
+
+				<!-- Conditional Sections -->
+				<div v-if="nodeType === 'workflow'" class="input-group">
+					<label for="workflow-select">Add Workflow Block</label>
+					<select v-model="selectedWorkflow" id="workflow-select" class="input-field">
+						<option v-for="workflow in availableWorkflows" :key="workflow.user_code" :value="workflow">
+							{{ workflow.user_code }}
+						</option>
+					</select>
+				</div>
+
+				<div v-if="nodeType === 'source_code'" class="input-group">
+					<label for="node-source-code">Enter Source Code:</label>
+					<v-ace-editor
+						v-model:value="sourceCode"
+						@init="payloadEditorInit"
+						lang="python"
+						theme="monokai"
+						style="height: 150px; width: 100%;"/>
+				</div>
+
+				<div v-if="nodeType === 'condition'" class="input-group">
+					<label for="node-condition-code">Enter Condition Logic:</label>
+					<v-ace-editor
+						v-model:value="conditionCode"
+						@init="payloadEditorInit"
+						lang="python"
+						theme="monokai"
+						style="height: 150px; width: 100%;"/>
+				</div>
+
+				<fm-btn @click="addBlock()" class="action-btn">Add Block</fm-btn>
+
+				<!-- Display Existing Blocks -->
+				<ul class="block-list">
+					<div v-for="block in blocks" :key="block.id" class="block-item">
+						{{ block.node.user_code }} - {{ block.name }}
 						<fm-btn @click="removeBlock(block.id)">Remove</fm-btn>
 					</div>
 				</ul>
 
 			</div>
 
-
 		</div>
 	</div>
 
-	<fm-base-modal
-		title="Launch Workflow"
-		v-model="isLaunchDialogOpen"
-	>
-
-		<p>
-			Note that a new workflow will be created, so the current one will not be changed and will still be available
-			in your history.
-		</p>
-
-
-		<p style="margin-top: 1rem">Payload</p>
-		<v-ace-editor
-			v-model:value="launchPayload"
-			@init="payloadEditorInit"
-			lang="json"
-			theme="monokai"
-			style="height: 300px;width: 100%;"/>
-
-		<template #footer>
-			<div class="flex flex-row justify-between">
-				<fm-btn type="text" @click="isLaunchDialogOpen = !isLaunchDialogOpen">Cancel</fm-btn>
-
-				<fm-btn type="filled" @click="relaunch($event)">Launch</fm-btn>
-			</div>
-		</template>
-	</fm-base-modal>
-
 </template>
-
 <script setup>
 
 
@@ -586,7 +546,7 @@ onMounted(async () => {
 });
 </script>
 
-<style lang="postcss" scoped>
+<style scoped>
 .workflow-detail-page {
 	display: flex;
 	height: 100vh;
@@ -595,14 +555,15 @@ onMounted(async () => {
 /* Left side for Rete.js Editor */
 .workflow-graph-section {
 	flex: 0.7;
-	background-color: #f0f0f0;
-	padding: 10px;
+	background-color: #f5f5f5;
+	padding: 15px;
 }
 
 #editor {
 	width: 100%;
 	height: 100%;
-	border: 1px solid #ccc;
+	border: 2px solid #ccc;
+	border-radius: 5px;
 }
 
 /* Right side for Workflow Details */
@@ -614,30 +575,80 @@ onMounted(async () => {
 	overflow-y: auto;
 }
 
-h2, h3 {
+h2 {
 	margin-top: 0;
+	font-size: 1.5rem;
 }
 
-table {
+h3 {
+	margin-top: 1rem;
+	font-size: 1.2rem;
+}
+
+/* Button Group Styles */
+.button-group {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 15px;
+}
+
+.action-btn {
+	padding: 10px 15px;
+	margin-right: 10px;
+	background-color: #007bff;
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.action-btn:hover {
+	background-color: #0056b3;
+}
+
+/* Workflow Information Table */
+.workflow-info-table {
 	width: 100%;
+	border-collapse: collapse;
 	margin-bottom: 20px;
 }
 
-table td {
-	padding: 8px;
+.workflow-info-table td {
+	padding: 10px;
+	border-bottom: 1px solid #ddd;
 }
 
-ul {
+/* Input Group Styles */
+.input-group {
+	margin-bottom: 15px;
+}
+
+.input-field {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	box-sizing: border-box;
+}
+
+/* Block List Styles */
+.block-list {
 	list-style-type: none;
 	padding-left: 0;
+	margin-top: 20px;
 }
 
-li {
-	margin-bottom: 10px;
-}
-
-.workflow-template-designer-section {
-	padding: 4px 8px;
+.block-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px;
 	border: 1px solid #ddd;
+	margin-bottom: 10px;
+	border-radius: 5px;
+}
+
+.payload-section {
+	margin-top: 20px;
 }
 </style>
