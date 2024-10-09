@@ -26,7 +26,7 @@
 					<td>{{ item.name }}</td>
 					<td>{{ item.user_code }}</td>
 					<td :class="getStatusClass(item.status)">
-						{{ item.status }}
+						<StatusBadge :status="item.status" />
 					</td>
 					<td>{{ formatDate(item.created) }}</td>
 				</tr>
@@ -41,6 +41,7 @@
 
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
+import StatusBadge from '~/components/StatusBadge.vue'; // Import the component
 
 let store = useStore();
 store.init();
@@ -58,7 +59,7 @@ async function getWorkflows() {
 
 function formatDate(dateString) {
 	// Format date in a more readable way
-	const options = { year: 'numeric', month: 'short', day: 'numeric' };
+	const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
 	return new Date(dateString).toLocaleDateString(undefined, options);
 }
 

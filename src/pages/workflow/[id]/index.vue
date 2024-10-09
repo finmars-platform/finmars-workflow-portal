@@ -57,7 +57,7 @@
 						</tr>
 						<tr>
 							<td>Status</td>
-							<td>{{ workflow.status }}</td>
+							<td><StatusBadge :status="workflow.status" /></td>
 						</tr>
 						<tr>
 							<td>Created</td>
@@ -95,7 +95,7 @@
 					<div>
 						ID: {{ activeTask.id }}
 					</div>
-					<strong>{{ activeTask.name }}</strong> - Status: {{ activeTask.status }}
+					<strong>{{ activeTask.name }}</strong> - Status:  <StatusBadge :status="activeTask.status" />
 					<div>
 						Celery Task ID: {{ activeTask.celery_task_id }}
 					</div>
@@ -201,6 +201,7 @@ import {AreaExtensions, AreaPlugin} from 'rete-area-plugin';
 import {Presets, VuePlugin} from 'rete-vue-plugin';
 
 import WorkflowNode from "../../../components/WorkflowNode.vue";
+import StatusBadge from "~/components/StatusBadge.vue";
 
 
 const router = useRouter();

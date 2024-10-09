@@ -1,7 +1,7 @@
 <template>
 	<div
 		class="node"
-		:class="{ selected: data.selected }"
+		:class="[{ 'node-with-task': data.data.taskId, 'node-without-task': !data.data.taskId }, { selected: data.selected }]"
 		:style="nodeStyles()"
 		data-testid="node"
 	>
@@ -14,7 +14,7 @@
 			<div>{{data.data.node.notes}}</div>
 		</div>
 		<div>
-			{{data.data.status}}
+			<StatusBadge :status="data.data.status" />
 		</div>
 		<!-- Outputs-->
 		<div
@@ -88,6 +88,7 @@
 <script lang="js">
 import { ref, defineComponent } from 'vue'
 import { Ref } from 'rete-vue-plugin'
+import StatusBadge from "~/components/StatusBadge.vue";
 
 function sortByIndex(entries) {
 	entries.sort((a, b) => {
@@ -119,6 +120,7 @@ export default defineComponent({
 		}
 	},
 	components: {
+		StatusBadge,
 		Ref
 	}
 })
@@ -146,6 +148,10 @@ export default defineComponent({
 
 	&.selected {
 		border-color: red;
+	}
+
+	&.node-without-task {
+		opacity: .5;
 	}
 
 	.title {

@@ -12,7 +12,6 @@
 					<th>ID</th>
 					<th>Name</th>
 					<th>User Code</th>
-					<th>Status</th>
 					<th>Created</th>
 				</tr>
 				</thead>
@@ -25,9 +24,6 @@
 					</td>
 					<td>{{ item.name }}</td>
 					<td>{{ item.user_code }}</td>
-					<td :class="getStatusClass(item.status)">
-						{{ item.status }}
-					</td>
 					<td>{{ formatDate(item.created) }}</td>
 				</tr>
 				</tbody>
