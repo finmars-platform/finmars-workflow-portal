@@ -33,6 +33,15 @@
 
 			</div>
 
+			<div>
+				<fm-btn @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
+					Pause
+				</fm-btn>
+				<fm-btn @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
+					Resume
+				</fm-btn>
+			</div>
+
 			<div class="workflow-detail-content-section" v-if="!activeTask">
 
 				<table>
@@ -152,6 +161,28 @@
 		</template>
 	</fm-base-modal>
 
+	<fm-base-modal
+		title="Resume Workflow"
+		v-model="isResumeDialogOpen"
+	>
+
+		<p style="margin-top: 1rem">Payload</p>
+		<v-ace-editor
+			v-model:value="resumePayload"
+			@init="editorInit"
+			lang="json"
+			theme="monokai"
+			style="height: 300px;width: 100%;"/>
+
+		<template #footer>
+			<div class="flex flex-row justify-between">
+				<fm-btn type="text" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</fm-btn>
+
+				<fm-btn type="filled" @click="resumeWorkflow($event)">Relaunch</fm-btn>
+			</div>
+		</template>
+	</fm-base-modal>
+
 </template>
 
 <script setup>
@@ -178,7 +209,9 @@ definePageMeta({
 });
 
 let isRelaunchDialogOpen = ref(false);
+let isResumeDialogOpen = ref(false);
 let relaunchPayload = ref('')
+let resumePayload = ref('')
 
 let workflowPayloadPretty = ref('')
 let workflow = ref({});
@@ -378,6 +411,62 @@ async function cancelWorkflow() {
 	await refresh();
 
 }
+
+async function pauseWorkflow() {
+
+	const result = await useApi('pauseWorkflow.put', {
+		params: {id: route.params.id},
+		body: JSON.stringify({})
+	})
+
+	useNotify({
+		type: 'success',
+		title: 'Success',
+		text: 'Workflow will be Paused after current Task is finished'
+	})
+
+	await refresh();
+
+}
+
+async function openResumeDialog() {
+
+	isResumeDialogOpen.value = true;
+
+	resumePayload.value = JSON.stringify(workflow.value.payload, null, 4)
+
+}
+
+
+async function resumeWorkflow() {
+
+	const result = await useApi('resumeWorkflow.put', {
+		params: {id: route.params.id},
+		body: JSON.stringify({payload: JSON.parse(resumePayload.value)})
+	})
+
+	console.log('result', result);
+
+	if (result._$error) {
+		useNotify({
+			type: 'error',
+			title: 'Error',
+			text: 'Cant Resume workflow'
+		})
+	} else {
+		useNotify({
+			type: 'success',
+			title: 'Success',
+			text: 'Workflow is resumed'
+		})
+	}
+
+	isResumeDialogOpen.value = false;
+
+	await refresh();
+
+}
+
 
 async function setupGraph() {
 

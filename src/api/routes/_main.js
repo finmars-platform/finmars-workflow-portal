@@ -22,6 +22,13 @@ export default {
 		post: prefix + '/workflow/run-workflow/'
 	},
 
+	pauseWorkflow: {
+		put: prefix + '/workflow/{id}/pause/'
+	},
+	resumeWorkflow: {
+		put: prefix + '/workflow/{id}/resume/'
+	},
+
 	cancelWorkflow: {
 		post: prefix + '/workflow/{id}/cancel/'
 	},
@@ -33,7 +40,6 @@ export default {
 	schedule: {
 		get: prefix + '/schedule/{id}/'
 	},
-
 
 
 	workflowTemplateList: {
