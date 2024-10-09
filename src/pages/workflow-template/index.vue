@@ -30,6 +30,9 @@
 			</table>
 		</div>
 
+
+		<fm-btn @click="goToNewWorkflowPage">Create New</fm-btn>
+
 	</div>
 </template>
 
@@ -38,6 +41,7 @@
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
 
+const router = useRouter();
 let store = useStore();
 store.init();
 definePageMeta({
@@ -58,14 +62,11 @@ function formatDate(dateString) {
 	return new Date(dateString).toLocaleDateString(undefined, options);
 }
 
-function getStatusClass(status) {
-	// Return CSS class based on the status
-	switch (status) {
-		case 'active': return 'status-active';
-		case 'inactive': return 'status-inactive';
-		default: return 'status-default';
-	}
+
+function goToNewWorkflowPage() {
+	router.push(`/${store.realm_code}/${store.space_code}/w/workflow-template/new`);
 }
+
 
 onMounted(async () => {
 	await getWorkflowTemplates();

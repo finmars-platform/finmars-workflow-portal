@@ -51,5 +51,6 @@ export default {
 	workflowTemplate: {
 		get: prefix + '/workflow-template/{id}/',
 		put: prefix + '/workflow-template/{id}/',
+		post: prefix + '/workflow-template/',
 	},
 };
