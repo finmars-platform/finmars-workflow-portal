@@ -138,6 +138,37 @@
 			</div>
 
 		</div>
+
+
+		<fm-base-modal
+			title="Launch Workflow"
+			v-model="isLaunchDialogOpen"
+		>
+
+			<p>
+				Note that a new workflow will be created, so the current one will not be changed and will still be available
+				in your history.
+			</p>
+
+
+			<p style="margin-top: 1rem">Payload</p>
+			<v-ace-editor
+				v-model:value="launchPayload"
+				@init="payloadEditorInit"
+				lang="json"
+				theme="monokai"
+				style="height: 300px;width: 100%;"/>
+
+			<template #footer>
+				<div class="flex flex-row justify-between">
+					<fm-btn type="text" @click="isLaunchDialogOpen = !isLaunchDialogOpen">Cancel</fm-btn>
+
+					<fm-btn type="filled" @click="relaunch($event)">Launch</fm-btn>
+				</div>
+			</template>
+		</fm-base-modal>
+
+
 	</div>
 
 </template>

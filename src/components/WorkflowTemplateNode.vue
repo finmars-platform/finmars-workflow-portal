@@ -5,13 +5,13 @@
 		:style="nodeStyles()"
 		data-testid="node"
 	>
-		<div class="title" data-testid="title">{{ data.data.node.name }}</div>
+		<div class="title" data-testid="title" @pointerdown.stop="">{{ data.data.node.name }}</div>
 		<div>
-			<div>Node User Code: {{ data.data.node.user_code }}</div>
-			<div>Workflow User Code: {{ data.data.workflow.user_code }}</div>
-			<div>Workflow Name {{ data.data.workflow.name }}</div>
+			<div @pointerdown.stop="">Node User Code: {{ data.data.node.user_code }}</div>
+			<div @pointerdown.stop="">Workflow User Code: {{ data.data.workflow.user_code }}</div>
+			<div @pointerdown.stop="">Workflow Name {{ data.data.workflow.name }}</div>
 
-			<div>{{ data.data.node.notes }}</div>
+			<div @pointerdown.stop="">{{ data.data.node.notes }}</div>
 
 			<!-- Source Code Editor for the node -->
 
@@ -23,6 +23,7 @@
 					lang="python"
 					theme="monokai"
 					style="height: 200px; width: 100%;"
+					@pointerdown.stop=""
 				/>
 			</div>
 
