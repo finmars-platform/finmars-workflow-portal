@@ -3,12 +3,9 @@
 		<h1>Edit Schedule</h1>
 
 		<!-- Schedule Form -->
-		<form @submit.prevent="saveSchedule" class="schedule-form">
+		<form @submit.prevent="createSchedule" class="schedule-form">
 			<table class="schedule-info-table">
-				<tr>
-					<th>ID</th>
-					<td>{{ schedule.id }}</td>
-				</tr>
+
 				<tr>
 					<th>User Code</th>
 					<td><input v-model="schedule.user_code" type="text" required /></td>
@@ -35,19 +32,6 @@
 					<td><input v-model="schedule.notes" type="text" /></td>
 				</tr>
 
-
-				<tr>
-					<th>Created</th>
-					<td>{{ formatDate(schedule.created) }}</td>
-				</tr>
-				<tr>
-					<th>Modified</th>
-					<td>{{ formatDate(schedule.modified) }}</td>
-				</tr>
-				<tr>
-					<th>Owner</th>
-					<td>{{ schedule.owner_username }}</td>
-				</tr>
 				<tr>
 					<th>Manager</th>
 					<td>
@@ -70,14 +54,9 @@
 
 			<!-- Actions -->
 			<div class="action-buttons">
-				<fm-btn type="submit" class="save-btn">Save</fm-btn>
-
+				<fm-btn type="submit" class="save-btn">Create</fm-btn>
 			</div>
 		</form>
-
-		<div style="margin-top: 8px;">
-			<fm-btn type="button" @click="deleteSchedule" class="delete-btn">Delete</fm-btn>
-		</div>
 	</div>
 </template>
 
@@ -85,77 +64,46 @@
 import {ref, onMounted} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 
-
+let store = useStore();
+store.init();
 const route = useRoute();
 const router = useRouter();
 
-let store = useStore();
-store.init();
 definePageMeta({
 	middleware: "auth",
 });
 
-let schedule = ref({});
-
-// Fetch the schedule data
-async function getSchedule() {
-	const response = await useApi('schedule.get', {params: {id: route.params.id}});
-	schedule.value = response;
-}
+let schedule = ref({is_manager: true, enabled: true});
 
 // Save the updated schedule
-async function saveSchedule() {
+async function createSchedule() {
 	try {
-		await useApi('schedule.put', {
+		const response = await useApi('schedule.post', {
 			body: schedule.value,
-			params: {id: route.params.id}
 		});
+
 		useNotify({
 			type: 'success',
 			title: 'Success',
-			text: 'Schedule updated successfully!'
-		});
-	} catch (error) {
-		useNotify({
-			type: 'error',
-			title: 'Error',
-			text: 'Failed to update the schedule.'
-		});
-	}
-}
-
-// Delete the schedule
-async function deleteSchedule() {
-	try {
-		await useApi('schedule.delete', {
-			params: {id: route.params.id}
-		});
-		useNotify({
-			type: 'success',
-			title: 'Success',
-			text: 'Schedule deleted successfully!'
+			text: 'Schedule created successfully!'
 		});
 
-		router.push(`/${store.realm_code}/${store.space_code}/w/schedule/`);
+		const id = response.id;
+		router.push(`/${store.realm_code}/${store.space_code}/w/schedule/${id}/`);
 
 	} catch (error) {
 		useNotify({
 			type: 'error',
 			title: 'Error',
-			text: 'Failed to delete the schedule.'
+			text: 'Failed to create the schedule.'
 		});
 	}
 }
 
-// Format the date to a more readable format
-function formatDate(dateString) {
-	const options = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'};
-	return new Date(dateString).toLocaleDateString(undefined, options);
-}
 
 // Fetch the schedule when the page loads
 onMounted(() => {
-	getSchedule();
+
 });
 </script>
 

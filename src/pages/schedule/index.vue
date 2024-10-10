@@ -32,6 +32,8 @@
 			</table>
 		</div>
 
+		<fm-btn @click="goToNewSchedulePage">Create New</fm-btn>
+
 	</div>
 </template>
 
@@ -40,6 +42,7 @@
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
 
+const router = useRouter();
 let store = useStore();
 store.init();
 definePageMeta({
@@ -53,6 +56,11 @@ async function getSchedules() {
 	schedules.value = data['results'];
 	console.log('schedules', schedules);
 }
+
+function goToNewSchedulePage() {
+	router.push(`/${store.realm_code}/${store.space_code}/w/schedule/new`);
+}
+
 
 function formatDate(dateString) {
 	// Format the created date in a more readable way
