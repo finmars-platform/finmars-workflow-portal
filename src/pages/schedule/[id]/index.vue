@@ -11,28 +11,43 @@
 				</tr>
 				<tr>
 					<th>User Code</th>
-					<td><input v-model="schedule.user_code" type="text" required /></td>
+					<td><input v-model="schedule.user_code" type="text" required/></td>
 				</tr>
 
 				<tr>
 					<th>Name</th>
-					<td><input v-model="schedule.name" type="text" required /></td>
+					<td><input v-model="schedule.name" type="text" required/></td>
 				</tr>
 
 				<tr>
 					<th>Workflow User Code</th>
-					<td><input v-model="schedule.workflow_user_code" type="text" required /></td>
+					<td><input v-model="schedule.workflow_user_code" type="text" required/></td>
 				</tr>
 
 				<tr>
 					<th>Crontab Line</th>
-					<td><input v-model="schedule.crontab_line" type="text" required /></td>
+					<td><input v-model="schedule.crontab_line" type="text" required/></td>
 				</tr>
 
 
 				<tr>
 					<th>Notes</th>
-					<td><input v-model="schedule.notes" type="text" /></td>
+					<td><input v-model="schedule.notes" type="text"/></td>
+				</tr>
+
+				<tr>
+					<th>Payload</th>
+					<td>
+
+						<v-ace-editor
+							v-model:value="schedulePayload"
+							@init="payloadEditorInit"
+							lang="json"
+							theme="monokai"
+							style="height: 300px;width: 100%;"/>
+
+
+					</td>
 				</tr>
 
 
@@ -82,8 +97,15 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue';
+
+import {VAceEditor} from 'vue3-ace-editor';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-monokai';
+
+import {onMounted, ref} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
+
+let schedulePayload = ref('')
 
 
 const route = useRoute();
@@ -101,11 +123,18 @@ let schedule = ref({});
 async function getSchedule() {
 	const response = await useApi('schedule.get', {params: {id: route.params.id}});
 	schedule.value = response;
+
+	if (schedule.value.payload) {
+		schedulePayload.value = JSON.stringify(schedule.value.payload)
+	}
 }
 
 // Save the updated schedule
 async function saveSchedule() {
 	try {
+
+		schedule.value.payload = JSON.parse(schedulePayload.value)
+
 		await useApi('schedule.put', {
 			body: schedule.value,
 			params: {id: route.params.id}
@@ -123,6 +152,17 @@ async function saveSchedule() {
 		});
 	}
 }
+
+function payloadEditorInit(payloadEditor) {
+	payloadEditor.setHighlightActiveLine(false);
+	payloadEditor.setShowPrintMargin(false);
+	payloadEditor.setFontSize(14)
+	payloadEditor.setBehavioursEnabled(true);
+
+	payloadEditor.focus();
+	payloadEditor.navigateFileStart();
+}
+
 
 // Delete the schedule
 async function deleteSchedule() {

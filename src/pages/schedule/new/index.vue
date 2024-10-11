@@ -33,6 +33,21 @@
 				</tr>
 
 				<tr>
+					<th>Payload</th>
+					<td>
+
+						<v-ace-editor
+							v-model:value="schedulePayload"
+							@init="payloadEditorInit"
+							lang="json"
+							theme="monokai"
+							style="height: 300px;width: 100%;"/>
+
+
+					</td>
+				</tr>
+
+				<tr>
 					<th>Manager</th>
 					<td>
 						<select v-model="schedule.is_manager">
@@ -61,13 +76,20 @@
 </template>
 
 <script setup>
+import {VAceEditor} from 'vue3-ace-editor';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-monokai';
+
 import {ref, onMounted} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
+
 
 let store = useStore();
 store.init();
 const route = useRoute();
 const router = useRouter();
+
+let schedulePayload = ref('')
 
 definePageMeta({
 	middleware: "auth",
@@ -78,6 +100,9 @@ let schedule = ref({is_manager: true, enabled: true});
 // Save the updated schedule
 async function createSchedule() {
 	try {
+
+		schedule.value.payload = JSON.parse(schedulePayload.value)
+
 		const response = await useApi('schedule.post', {
 			body: schedule.value,
 		});
@@ -100,6 +125,15 @@ async function createSchedule() {
 	}
 }
 
+function payloadEditorInit(payloadEditor) {
+	payloadEditor.setHighlightActiveLine(false);
+	payloadEditor.setShowPrintMargin(false);
+	payloadEditor.setFontSize(14)
+	payloadEditor.setBehavioursEnabled(true);
+
+	payloadEditor.focus();
+	payloadEditor.navigateFileStart();
+}
 
 // Fetch the schedule when the page loads
 onMounted(() => {

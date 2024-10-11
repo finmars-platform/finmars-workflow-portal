@@ -13,6 +13,7 @@
 					<th>Name</th>
 					<th>User Code</th>
 					<th>Crontab</th>
+					<th>Notes</th>
 					<th>Created</th>
 				</tr>
 				</thead>
@@ -26,6 +27,7 @@
 					<td>{{ item.name }}</td>
 					<td>{{ item.user_code }}</td>
 					<td>{{ formatCrontab(item.crontab_line) }}</td>
+					<td>{{ item.notes }}</td>
 					<td>{{ formatDate(item.created) }}</td>
 				</tr>
 				</tbody>
