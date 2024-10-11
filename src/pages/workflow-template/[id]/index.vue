@@ -21,6 +21,9 @@
 				<fm-btn @click="save()" class="action-btn">
 					Save
 				</fm-btn>
+				<fm-btn @click="openTemplateFile()" class="action-btn">
+					See Template
+				</fm-btn>
 			</div>
 
 			<!-- Workflow Information Table -->
@@ -139,7 +142,7 @@
 
 
 			<div style="margin-top: 8px;">
-				<fm-btn type="button" @click="deleteWorkflowTemplate" class="delete-btn">Delete</fm-btn>
+				<fm-btn @click="deleteWorkflowTemplate" class="delete-btn">Delete</fm-btn>
 			</div>
 
 		</div>
@@ -151,7 +154,8 @@
 		>
 
 			<p>
-				Note that a new workflow will be created, so the current one will not be changed and will still be available
+				Note that a new workflow will be created, so the current one will not be changed and will still be
+				available
 				in your history.
 			</p>
 
@@ -204,7 +208,9 @@ definePageMeta({
 
 let isLaunchDialogOpen = ref(false);
 let launchPayload = ref('')
-let defaultPayload = ref('')
+let defaultPayload = ref(`
+{"report_date": "2024-10-10"}
+`)
 
 const selectedWorkflow = ref(null);
 let availableWorkflows = ref([]);
@@ -238,7 +244,6 @@ let editorArea;
 const blocks = ref([]);
 
 async function addBlock() {
-
 
 
 	// Ensure the `node_user_code` is provided and unique
@@ -276,7 +281,7 @@ async function addBlock() {
 	// Create a new node with the provided user_code and node_user_code
 	const node = await createNode(workflow, nodeUserCode.value, nodeName.value, nodeType.value, nodeNotes.value, source_code, 100, 100);
 	await editor.addNode(node);
-	blocks.value.push({id: node.id,  node: {name: nodeName.value, user_code: nodeUserCode.value}});
+	blocks.value.push({id: node.id, node: {name: nodeName.value, user_code: nodeUserCode.value}});
 
 	// Reset `nodeUserCode` for future additions
 	nodeUserCode.value = "";
@@ -361,7 +366,9 @@ async function getWorkflow() {
 
 	workflow.value = await useApi('workflowTemplate.get', {params: {id: route.params.id}});
 
-	defaultPayload.value = JSON.stringify(workflow.value.data.workflow.default_payload, null, 4) || ""
+	if (workflow.value.data) {
+		defaultPayload.value = JSON.stringify(workflow.value.data.workflow.default_payload, null, 4) || ""
+	}
 
 	await initGraph();
 }
@@ -487,7 +494,6 @@ async function deleteWorkflowTemplate() {
 }
 
 
-
 // Load workflow details on page load
 
 async function refresh() {
@@ -599,6 +605,19 @@ async function setupGraph() {
 	editor.use(editorArea);
 	editorArea.use(render);
 	editorArea.use(connection);
+}
+
+function openTemplateFile() {
+
+	let pieces = workflow.value.user_code.split(':')
+	let workflow_user_code = pieces[1]
+	let workflow_path = pieces[0].split('.').join('/')
+
+	// const link = window.location.origin + '/realm00000/space00000/api/storage/workflows/' + workflow_path + '/' + workflow_user_code + '/workflow.json'
+	const link = window.location.origin + '/realm00000/space00000/a/#!/explorer/workflows/' + workflow_path + '/' + workflow_user_code + '/workflow.json'
+
+	window.open(link, '_blank')
+
 }
 
 // Rete.js Setup
