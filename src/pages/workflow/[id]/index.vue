@@ -60,6 +60,10 @@
 							<td><StatusBadge :status="workflow.status" /></td>
 						</tr>
 						<tr>
+							<td>Worker</td>
+							<td>{{ workflow.worker_name }}</td>
+						</tr>
+						<tr>
 							<td>Created</td>
 							<td>{{ $formatDate(workflow.created) }}</td>
 						</tr>
