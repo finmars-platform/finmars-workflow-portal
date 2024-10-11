@@ -123,11 +123,10 @@
 						theme="monokai"
 						style="height: 300px;width: 100%;"/>
 
+					<fm-btn @click="viewInFlower">View in Flower</fm-btn>
+
 				</div>
 
-				<fm-btn>
-					<a href="/flower" target="_blank">View in Flower</a>
-				</fm-btn>
 
 			</div>
 
@@ -474,6 +473,11 @@ async function resumeWorkflow() {
 	await refresh();
 
 }
+
+function viewInFlower() {
+	router.push(`/${store.realm_code}/workflow/flower/task/${activeTask.value.celery_task_id}`);
+}
+
 
 
 async function setupGraph() {
