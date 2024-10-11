@@ -68,7 +68,10 @@
 			:data-testid="'input-' + key"
 		>
 			<Ref
-				class="input-socket"
+				:class="{
+					  'input-socket': true,
+					  'input-socket--payload': key === 'payload_input'  // Add specific class for payload_input
+					}"
 				:emit="emit"
 				:data="{
           type: 'socket',
@@ -203,7 +206,7 @@ export default defineComponent({
 	.input-title,
 	.output-title {
 		vertical-align: middle;
-		color: white;
+		color: #000;
 		display: inline-block;
 		font-family: sans-serif;
 		font-size: 14px;
@@ -221,5 +224,15 @@ export default defineComponent({
 	.control {
 		//padding: $socket-margin math.div($socket-size, 2) + $socket-margin;
 	}
+}
+
+.input-socket--payload {
+	background-color: transparent; /* Purple color */
+	border-radius: 50%;
+	//width: 16px;
+	//height: 16px;
+	display: inline-block;
+	margin-left: -1px;
+	border: 2px solid #000; /* Darker purple border */
 }
 </style>

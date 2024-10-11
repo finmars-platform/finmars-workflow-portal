@@ -342,21 +342,24 @@ async function createNode(workflow, node_user_code, node_name, node_type, node_n
 
 	};
 
+	const payloadInputSocket = new ClassicPreset.Socket("payload_socket");
+	node.addInput("payload_input", new ClassicPreset.Input(payloadInputSocket, "Payload"));
+
 	// Add sockets for input and output connections
 	const inputSocket = new ClassicPreset.Socket("socket");
-	node.addInput("in", new ClassicPreset.Input(inputSocket));
+	node.addInput("in", new ClassicPreset.Input(inputSocket, "Input"));
 
 	// Add output sockets
 	if (node_type === 'condition') {
 		// Conditional nodes have two outputs: true and false
 		const outputTrueSocket = new ClassicPreset.Socket("socket_true");
 		const outputFalseSocket = new ClassicPreset.Socket("socket_false");
-		node.addOutput("out_true", new ClassicPreset.Output(outputTrueSocket, 'socket_true', false));
-		node.addOutput("out_false", new ClassicPreset.Output(outputFalseSocket, 'socket_false', false));
+		node.addOutput("out_true", new ClassicPreset.Output(outputTrueSocket, 'Output True', false));
+		node.addOutput("out_false", new ClassicPreset.Output(outputFalseSocket, 'Output False', false));
 	} else {
 		// Normal nodes have a single output
 		const outputSocket = new ClassicPreset.Socket("socket");
-		node.addOutput("out", new ClassicPreset.Output(outputSocket));
+		node.addOutput("out", new ClassicPreset.Output(outputSocket, "Output"));
 	}
 
 	return node;
