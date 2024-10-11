@@ -16,7 +16,10 @@
 			<!-- Source Code Editor for the node -->
 
 			<div v-if="data.data.node.type === 'source_code' || data.data.node.type === 'condition'">
-				<p>Source Code:</p>
+				<div class="node-source-code-panel">
+					<p>Source Code:</p>
+					<button class="node-source-code-panel-edit-button" @click="isSourceCodeDialogOpen = true">Edit</button>
+				</div>
 				<v-ace-editor
 					v-model:value="data.data.source_code"
 					@init="sourceCodeEditorInit"
@@ -97,16 +100,44 @@
 				data-testid="input-control"
 			/>
 		</div>
+
+
+		<fm-base-modal
+			title="Source code"
+			style="width: 80vw;"
+			v-model="isSourceCodeDialogOpen"
+		>
+
+
+			<v-ace-editor
+				v-model:value="data.data.source_code"
+				@init="sourceCodeEditorInit"
+				lang="python"
+				theme="monokai"
+				style="height: 400px; width: 100%;"
+				@pointerdown.stop=""
+			/>
+
+			<template #footer>
+				<div class="flex flex-row justify-between">
+					<fm-btn type="filled" @click="isSourceCodeDialogOpen = !isSourceCodeDialogOpen">Save</fm-btn>
+				</div>
+			</template>
+		</fm-base-modal>
+
 	</div>
 </template>
 
 <script lang="js">
-import {defineComponent} from 'vue'
+import {defineComponent, ref} from 'vue'
 import {Ref} from 'rete-vue-plugin'
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/theme-monokai';
+
+import {BaseModal as FmBaseModal, FmBtn as FmBtn} from "@finmars/ui"
+
 
 function sortByIndex(entries) {
 	entries.sort((a, b) => {
@@ -120,6 +151,15 @@ function sortByIndex(entries) {
 
 export default defineComponent({
 	props: ['data', 'emit', 'seed'],
+	setup() {
+		// Define your reactive ref here
+		const isSourceCodeDialogOpen = ref(false)
+
+
+		return {
+			isSourceCodeDialogOpen,
+		}
+	},
 	methods: {
 		nodeStyles() {
 			return {
@@ -147,6 +187,8 @@ export default defineComponent({
 	},
 	components: {
 		VAceEditor,
+		FmBaseModal,
+		FmBtn,
 		Ref
 	}
 })
@@ -234,5 +276,20 @@ export default defineComponent({
 	display: inline-block;
 	margin-left: -1px;
 	border: 2px solid #000; /* Darker purple border */
+}
+.node-source-code-panel {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.node-source-code-panel-edit-button {
+	border: 1px solid #000;
+	border-radius: 4px;
+	padding: 4px 8px;
+	margin: 8px 4px;
+}
+.node-source-code-panel-edit-button:hover {
+	opacity: .9;
 }
 </style>
