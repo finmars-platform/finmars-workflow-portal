@@ -33,14 +33,34 @@
 					<td>ID</td>
 					<td>{{ workflow.id }}</td>
 				</tr>
-				<tr>
-					<td>Name</td>
-					<td>{{ workflow.name }}</td>
-				</tr>
+
 				<tr>
 					<td>User Code</td>
 					<td>{{ workflow.user_code }}</td>
 				</tr>
+				<tr>
+					<td>Name</td>
+					<td>
+
+						<div class="form-group">
+
+							<input id="user_code" v-model="workflow.name" type="text" required class="form-control" placeholder="Daily" />
+						</div>
+
+					</td>
+				</tr>
+				<tr>
+					<td>Notes</td>
+					<td>
+
+						<div class="form-group">
+
+							<input id="user_code" v-model="workflow.notes" type="text" required class="form-control" placeholder="Daily for ..." />
+						</div>
+
+					</td>
+				</tr>
+
 				<tr>
 					<td>Created</td>
 					<td>{{ $formatDate(workflow.created) }}</td>
@@ -742,4 +762,14 @@ h3 {
 	color: white;
 	padding: 10px 20px;
 }
+
+.form-control {
+	width: 100%;
+	padding: 10px;
+	font-size: 1rem;
+	border-radius: 5px;
+	border: 1px solid #ddd;
+	transition: border-color 0.3s, box-shadow 0.3s;
+}
+
 </style>
