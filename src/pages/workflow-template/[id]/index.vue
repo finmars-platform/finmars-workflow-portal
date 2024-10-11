@@ -137,6 +137,11 @@
 
 			</div>
 
+
+			<div style="margin-top: 8px;">
+				<fm-btn type="button" @click="deleteWorkflowTemplate" class="delete-btn">Delete</fm-btn>
+			</div>
+
 		</div>
 
 
@@ -452,6 +457,36 @@ async function initGraph() {
 
 }
 
+// Delete the schedule
+async function deleteWorkflowTemplate() {
+	try {
+
+		let isConfirm = await useConfirm({
+			text: `Are you sure you want to delete Workflow Template?`,
+		})
+		if (!isConfirm) return false
+
+		await useApi('workflowTemplate.delete', {
+			params: {id: route.params.id}
+		});
+		useNotify({
+			type: 'success',
+			title: 'Success',
+			text: 'Workflow Template deleted successfully!'
+		});
+
+		router.push(`/${store.realm_code}/${store.space_code}/w/workflow-template/`);
+
+	} catch (error) {
+		useNotify({
+			type: 'error',
+			title: 'Error',
+			text: 'Failed to delete the Workflow Template.'
+		});
+	}
+}
+
+
 
 // Load workflow details on page load
 
@@ -681,5 +716,11 @@ h3 {
 
 .payload-section {
 	margin-top: 20px;
+}
+
+.delete-btn {
+	background-color: #ff4d4f;
+	color: white;
+	padding: 10px 20px;
 }
 </style>

@@ -127,6 +127,12 @@ async function saveSchedule() {
 // Delete the schedule
 async function deleteSchedule() {
 	try {
+
+		let isConfirm = await useConfirm({
+			text: `Are you sure you want to delete Schedule?`,
+		})
+		if (!isConfirm) return false
+
 		await useApi('schedule.delete', {
 			params: {id: route.params.id}
 		});
