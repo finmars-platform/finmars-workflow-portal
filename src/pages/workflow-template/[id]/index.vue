@@ -681,6 +681,7 @@ onMounted(async () => {
 	padding: 20px;
 	border-left: 1px solid #ccc;
 	overflow-y: auto;
+	z-index: 0;
 }
 
 h2 {

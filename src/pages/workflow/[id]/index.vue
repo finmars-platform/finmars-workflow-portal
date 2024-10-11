@@ -618,6 +618,7 @@ function stopResize() {
 	border-left: 1px solid #ccc;
 	overflow-y: auto;
 	transition: width 0.2s ease;
+	z-index: 0;
 }
 
 
