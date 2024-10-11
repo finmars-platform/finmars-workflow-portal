@@ -614,7 +614,7 @@ function openTemplateFile() {
 	let workflow_path = pieces[0].split('.').join('/')
 
 	// const link = window.location.origin + '/realm00000/space00000/api/storage/workflows/' + workflow_path + '/' + workflow_user_code + '/workflow.json'
-	const link = window.location.origin + '/realm00000/space00000/a/#!/explorer/workflows/' + workflow_path + '/' + workflow_user_code + '/workflow.json'
+	const link = window.location.origin + `/${store.realm_code}/${store.space_code}/a/#!/explorer/workflows/${workflow_path}/${workflow_user_code}/workflow.json`
 
 	window.open(link, '_blank')
 
