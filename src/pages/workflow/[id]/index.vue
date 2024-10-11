@@ -63,10 +63,6 @@
 							</td>
 						</tr>
 						<tr>
-							<td>Worker</td>
-							<td>{{ workflow.worker_name }}</td>
-						</tr>
-						<tr>
 							<td>Created</td>
 							<td>{{ $formatDate(workflow.created) }}</td>
 						</tr>
@@ -106,6 +102,9 @@
 					<StatusBadge :status="activeTask.status"/>
 					<div>
 						Celery Task ID: {{ activeTask.celery_task_id }}
+					</div>
+					<div>
+						Worker: {{ activeTask.worker_name }}
 					</div>
 
 					<h2>Log</h2>
