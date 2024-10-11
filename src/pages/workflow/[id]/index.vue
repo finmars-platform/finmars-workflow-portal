@@ -23,7 +23,8 @@
 					<fm-btn @click="openRelaunchDialog()">
 						Relaunch
 					</fm-btn>
-					<fm-btn @click="cancelWorkflow()" v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
+					<fm-btn @click="cancelWorkflow()"
+							v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
 						Cancel
 					</fm-btn>
 
@@ -57,7 +58,9 @@
 						</tr>
 						<tr>
 							<td>Status</td>
-							<td><StatusBadge :status="workflow.status" /></td>
+							<td>
+								<StatusBadge :status="workflow.status"/>
+							</td>
 						</tr>
 						<tr>
 							<td>Worker</td>
@@ -99,7 +102,8 @@
 					<div>
 						ID: {{ activeTask.id }}
 					</div>
-					<strong>{{ activeTask.name }}</strong> - Status:  <StatusBadge :status="activeTask.status" />
+					<strong>{{ activeTask.name }}</strong> - Status:
+					<StatusBadge :status="activeTask.status"/>
 					<div>
 						Celery Task ID: {{ activeTask.celery_task_id }}
 					</div>
@@ -143,7 +147,8 @@
 		>
 
 			<p>
-				Note that a new workflow will be created, so the current one will not be changed and will still be available
+				Note that a new workflow will be created, so the current one will not be changed and will still be
+				available
 				in your history.
 			</p>
 
@@ -475,9 +480,11 @@ async function resumeWorkflow() {
 }
 
 function viewInFlower() {
-	router.push(`/${store.realm_code}/workflow/flower/task/${activeTask.value.celery_task_id}`);
-}
 
+	const link = window.location.origin + `/${store.realm_code}/workflow/flower/task/${activeTask.value.celery_task_id}`
+	window.open(link, '_blank')
+
+}
 
 
 async function setupGraph() {
