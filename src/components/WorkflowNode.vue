@@ -5,27 +5,24 @@
 		:style="nodeStyles()"
 		data-testid="node"
 	>
-		<div class="title" data-testid="title">{{data.data.taskId}} {{data.data.node.name}}</div>
-		<div>
-			<div>Node User Code: {{data.data.node.user_code}}</div>
-			<div>Workflow User Code: {{data.data.workflow.user_code}}</div>
-			<div>Workflow Name {{data.data.workflow.name}}</div>
-
-			<div>{{data.data.node.notes}}</div>
-		</div>
-		<div>
+		<div class="node-header">
+			<div class="title" data-testid="title">
+				<span v-if="data.data.taskId" class="task-badge">Task ID: {{ data.data.taskId }}</span>
+				{{ data.data.node.name }}
+			</div>
 			<StatusBadge :status="data.data.status" />
 		</div>
-		<!-- Outputs-->
-		<div
-			class="output"
-			v-for="[key, output] in outputs()"
-			:key="key + seed"
-			:data-testid="'output-' + key"
-		>
-			<div class="output-title" data-testid="output-title">
-				{{ output.label }}
-			</div>
+
+		<div class="node-details">
+			<div v-if="data.data.node.user_code">Node User Code: <strong>{{ data.data.node.user_code }}</strong></div>
+			<div v-if="data.data.workflow.user_code">Workflow User Code: <strong>{{ data.data.workflow.user_code }}</strong></div>
+			<div v-if="data.data.workflow.name">Workflow Name: <strong>{{ data.data.workflow.name }}</strong></div>
+			<div v-if="data.data.node.notes">Notes: <em>{{ data.data.node.notes }}</em></div>
+		</div>
+
+		<!-- Outputs -->
+		<div class="output" v-for="[key, output] in outputs()" :key="key + seed" :data-testid="'output-' + key">
+			<div class="output-title">{{ output.label }}</div>
 			<Ref
 				class="output-socket"
 				:emit="emit"
@@ -39,7 +36,8 @@
 				data-testid="output-socket"
 			/>
 		</div>
-		<!-- Controls-->
+
+		<!-- Controls -->
 		<Ref
 			class="control"
 			v-for="[key, control] in controls()"
@@ -48,11 +46,12 @@
 			:data="{ type: 'control', payload: control }"
 			:data-testid="'control-' + key"
 		/>
-		<!-- Inputs-->
+
+		<!-- Inputs -->
 		<div
 			:class="{
 					  'input-socket': true,
-					  'input-socket--payload': key === 'payload_input'  // Add specific class for payload_input
+					  'input-socket--payload': key === 'payload_input'
 					}"
 			v-for="[key, input] in inputs()"
 			:key="key + seed"
@@ -70,20 +69,8 @@
         }"
 				data-testid="input-socket"
 			/>
-			<div
-				class="input-title"
-				v-show="!input.control || !input.showControl"
-				data-testid="input-title"
-			>
-				{{ input.label }}
-			</div>
-			<Ref
-				class="input-control"
-				v-show="input.control && input.showControl"
-				:emit="emit"
-				:data="{ type: 'control', payload: input.control }"
-				data-testid="input-control"
-			/>
+			<div class="input-title" v-show="!input.control || !input.showControl">{{ input.label }}</div>
+			<Ref v-show="input.control && input.showControl" class="input-control" :emit="emit" :data="{ type: 'control', payload: input.control }" />
 		</div>
 	</div>
 </template>
@@ -131,88 +118,101 @@ export default defineComponent({
 
 <style lang="postcss" scoped>
 
-
 .node {
-	background: #fff;
-	border: 2px solid grey;
-	border-radius: 10px;
+	background: #f9f9fb; /* Softer background */
+	border: 2px solid #ccc;
+	border-radius: 12px;
 	cursor: pointer;
 	box-sizing: border-box;
-	width: 400px;
+	width: 420px;
 	height: auto;
-	padding-bottom: 6px;
+	padding: 16px;
 	position: relative;
 	user-select: none;
-	padding: 8px;
-
-	&:hover {
-		opacity: .8;
-	}
-
-	&.selected {
-		border-color: red;
-	}
-
-	&.node-without-task {
-		opacity: .5;
-	}
-
-	.title {
-		color: #000;
-		font-family: sans-serif;
-		font-size: 18px;
-		padding: 8px;
-	}
-
-	.output {
-		text-align: right;
-	}
-
-	.input {
-		text-align: left;
-	}
-
-	.output-socket {
-		text-align: right;
-		margin-right: -1px;
-		display: inline-block;
-	}
-
-	.input-socket {
-		text-align: left;
-		margin-left: -1px;
-		display: inline-block;
-	}
-
-	.input-title,
-	.output-title {
-		vertical-align: middle;
-		color: #000;
-		display: inline-block;
-		font-family: sans-serif;
-		font-size: 14px;
-		margin: 4px;
-		line-height: 1;
-	}
-
-	.input-control {
-		z-index: 1;
-		//width: calc(100% - #{$socket-size + 2 * $socket-margin});
-		vertical-align: middle;
-		display: inline-block;
-	}
-
-	.control {
-		//padding: $socket-margin math.div($socket-size, 2) + $socket-margin;
-	}
+	transition: box-shadow 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
-.input-socket--payload {
-	background-color: transparent; /* Purple color */
-	border-radius: 50%;
-	//width: 16px;
-	//height: 16px;
+
+.node-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.task-badge {
+	background-color: #007bff; /* Vibrant color for the task badge */
+	color: #fff;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-size: 12px;
+	margin-right: 8px;
+}
+
+.node-details {
+	margin-bottom: 12px;
+}
+
+.node-details div {
+	margin-bottom: 4px;
+}
+
+.title {
+	color: #333;
+	font-family: 'Arial', sans-serif;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.output {
+	text-align: right;
+	margin-bottom: 8px;
+}
+
+.input {
+	text-align: left;
+	margin-bottom: 8px;
+}
+
+.output-socket,
+.input-socket {
+	text-align: right;
+	margin-right: -1px;
 	display: inline-block;
-	margin-left: -1px;
-	border: 2px solid #000; /* Darker purple border */
 }
+
+.input-socket--payload {
+	border-color: #007bff; /* Different color for payload input */
+}
+
+.input-title,
+.output-title {
+	vertical-align: middle;
+	color: #333;
+	font-family: 'Arial', sans-serif;
+	font-size: 14px;
+	margin: 4px;
+	display: inline-block;
+}
+
+.input-control {
+	z-index: 1;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.control {
+	padding: 4px;
+}
+
+.node-without-task {
+	opacity: 0.5;
+}
+
+/* Hover effect */
+.node:hover {
+	box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+	opacity: 1;
+}
+
+
 </style>

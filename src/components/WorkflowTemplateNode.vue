@@ -7,11 +7,33 @@
 	>
 		<div class="title" data-testid="title" @pointerdown.stop="">{{ data.data.node.name }}</div>
 		<div>
-			<div @pointerdown.stop="">Node User Code: {{ data.data.node.user_code }}</div>
-			<div @pointerdown.stop="">Workflow User Code: {{ data.data.workflow.user_code }}</div>
-			<div @pointerdown.stop="">Workflow Name {{ data.data.workflow.name }}</div>
+			<div class="node-info">
+				<div @pointerdown.stop="" class="node-info-header">
+					<p>Node Details</p>
+				</div>
 
-			<div @pointerdown.stop="">{{ data.data.node.notes }}</div>
+				<div class="node-info-content">
+					<div class="info-item" @pointerdown.stop="">
+						<span class="info-label">Node User Code:</span>
+						<input v-model="data.data.node.user_code" class="info-value" readonly />
+					</div>
+
+					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.user_code">
+						<span class="info-label">Workflow User Code:</span>
+						<input v-model="data.data.workflow.user_code" class="info-value" readonly />
+					</div>
+
+					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.name">
+						<span class="info-label">Workflow Name:</span>
+						<input v-model="data.data.workflow.name" class="info-value" readonly />
+					</div>
+
+					<div class="info-item" @pointerdown.stop="">
+						<span class="info-label">Notes:</span>
+						<textarea v-model="data.data.node.notes" class="info-value" rows="3" />
+					</div>
+				</div>
+			</div>
 
 			<!-- Source Code Editor for the node -->
 
@@ -157,6 +179,7 @@ export default defineComponent({
 
 
 		return {
+
 			isSourceCodeDialogOpen,
 		}
 	},
@@ -198,9 +221,9 @@ export default defineComponent({
 
 
 .node {
-	background: #fff;
-	border: 2px solid grey;
-	border-radius: 10px;
+	background: #f8f9fa; /* Light background for a cleaner look */
+	border: 2px solid #ddd; /* Softer border color */
+	border-radius: 12px; /* More rounded corners */
 	cursor: pointer;
 	box-sizing: border-box;
 	width: 400px;
@@ -208,21 +231,25 @@ export default defineComponent({
 	padding-bottom: 6px;
 	position: relative;
 	user-select: none;
-	padding: 8px;
+	padding: 16px; /* Increase padding for breathing room */
+	box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+	transition: all 0.2s ease-in-out; /* Smooth transition for hover */
 
 	&:hover {
-		opacity: .8;
+		opacity: 1; /* Slight increase in opacity */
+		box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
 	}
 
 	&.selected {
-		border-color: red;
+		border-color: #007bff; /* More vibrant color for selected node */
 	}
 
 	.title {
-		color: #000;
-		font-family: sans-serif;
-		font-size: 18px;
-		padding: 8px;
+		color: #333; /* Darker text color for better readability */
+		font-family: 'Helvetica Neue', sans-serif;
+		font-size: 20px; /* Slightly larger font */
+		padding: 12px 0;
+		font-weight: bold; /* Bold for better emphasis */
 	}
 
 	.output {
@@ -248,48 +275,97 @@ export default defineComponent({
 	.input-title,
 	.output-title {
 		vertical-align: middle;
-		color: #000;
+		color: #555; /* Medium grey for labels */
 		display: inline-block;
-		font-family: sans-serif;
+		font-family: 'Helvetica Neue', sans-serif;
 		font-size: 14px;
 		margin: 4px;
-		line-height: 1;
+		line-height: 1.4;
 	}
 
 	.input-control {
 		z-index: 1;
-		//width: calc(100% - #{$socket-size + 2 * $socket-margin});
 		vertical-align: middle;
 		display: inline-block;
 	}
 
 	.control {
-		//padding: $socket-margin math.div($socket-size, 2) + $socket-margin;
+		padding: 4px;
 	}
 }
 
 .input-socket--payload {
-	background-color: transparent; /* Purple color */
+	background-color: transparent;
 	border-radius: 50%;
-	//width: 16px;
-	//height: 16px;
 	display: inline-block;
 	margin-left: -1px;
-	border: 2px solid #000; /* Darker purple border */
+	border: 2px solid #007bff; /* Blue border for payload */
 }
+
 .node-source-code-panel {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	background: #f1f3f5; /* Light background for the panel */
+	padding: 8px;
+	border-radius: 8px; /* Round corners for a modern look */
 }
 
 .node-source-code-panel-edit-button {
-	border: 1px solid #000;
+	border: 1px solid #007bff;
+	border-radius: 4px;
+	padding: 6px 12px;
+	margin: 8px 4px;
+	background-color: #007bff;
+	color: #fff;
+	font-size: 14px;
+	cursor: pointer;
+	transition: background-color 0.2s ease-in-out;
+}
+
+.node-source-code-panel-edit-button:hover {
+	background-color: #0056b3; /* Darker blue on hover */
+	opacity: 0.9;
+}
+
+.node-info {
+	margin: 16px 0;
+	background: #f8f9fa;
+	padding: 12px;
+	border-radius: 8px;
+	border: 1px solid #ddd;
+}
+
+.node-info-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	cursor: pointer;
+	font-weight: bold;
+	color: #333;
+}
+
+.node-info-content {
+	margin-top: 12px;
+}
+
+.info-item {
+	margin-bottom: 12px;
+}
+
+.info-label {
+	font-weight: bold;
+	margin-right: 8px;
+	display: inline-block;
+	width: 150px;
+}
+
+.info-value {
+	background: #fff;
+	border: 1px solid #ccc;
 	border-radius: 4px;
 	padding: 4px 8px;
-	margin: 8px 4px;
+	width: 100%;
 }
-.node-source-code-panel-edit-button:hover {
-	opacity: .9;
-}
+
 </style>
