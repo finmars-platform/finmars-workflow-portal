@@ -13,12 +13,13 @@
 					<th>Name</th>
 					<th>User Code</th>
 					<th>Crontab</th>
+					<th>Is Enabled</th>
 					<th>Notes</th>
 					<th>Created</th>
 				</tr>
 				</thead>
 				<tbody>
-				<tr v-for="item in schedules" :key="item.id">
+				<tr v-for="item in schedules" :key="item.id" :style="{ opacity: !item.enabled ? 0.5 : 1 }">
 					<td>
 						<NuxtLink :to="useGetNuxtLink(`/schedule/${item.id}`, $route.params)" class="table-link">
 							{{ item.id }}
@@ -27,6 +28,7 @@
 					<td>{{ item.name }}</td>
 					<td>{{ item.user_code }}</td>
 					<td>{{ formatCrontab(item.crontab_line) }}</td>
+					<td><span v-if="item.enabled">Yes</span> <span v-if="!item.enabled">No</span></td>
 					<td>{{ item.notes }}</td>
 					<td>{{ formatDate(item.created) }}</td>
 				</tr>
