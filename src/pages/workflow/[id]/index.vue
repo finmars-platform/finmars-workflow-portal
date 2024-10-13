@@ -40,7 +40,7 @@
 						<fm-icon :icon="'pause'" title="Pause" />
 					</fm-btn>
 					<fm-btn @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
-						<fm-icon :icon="'resume'" title="Resume" />
+						<fm-icon :icon="'play_circle'" title="Resume" />
 					</fm-btn>
 				</div>
 
