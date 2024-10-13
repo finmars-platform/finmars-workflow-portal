@@ -26,7 +26,7 @@
 					<td>{{ item.name }}</td>
 					<td>{{ item.user_code }}</td>
 					<td>{{ item.notes }}</td>
-					<td>{{ formatDate(item.created) }}</td>
+					<td>{{ formatDate(item.created_at) }}</td>
 				</tr>
 				</tbody>
 			</table>

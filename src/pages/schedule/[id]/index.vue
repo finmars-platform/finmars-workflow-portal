@@ -53,11 +53,11 @@
 
 				<tr>
 					<th>Created</th>
-					<td>{{ formatDate(schedule.created) }}</td>
+					<td>{{ formatDate(schedule.created_at) }}</td>
 				</tr>
 				<tr>
 					<th>Modified</th>
-					<td>{{ formatDate(schedule.modified) }}</td>
+					<td>{{ formatDate(schedule.modified_at) }}</td>
 				</tr>
 
 				<tr>

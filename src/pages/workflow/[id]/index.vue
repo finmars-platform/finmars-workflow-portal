@@ -63,12 +63,21 @@
 							</td>
 						</tr>
 						<tr>
-							<td>Created</td>
-							<td>{{ $formatDate(workflow.created) }}</td>
+							<td>Created At</td>
+							<td :title="'Server Time: ' + workflow.created_at">{{ $formatDate(workflow.created_at) }}</td>
 						</tr>
 						<tr>
-							<td>Modified</td>
-							<td>{{ $formatDate(workflow.modified) }}</td>
+							<td>Modified At</td>
+							<td :title="'Server Time: ' + workflow.modified_at">{{ $formatDate(workflow.modified_at) }}</td>
+						</tr>
+						<tr v-if="workflow.finished_at">
+							<td>Finished At</td>
+							<td :title="'Server Time: ' + workflow.finished_at">{{ $formatDate(workflow.finished_at) }}</td>
+						</tr>
+
+						<tr v-if="workflow.finished_at">
+							<td>Execution Time</td>
+							<td>{{ formatExecutionTime(workflow.created_at, workflow.finished_at) }}</td>
 						</tr>
 
 						</tbody>
@@ -114,6 +123,9 @@
 						<div>Status: <StatusBadge :status="activeTask.status" /></div>
 						<div>Celery Task ID: <strong>{{ activeTask.celery_task_id }}</strong></div>
 						<div>Worker: <strong>{{ activeTask.worker_name }}</strong></div>
+						<div :title="'Server Time: ' + activeTask.created_at">Created At: <strong>{{ $formatDate(activeTask.created_at) }}</strong></div>
+						<div :title="'Server Time: ' + activeTask.finished_at" v-if="activeTask.finished_at">Finished At: <strong>{{ $formatDate(activeTask.finished_at) }}</strong></div>
+						<div v-if="activeTask.finished_at">Execution Time: <strong>{{ formatExecutionTime(activeTask.created_at, activeTask.finished_at) }}</strong></div>
 					</div>
 
 					<div class="task-section">
@@ -593,6 +605,21 @@ function resize(event) {
 function stopResize() {
 	document.removeEventListener('mousemove', resize);
 	document.removeEventListener('mouseup', stopResize);
+}
+
+function formatExecutionTime(createdAt, finishedAt) {
+	const created = new Date(createdAt);
+	const finished = new Date(finishedAt);
+
+	// Calculate the difference in milliseconds
+	const diff = finished - created;
+
+	// Convert to seconds and calculate mm:ss
+	const totalSeconds = Math.floor(diff / 1000);
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = totalSeconds % 60;
+
+	return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 </script>

@@ -63,11 +63,11 @@
 
 				<tr>
 					<td>Created</td>
-					<td>{{ $formatDate(workflow.created) }}</td>
+					<td>{{ $formatDate(workflow.created_at) }}</td>
 				</tr>
 				<tr>
 					<td>Modified</td>
-					<td>{{ $formatDate(workflow.modified) }}</td>
+					<td>{{ $formatDate(workflow.modified_at) }}</td>
 				</tr>
 				</tbody>
 			</table>

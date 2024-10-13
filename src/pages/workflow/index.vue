@@ -28,7 +28,7 @@
 					<td :class="getStatusClass(item.status)">
 						<StatusBadge :status="item.status" />
 					</td>
-					<td>{{ formatDate(item.created) }}</td>
+					<td>{{ formatDate(item.created_at) }}</td>
 				</tr>
 				</tbody>
 			</table>
