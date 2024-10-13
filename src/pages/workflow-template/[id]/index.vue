@@ -24,6 +24,9 @@
 				<fm-btn @click="openTemplateFile()" class="action-btn">
 					<fm-icon :icon="'file_open'" title="Save" />
 				</fm-btn>
+				<fm-btn @click="arrangeNodes()" class="action-btn">
+					<fm-icon :icon="'layers'" title="Arrange Nodes" />
+				</fm-btn>
 			</div>
 
 			<!-- Workflow Information Table -->
@@ -214,6 +217,7 @@ import {ClassicPreset, NodeEditor} from "rete";
 import {AreaExtensions, AreaPlugin} from 'rete-area-plugin';
 import {ConnectionPlugin, Presets as ConnectionPresets} from "rete-connection-plugin"
 import {Presets, VuePlugin} from 'rete-vue-plugin';
+import { AutoArrangePlugin, Presets as ArrangePresets } from "rete-auto-arrange-plugin";
 
 import WorkflowNode from "~/components/WorkflowNode.vue";
 import WorkflowTemplateNode from "~/components/WorkflowTemplateNode.vue";
@@ -260,6 +264,7 @@ async function getWorkflows() {
 let workflow = ref({});
 let editor;
 let editorArea;
+let editorArrange
 
 const blocks = ref([]);
 
@@ -325,6 +330,8 @@ def main(self, *args, **kwargs):
 async function createNode(workflow, node_user_code, node_name, node_type, node_notes, node_source_code, x, y) {
 	const node = await new ClassicPreset.Node(name);
 	node.position = [x, y];
+	node.height = 800;
+	node.width = 400;
 	node.name = node_name;
 	node.data = {
 		node: {
@@ -609,6 +616,7 @@ async function setupGraph() {
 	editorArea = new AreaPlugin(container);
 	const render = new VuePlugin();
 	const connection = new ConnectionPlugin()
+	editorArrange = new AutoArrangePlugin();
 
 	// Apply "classic" preset for default node appearance
 	render.addPreset(Presets.classic.setup({
@@ -624,10 +632,12 @@ async function setupGraph() {
 		}
 	}));
 	connection.addPreset(ConnectionPresets.classic.setup())
+	editorArrange.addPreset(ArrangePresets.classic.setup());
 
 	editor.use(editorArea);
 	editorArea.use(render);
 	editorArea.use(connection);
+	editorArea.use(editorArrange);
 }
 
 function openTemplateFile() {
@@ -641,6 +651,10 @@ function openTemplateFile() {
 
 	window.open(link, '_blank')
 
+}
+
+async function arrangeNodes() {
+	await editorArrange.layout();
 }
 
 // Rete.js Setup
