@@ -162,7 +162,7 @@
 
 
 			<div style="margin-top: 8px;">
-				<fm-btn @click="deleteWorkflowTemplate" class="delete-btn">Delete</fm-btn>
+				<fm-btn @click="deleteWorkflowTemplate" class="delete-btn">Delete Workflow Template</fm-btn>
 			</div>
 
 		</div>
@@ -761,10 +761,14 @@ h3 {
 	margin-top: 20px;
 }
 
-.delete-btn {
-	background-color: #ff4d4f;
-	color: white;
+.btn.delete-btn {
+	background-color: #ff4d4f !important;
+	color: white !important;
 	padding: 10px 20px;
+	margin-top: 40px !important;
+}
+.btn.delete-btn:hover  {
+	opacity: .8;
 }
 
 .form-control {
