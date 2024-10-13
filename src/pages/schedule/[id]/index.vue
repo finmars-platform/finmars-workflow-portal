@@ -125,7 +125,7 @@ async function getSchedule() {
 	schedule.value = response;
 
 	if (schedule.value.payload) {
-		schedulePayload.value = JSON.stringify(schedule.value.payload)
+		schedulePayload.value = JSON.stringify(schedule.value.payload, null, 4)
 	}
 }
 
