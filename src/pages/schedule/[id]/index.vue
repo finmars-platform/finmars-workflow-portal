@@ -59,6 +59,16 @@
 					<th>Modified</th>
 					<td>{{ formatDate(schedule.modified) }}</td>
 				</tr>
+
+				<tr>
+					<th>Next Run At</th>
+					<td><span :title="'Server Time: ' + schedule.next_run_at">{{ formatDate(schedule.next_run_at) }}</span></td>
+				</tr>
+				<tr>
+					<th>Last Run At</th>
+					<td><span :title="'Server Time: ' + schedule.last_run_at">{{ formatDate(schedule.last_run_at) }}</span></td>
+				</tr>
+
 				<tr>
 					<th>Owner</th>
 					<td>{{ schedule.owner_username }}</td>
@@ -86,13 +96,18 @@
 			<!-- Actions -->
 			<div class="action-buttons">
 				<fm-btn type="submit" class="save-btn">Save</fm-btn>
-
 			</div>
+
 		</form>
 
+
 		<div style="margin-top: 8px;">
-			<fm-btn type="button" @click="deleteSchedule" class="delete-btn">Delete</fm-btn>
+			<fm-btn  @click="deleteSchedule" class="delete-btn">Delete</fm-btn>
 		</div>
+
+		<hr style="margin: 24px 0">
+
+		<fm-btn @click="runManual"  class="save-btn">Run Manually</fm-btn>
 	</div>
 </template>
 
@@ -193,6 +208,18 @@ async function deleteSchedule() {
 	}
 }
 
+async function runManual() {
+
+	await useApi('scheduleRunManual.put', {
+		params: {id: route.params.id}
+	});
+	useNotify({
+		type: 'success',
+		title: 'Success',
+		text: 'Schedule is triggered manually!'
+	});
+}
+
 // Format the date to a more readable format
 function formatDate(dateString) {
 	const options = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'};
@@ -252,9 +279,9 @@ input, select {
 	margin-right: 10px;
 }
 
-.delete-btn {
-	background-color: #ff4d4f;
-	color: white;
+.btn.delete-btn {
+	background-color: #ff4d4f !important;
+	color: white !important;
 	padding: 10px 20px;
 }
 </style>

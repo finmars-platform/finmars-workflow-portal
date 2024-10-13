@@ -45,6 +45,9 @@ export default {
 		delete: prefix + '/schedule/{id}/',
 	},
 
+	scheduleRunManual: {
+		put: prefix + '/schedule/{id}/run-manual/',
+	},
 
 	workflowTemplateList: {
 		get: prefix + '/workflow-template/'

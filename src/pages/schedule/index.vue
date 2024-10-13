@@ -15,7 +15,8 @@
 					<th>Crontab</th>
 					<th>Is Enabled</th>
 					<th>Notes</th>
-					<th>Created</th>
+					<th>Next Run At</th>
+					<th>Last Run At</th>
 				</tr>
 				</thead>
 				<tbody>
@@ -30,7 +31,8 @@
 					<td>{{ formatCrontab(item.crontab_line) }}</td>
 					<td><span v-if="item.enabled">Yes</span> <span v-if="!item.enabled">No</span></td>
 					<td>{{ item.notes }}</td>
-					<td>{{ formatDate(item.created) }}</td>
+					<td><span :title="'Server Time: ' + item.next_run_at"> {{formatDate(item.next_run_at)}} </span></td>
+					<td><span :title="'Server Time: ' + item.last_run_at"> {{formatDate(item.last_run_at)}} </span></td>
 				</tr>
 				</tbody>
 			</table>
@@ -68,7 +70,7 @@ function goToNewSchedulePage() {
 
 function formatDate(dateString) {
 	// Format the created date in a more readable way
-	const options = { year: 'numeric', month: 'short', day: 'numeric' };
+	const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
 	return new Date(dateString).toLocaleDateString(undefined, options);
 }
 
