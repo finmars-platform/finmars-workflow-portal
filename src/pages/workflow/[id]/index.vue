@@ -121,8 +121,8 @@
 						<pre class="log-container">{{ activeTask.log }}</pre>
 					</div>
 
-					<div class="task-section collapsible" @click="payloadVisible = !payloadVisible">
-						<h4>Payload <fm-icon :icon="payloadVisible ? 'arrow_upward' : 'arrow_downward'" /></h4>
+					<div class="task-section collapsible" >
+						<h4>Payload <fm-icon :icon="payloadVisible ? 'arrow_upward' : 'arrow_downward'"  @click="payloadVisible = !payloadVisible" /></h4>
 						<v-ace-editor
 							v-if="payloadVisible"
 							v-model:value="activeTask.payloadPretty"
@@ -133,8 +133,8 @@
 						/>
 					</div>
 
-					<div class="task-section collapsible" @click="resultVisible = !resultVisible">
-						<h4>Result <fm-icon :icon="resultVisible ? 'arrow_upward' : 'arrow_downward'" /></h4>
+					<div class="task-section collapsible">
+						<h4>Result <fm-icon :icon="resultVisible ? 'arrow_upward' : 'arrow_downward'" @click="resultVisible = !resultVisible" /></h4>
 						<v-ace-editor
 							v-if="resultVisible"
 							v-model:value="activeTask.resultPretty"
