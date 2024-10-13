@@ -123,6 +123,7 @@
 						<div>Status: <StatusBadge :status="activeTask.status" /></div>
 						<div>Celery Task ID: <strong>{{ activeTask.celery_task_id }}</strong></div>
 						<div>Worker: <strong>{{ activeTask.worker_name }}</strong></div>
+						<div><fm-btn @click="seeWorkerLogs()">See Worker Logs</fm-btn></div>
 						<div :title="'Server Time: ' + activeTask.created_at">Created At: <strong>{{ $formatDate(activeTask.created_at) }}</strong></div>
 						<div :title="'Server Time: ' + activeTask.finished_at" v-if="activeTask.finished_at">Finished At: <strong>{{ $formatDate(activeTask.finished_at) }}</strong></div>
 						<div v-if="activeTask.finished_at">Execution Time: <strong>{{ formatExecutionTime(activeTask.created_at, activeTask.finished_at) }}</strong></div>
@@ -620,6 +621,19 @@ function formatExecutionTime(createdAt, finishedAt) {
 	const seconds = totalSeconds % 60;
 
 	return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function seeWorkerLogs() {
+	// https://eu-central-2.finmars.com/authorizer/api/v2/realm/3/log/?app_code=workflow&worker_name=worker00&start_time=2024-10-13
+
+	const start_time = new Date(activeTask.value.created_at).toISOString().split('T')[0]
+
+	// workflow-worker-worker00-realm0sqjq-6bff7c78ff-d8zzr
+	const worker_name = activeTask.value.worker_name.split('-')[2]
+
+	const link = window.location.origin + `/authorizer/api/v2/realm/${store.realm_code}/log/?app_code=workflow&worker_name=${worker_name}&start_time=${start_time}`
+	window.open(link, '_blank')
+
 }
 
 </script>
