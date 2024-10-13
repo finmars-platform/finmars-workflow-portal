@@ -18,18 +18,18 @@
 				<div style="display: flex">
 
 					<fm-btn @click="refresh()">
-						Refresh
+						<fm-icon :icon="'refresh'" title="Refresh" />
 					</fm-btn>
 					<fm-btn @click="openRelaunchDialog()">
-						Relaunch
+						<fm-icon :icon="'replay'" title="Relaunch" />
 					</fm-btn>
 					<fm-btn @click="cancelWorkflow()"
 							v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
-						Cancel
+						<fm-icon :icon="'cancel'" title="Cancel" />
 					</fm-btn>
 
 					<fm-btn @click="activeTask = null" v-if="activeTask">
-						Show Workflow
+						<fm-icon :icon="'home'" title="Show Workflow" />
 					</fm-btn>
 
 
@@ -83,51 +83,71 @@
 						style="height: 300px;width: 100%;"/>
 
 					<h3>Tasks</h3>
-					<ul>
-						<div v-for="task in workflow.tasks" :key="task.id" @click="activeTask = task" class="task-item">
-							{{ task.id }} {{ task.name }}
-						</div>
+					<ul class="task-list">
+						<div
+							v-for="task in workflow.tasks"
+							:key="task.id"
+							@click="activeTask = task"
+							class="task-item"
+						>
+							<div class="task-header">
+								<span class="task-id">{{ task.id }} - {{ task.name }}</span>
+								<StatusBadge :status="task.status" />
+							</div>
 
+							<!-- Node Information -->
+							<div v-if="linkedNode(task)" class="task-node-info">
+								Linked Node: <strong>{{ linkedNode(task).data.node.user_code }}</strong>
+							</div>
+						</div>
 					</ul>
+
 
 				</div>
 
 				<div v-if="activeTask" class="active-task-section">
-					Active Task
+					<h3>Active Task</h3>
 
-					<div>
-						ID: {{ activeTask.id }}
-					</div>
-					<strong>{{ activeTask.name }}</strong> - Status:
-					<StatusBadge :status="activeTask.status"/>
-					<div>
-						Celery Task ID: {{ activeTask.celery_task_id }}
-					</div>
-					<div>
-						Worker: {{ activeTask.worker_name }}
+					<div class="task-details">
+						<div>ID: <strong>{{ activeTask.id }}</strong></div>
+						<div>Name: <strong>{{ activeTask.name }}</strong></div>
+						<div>Status: <StatusBadge :status="activeTask.status" /></div>
+						<div>Celery Task ID: <strong>{{ activeTask.celery_task_id }}</strong></div>
+						<div>Worker: <strong>{{ activeTask.worker_name }}</strong></div>
 					</div>
 
-					<h2>Log</h2>
-					<pre class="log-container">{{ activeTask.log }}</pre>
+					<div class="task-section">
+						<h4>Log</h4>
+						<pre class="log-container">{{ activeTask.log }}</pre>
+					</div>
 
-					<h2>Payload</h2>
-					<v-ace-editor
-						v-model:value="activeTask.payloadPretty"
-						@init="editorInit"
-						lang="json"
-						theme="monokai"
-						style="height: 300px;width: 100%;"/>
+					<div class="task-section collapsible" @click="payloadVisible = !payloadVisible">
+						<h4>Payload <fm-icon :icon="payloadVisible ? 'arrow_upward' : 'arrow_downward'" /></h4>
+						<v-ace-editor
+							v-if="payloadVisible"
+							v-model:value="activeTask.payloadPretty"
+							@init="editorInit"
+							lang="json"
+							theme="monokai"
+							style="height: 300px;width: 100%;"
+						/>
+					</div>
 
-					<h2>Result</h2>
-					<v-ace-editor
-						v-model:value="activeTask.resultPretty"
-						@init="editorInit"
-						lang="json"
-						theme="monokai"
-						style="height: 300px;width: 100%;"/>
+					<div class="task-section collapsible" @click="resultVisible = !resultVisible">
+						<h4>Result <fm-icon :icon="resultVisible ? 'arrow_upward' : 'arrow_downward'" /></h4>
+						<v-ace-editor
+							v-if="resultVisible"
+							v-model:value="activeTask.resultPretty"
+							@init="editorInit"
+							lang="json"
+							theme="monokai"
+							style="height: 300px;width: 100%;"
+						/>
+					</div>
 
-					<fm-btn @click="viewInFlower">View in Flower</fm-btn>
-
+					<div class="task-actions">
+						<fm-btn @click="viewInFlower">View in Flower</fm-btn>
+					</div>
 				</div>
 
 
@@ -230,6 +250,8 @@ let editor;
 let editorArea;
 
 let activeTask = ref(null)
+let resultVisible = ref(false)
+let payloadVisible = ref(false)
 
 async function getWorkflow() {
 
@@ -523,6 +545,11 @@ onMounted(async () => {
 
 });
 
+function linkedNode(task) {
+	// Assuming task.node_id links to a node in workflow template
+	return workflow.value.workflow_template_object.data.workflow.nodes.find(node => node.id === task.node_id);
+}
+
 let initialX = 0;  // Track the initial mouse position
 
 function initResize(event) {
@@ -669,14 +696,14 @@ li {
 	background: #000;
 	color: #fff;
 	white-space: pretty;
-	max-height: 200px;
+	max-height: 400px;
 	overflow: auto;
 }
 
 .workflow-detail-section {
-	flex: 0 0 30%; /* Adjusted width */
+	flex: 0 0 29%; /* Adjusted width */
 	background-color: #ffffff;
-	padding: 20px; /* Increased padding for a cleaner layout */
+	padding: 4px; /* Increased padding for a cleaner layout */
 	border-left: 1px solid #ddd; /* Separate left and right sections visually */
 	overflow-y: auto;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add slight shadow for depth */
@@ -773,4 +800,119 @@ li {
 	justify-content: space-between;
 	margin-top: 20px;
 }
+
+
+
+.task-list {
+	list-style: none;
+	padding: 0;
+	margin: 16px 0;
+}
+
+.task-item {
+	background: #f8f9fa;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 12px;
+	margin-bottom: 12px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.task-item:hover {
+	background: #e9ecef;
+}
+
+.task-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.task-id {
+	font-size: 16px;
+	font-weight: bold;
+	color: #333;
+}
+
+.task-node-info {
+	font-size: 14px;
+	color: #555;
+}
+
+.StatusBadge {
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-size: 12px;
+	color: #fff;
+}
+
+.active-task-section {
+	background-color: #f9f9fb;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 16px;
+	margin-top: 16px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-details {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 16px;
+}
+
+.task-details div {
+	margin-bottom: 8px;
+	font-size: 14px;
+	color: #333;
+}
+
+.task-details strong {
+	font-weight: bold;
+	color: #000;
+}
+
+.task-section {
+	margin-bottom: 16px;
+}
+
+.task-section h4 {
+	font-size: 16px;
+	margin-bottom: 8px;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+}
+
+.log-container {
+	background: #f0f0f0;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 8px;
+	font-size: 12px;
+	color: #333;
+	white-space: pre-wrap;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.collapsible {
+	background: #fafafa;
+	padding: 12px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+}
+
+.task-actions {
+	margin-top: 16px;
+	display: flex;
+	justify-content: flex-start;
+}
+
+.task-actions fm-btn {
+	margin-right: 8px;
+}
+
 </style>

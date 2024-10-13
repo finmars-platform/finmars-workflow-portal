@@ -13,16 +13,16 @@
 
 			<div class="button-group">
 				<fm-btn @click="refresh()" class="action-btn">
-					Refresh
+					<fm-icon :icon="'refresh'" title="Refresh" />
 				</fm-btn>
 				<fm-btn @click="openLaunchDialog()" class="action-btn">
-					Launch
+					<fm-icon :icon="'play_arrow'" title="Launch" />
 				</fm-btn>
 				<fm-btn @click="save()" class="action-btn">
-					Save
+					<fm-icon :icon="'save'" title="Save" />
 				</fm-btn>
 				<fm-btn @click="openTemplateFile()" class="action-btn">
-					See Template
+					<fm-icon :icon="'file_open'" title="Save" />
 				</fm-btn>
 			</div>
 
