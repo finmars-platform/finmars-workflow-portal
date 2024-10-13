@@ -20,7 +20,7 @@
 					<fm-btn @click="refresh()">
 						<fm-icon :icon="'refresh'" title="Refresh" />
 					</fm-btn>
-					<fm-btn @click="openRelaunchDialog()">
+					<fm-btn @click="openRelaunchDialog()" v-if="workflow?.status !== 'progress'">
 						<fm-icon :icon="'replay'" title="Relaunch" />
 					</fm-btn>
 					<fm-btn @click="cancelWorkflow()"
@@ -37,10 +37,10 @@
 
 				<div>
 					<fm-btn @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
-						Pause
+						<fm-icon :icon="'pause'" title="Pause" />
 					</fm-btn>
 					<fm-btn @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
-						Resume
+						<fm-icon :icon="'resume'" title="Resume" />
 					</fm-btn>
 				</div>
 
