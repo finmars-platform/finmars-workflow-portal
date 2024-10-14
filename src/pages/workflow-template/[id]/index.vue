@@ -381,7 +381,7 @@ async function addComment() {
 async function createNode(workflow, node_user_code, node_name, node_type, node_notes, node_source_code, x, y) {
 	const node = await new ClassicPreset.Node(name);
 	node.position = [x, y];
-	node.height = 450;
+	node.height = 500;
 	node.width = 300;
 	node.name = node_name;
 	node.data = {
