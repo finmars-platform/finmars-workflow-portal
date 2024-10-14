@@ -6,33 +6,34 @@
 		data-testid="node"
 	>
 		<div class="title" data-testid="title" @pointerdown.stop="">{{ data.data.node.name }}</div>
+		<div class="sub-title" data-testid="sub-title" @pointerdown.stop="">{{ data.data.node.user_code }}</div>
 		<div>
 			<div class="node-info">
 				<div @pointerdown.stop="" class="node-info-header">
 					<p>Node Details</p>
 				</div>
 
-				<div class="node-info-content">
-					<div class="info-item" @pointerdown.stop="">
-						<span class="info-label">Node User Code:</span>
-						<input v-model="data.data.node.user_code" class="info-value" readonly />
-					</div>
+<!--				<div class="node-info-content">-->
+<!--					<div class="info-item" @pointerdown.stop="">-->
+<!--						<span class="info-label">Node User Code:</span>-->
+<!--						<input v-model="data.data.node.user_code" class="info-value" readonly />-->
+<!--					</div>-->
 
-					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.user_code">
-						<span class="info-label">Workflow User Code:</span>
-						<input v-model="data.data.workflow.user_code" class="info-value" readonly />
-					</div>
+<!--					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.user_code">-->
+<!--						<span class="info-label">Workflow User Code:</span>-->
+<!--						<input v-model="data.data.workflow.user_code" class="info-value" readonly />-->
+<!--					</div>-->
 
-					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.name">
-						<span class="info-label">Workflow Name:</span>
-						<input v-model="data.data.workflow.name" class="info-value" readonly />
-					</div>
+<!--					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.name">-->
+<!--						<span class="info-label">Workflow Name:</span>-->
+<!--						<input v-model="data.data.workflow.name" class="info-value" readonly />-->
+<!--					</div>-->
 
-					<div class="info-item" @pointerdown.stop="">
-						<span class="info-label">Notes:</span>
-						<textarea v-model="data.data.node.notes" class="info-value" rows="3" />
-					</div>
-				</div>
+<!--					<div class="info-item" @pointerdown.stop="">-->
+<!--						<span class="info-label">Notes:</span>-->
+<!--						<textarea v-model="data.data.node.notes" class="info-value" rows="3" />-->
+<!--					</div>-->
+<!--				</div>-->
 			</div>
 
 			<!-- Source Code Editor for the node -->
@@ -44,10 +45,10 @@
 				</div>
 				<v-ace-editor
 					v-model:value="data.data.source_code"
-					@init="sourceCodeEditorInit"
+					@init="sourceCodePreviewInit"
 					lang="python"
 					theme="monokai"
-					style="height: 200px; width: 100%;"
+					style="height: 100px; width: 100%;"
 					@pointerdown.stop=""
 				/>
 			</div>
@@ -199,6 +200,14 @@ export default defineComponent({
 		outputs() {
 			return sortByIndex(Object.entries(this.data.outputs))
 		},
+		sourceCodePreviewInit(editor) {
+			editor.setHighlightActiveLine(false)
+			editor.setShowPrintMargin(false)
+			editor.setFontSize(5)
+			editor.setBehavioursEnabled(true)
+			editor.focus()
+			editor.navigateFileStart()
+		},
 		sourceCodeEditorInit(editor) {
 			editor.setHighlightActiveLine(false)
 			editor.setShowPrintMargin(false)
@@ -234,6 +243,7 @@ export default defineComponent({
 	padding: 16px; /* Increase padding for breathing room */
 	box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 	transition: all 0.2s ease-in-out; /* Smooth transition for hover */
+	padding-top: 16px;
 
 	&:hover {
 		opacity: 1; /* Slight increase in opacity */
@@ -248,8 +258,13 @@ export default defineComponent({
 		color: #333; /* Darker text color for better readability */
 		font-family: 'Helvetica Neue', sans-serif;
 		font-size: 20px; /* Slightly larger font */
-		padding: 12px 0;
+		padding: 0;
 		font-weight: bold; /* Bold for better emphasis */
+		cursor: auto;
+	}
+	.sub-title {
+		font-size: 14px;
+		cursor: auto;
 	}
 
 	.output {

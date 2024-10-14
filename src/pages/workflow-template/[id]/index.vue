@@ -12,9 +12,9 @@
 			<h2>Workflow Template Details</h2>
 
 			<div class="button-group">
-				<fm-btn @click="refresh()" class="action-btn">
-					<fm-icon :icon="'refresh'" title="Refresh" />
-				</fm-btn>
+<!--				<fm-btn @click="refresh()" class="action-btn">-->
+<!--					<fm-icon :icon="'refresh'" title="Refresh" />-->
+<!--				</fm-btn>-->
 				<fm-btn @click="openLaunchDialog()" class="action-btn">
 					<fm-icon :icon="'play_arrow'" title="Launch" />
 				</fm-btn>
@@ -26,6 +26,9 @@
 				</fm-btn>
 				<fm-btn @click="arrangeNodes()" class="action-btn">
 					<fm-icon :icon="'layers'" title="Arrange Nodes" />
+				</fm-btn>
+				<fm-btn @click="showEditAsJsonDialog()" class="action-btn">
+					<fm-icon :icon="'code'" title="Edit as JSON" />
 				</fm-btn>
 			</div>
 
@@ -201,6 +204,28 @@
 		</fm-base-modal>
 
 
+		<fm-base-modal
+			style="width: 80vw; height: 80vh;"
+			title="Edit as JSON"
+			v-model="isEditAsJsonDialogOpen"
+		>
+
+			<v-ace-editor
+				v-model:value="workflowTemplateJson"
+				@init="payloadEditorInit"
+				lang="json"
+				theme="monokai"
+				style="height: 100%;width: 100%;"/>
+
+			<template #footer>
+				<div class="flex flex-row justify-between">
+					<fm-btn type="text" @click="isEditAsJsonDialogOpen = !isEditAsJsonDialogOpen">Cancel</fm-btn>
+
+					<fm-btn type="filled" @click="saveAsJson($event)">Save</fm-btn>
+				</div>
+			</template>
+		</fm-base-modal>
+
 	</div>
 
 </template>
@@ -230,6 +255,8 @@ definePageMeta({
 	middleware: "auth",
 });
 
+let workflowTemplateJson = ref('');
+let isEditAsJsonDialogOpen = ref(false);
 let isLaunchDialogOpen = ref(false);
 let launchPayload = ref('')
 let defaultPayload = ref(`
@@ -330,8 +357,8 @@ def main(self, *args, **kwargs):
 async function createNode(workflow, node_user_code, node_name, node_type, node_notes, node_source_code, x, y) {
 	const node = await new ClassicPreset.Node(name);
 	node.position = [x, y];
-	node.height = 800;
-	node.width = 400;
+	node.height = 450;
+	node.width = 300;
 	node.name = node_name;
 	node.data = {
 		node: {
@@ -657,6 +684,32 @@ async function arrangeNodes() {
 	await editorArrange.layout();
 }
 
+function showEditAsJsonDialog() {
+
+	workflowTemplateJson.value = JSON.stringify(workflow.value, null, 4)
+
+	isEditAsJsonDialogOpen.value = true
+
+}
+
+async function saveAsJson() {
+
+	const result = await useApi('workflowTemplate.put', {
+		params: {id: route.params.id},
+		body: workflowTemplateJson.value
+	})
+
+	useNotify({
+		type: 'success',
+		title: 'Success',
+		text: 'Workflow Template is Saved'
+	})
+
+	isEditAsJsonDialogOpen.value = false
+
+	await refresh();
+
+}
 // Rete.js Setup
 onMounted(async () => {
 
