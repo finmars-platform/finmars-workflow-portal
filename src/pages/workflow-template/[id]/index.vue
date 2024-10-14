@@ -166,6 +166,20 @@
 
 			</div>
 
+			<div class="workflow-template-designer-section">
+				<h2>Comments</h2>
+
+				<!-- Node Name -->
+				<div class="input-group">
+					<label for="comment-text">Comment:</label>
+					<input id="comment-text" v-model="commentText" type="text" placeholder="This step is for..."
+						   class="input-field"/>
+				</div>
+
+				<fm-btn @click="addComment()" class="action-btn">Add Comment</fm-btn>
+
+			</div>
+
 
 			<div style="margin-top: 8px;">
 				<fm-btn @click="deleteWorkflowTemplate" class="delete-btn">Delete Workflow Template</fm-btn>
@@ -243,6 +257,7 @@ import {AreaExtensions, AreaPlugin} from 'rete-area-plugin';
 import {ConnectionPlugin, Presets as ConnectionPresets} from "rete-connection-plugin"
 import {Presets, VuePlugin} from 'rete-vue-plugin';
 import { AutoArrangePlugin, Presets as ArrangePresets } from "rete-auto-arrange-plugin";
+import { CommentPlugin } from "rete-comment-plugin";
 
 import WorkflowNode from "~/components/WorkflowNode.vue";
 import WorkflowTemplateNode from "~/components/WorkflowTemplateNode.vue";
@@ -265,6 +280,7 @@ let defaultPayload = ref(`
 
 const selectedWorkflow = ref(null);
 let availableWorkflows = ref([]);
+let commentText = ref("");
 let nodeUserCode = ref("");
 let nodeName = ref("");
 let nodeType = ref("workflow");
@@ -291,7 +307,8 @@ async function getWorkflows() {
 let workflow = ref({});
 let editor;
 let editorArea;
-let editorArrange
+let editorArrange;
+let editorComment;
 
 const blocks = ref([]);
 
@@ -353,6 +370,13 @@ def main(self, *args, **kwargs):
 `;
 }
 
+
+async function addComment() {
+
+	await editorComment.addInline(commentText.value, [100, 100]);
+
+	commentText.value = "";
+}
 
 async function createNode(workflow, node_user_code, node_name, node_type, node_notes, node_source_code, x, y) {
 	const node = await new ClassicPreset.Node(name);
@@ -487,7 +511,20 @@ async function initGraph() {
 			);
 		}
 
+		console.log("Settings comments", editorComment);
+		if (workflow.value.data.workflow.comments) {
+			console.log("Settings comments", editorComment);
+
+			for (const comment of workflow.value.data.workflow.comments) {
+
+				await editorComment.addInline(comment.text, [comment.x, comment.y]);
+			}
+
+		}
+
 	}
+
+
 
 	// editorArea.on('nodetranslated', (node, position) => {
 	// 	console.log(`Node ${node.name} was moved to`, position);
@@ -593,7 +630,8 @@ async function exportToJson() {
 			modified_at: workflow.modified_at,
 			default_payload: JSON.parse(defaultPayload.value),
 			nodes: [],
-			connections: []
+			connections: [],
+			comments: []
 		}
 	}
 
@@ -607,6 +645,16 @@ async function exportToJson() {
 
 	for (const connection of connections) {
 		data.workflow.connections.push(connection)
+	}
+
+	console.log('editorComment', editorComment);
+	console.log('editorArea', editorArea);
+	console.log('editor', editor);
+
+	const comments = Array.from(editorComment.comments.values())
+
+	for (const comment of comments) {
+		data.workflow.comments.push(comment)
 	}
 
 	return data
@@ -644,6 +692,17 @@ async function setupGraph() {
 	const render = new VuePlugin();
 	const connection = new ConnectionPlugin()
 	editorArrange = new AutoArrangePlugin();
+	editorComment = new CommentPlugin({
+		edit: async (comment) => {
+			const result = prompt('Edit comment', comment.text)
+
+			if (result) {
+				return result
+			} else {
+				await editorComment.delete(comment.id)
+			}
+		}
+	});
 
 	// Apply "classic" preset for default node appearance
 	render.addPreset(Presets.classic.setup({
@@ -665,6 +724,7 @@ async function setupGraph() {
 	editorArea.use(render);
 	editorArea.use(connection);
 	editorArea.use(editorArrange);
+	editorArea.use(editorComment);
 }
 
 function openTemplateFile() {
