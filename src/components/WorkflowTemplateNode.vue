@@ -4,6 +4,7 @@
 		:class="{ selected: data.selected }"
 		:style="nodeStyles()"
 		data-testid="node"
+		ref="nodeElement"
 	>
 		<div class="title" data-testid="title" @pointerdown.stop="">{{ data.data.node.name }}</div>
 		<div class="sub-title" data-testid="sub-title" @pointerdown.stop="">{{ data.data.node.user_code }}</div>
@@ -13,27 +14,27 @@
 					<p>Node Details</p>
 				</div>
 
-<!--				<div class="node-info-content">-->
-<!--					<div class="info-item" @pointerdown.stop="">-->
-<!--						<span class="info-label">Node User Code:</span>-->
-<!--						<input v-model="data.data.node.user_code" class="info-value" readonly />-->
-<!--					</div>-->
+				<div class="node-info-content">
+					<div class="info-item" @pointerdown.stop="">
+						<span class="info-label">Node User Code:</span>
+						<b>{{data.data.node.user_code}}</b>
+					</div>
 
-<!--					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.user_code">-->
-<!--						<span class="info-label">Workflow User Code:</span>-->
-<!--						<input v-model="data.data.workflow.user_code" class="info-value" readonly />-->
-<!--					</div>-->
+					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.user_code">
+						<span class="info-label">Workflow User Code:</span>
+						<b>{{data.data.workflow.user_code}}</b>
+					</div>
 
-<!--					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.name">-->
-<!--						<span class="info-label">Workflow Name:</span>-->
-<!--						<input v-model="data.data.workflow.name" class="info-value" readonly />-->
-<!--					</div>-->
+					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.name">
+						<span class="info-label">Workflow Name:</span>
+						<b>{{data.data.workflow.name}}</b>
+					</div>
 
-<!--					<div class="info-item" @pointerdown.stop="">-->
-<!--						<span class="info-label">Notes:</span>-->
-<!--						<textarea v-model="data.data.node.notes" class="info-value" rows="3" />-->
-<!--					</div>-->
-<!--				</div>-->
+					<div class="info-item" @pointerdown.stop="">
+						<span class="info-label">Notes:</span>
+						<textarea v-model="data.data.node.notes" class="info-value" rows="3" />
+					</div>
+				</div>
 			</div>
 
 			<!-- Source Code Editor for the node -->
@@ -148,6 +149,8 @@
 			</template>
 		</fm-base-modal>
 
+		<div class="resize-handle"  @pointerdown.stop=""  @mousedown="initResize"></div>
+
 	</div>
 </template>
 
@@ -161,7 +164,6 @@ import 'ace-builds/src-noconflict/theme-monokai';
 
 import {BaseModal as FmBaseModal, FmBtn as FmBtn} from "@finmars/ui"
 
-
 function sortByIndex(entries) {
 	entries.sort((a, b) => {
 		const ai = a[1] && a[1].index || 0
@@ -174,14 +176,69 @@ function sortByIndex(entries) {
 
 export default defineComponent({
 	props: ['data', 'emit', 'seed'],
-	setup() {
-		// Define your reactive ref here
+	setup(props, { emit }) {
 		const isSourceCodeDialogOpen = ref(false)
+		const nodeElement = ref(null)
 
+		const node = props.data
+
+		let startX, startY, startWidth, startHeight
+		let requestId = null
+
+		const initResize = (e) => {
+			startX = e.clientX
+			startY = e.clientY
+			startWidth = parseInt(document.defaultView.getComputedStyle(nodeElement.value).width, 10)
+			startHeight = parseInt(document.defaultView.getComputedStyle(nodeElement.value).height, 10)
+			document.documentElement.addEventListener('mousemove', resizeThrottled, false)
+			document.documentElement.addEventListener('mouseup', stopResize, false)
+		}
+
+		const resizeThrottled = (e) => {
+			if (!requestId) {
+				requestId = requestAnimationFrame(() => {
+					doResize(e)
+					requestId = null
+				})
+			}
+		}
+
+
+
+		const doResize = (e) => {
+			const minWidth = 300
+			const minHeight = 350
+
+			const newWidth = startWidth + e.clientX - startX
+			const newHeight = startHeight + e.clientY - startY
+
+			if (newWidth > minWidth) {
+				nodeElement.value.style.width = newWidth + 'px';
+				node.width = newWidth;
+			}
+			if (newHeight > minHeight) {
+				nodeElement.value.style.height = newHeight + 'px';
+				node.height = newHeight;
+			}
+
+
+
+		}
+
+
+		const stopResize = () => {
+			document.documentElement.removeEventListener('mousemove', resizeThrottled, false)
+			document.documentElement.removeEventListener('mouseup', stopResize, false)
+			if (requestId) {
+				cancelAnimationFrame(requestId)
+				requestId = null
+			}
+		}
 
 		return {
-
 			isSourceCodeDialogOpen,
+			nodeElement,
+			initResize,
 		}
 	},
 	methods: {
@@ -244,6 +301,7 @@ export default defineComponent({
 	box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 	transition: all 0.2s ease-in-out; /* Smooth transition for hover */
 	padding-top: 16px;
+	transition: width 0.1s ease-out, height 0.1s ease-out;
 
 	&:hover {
 		opacity: 1; /* Slight increase in opacity */
@@ -306,6 +364,40 @@ export default defineComponent({
 
 	.control {
 		padding: 4px;
+	}
+
+	.resize-handle {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		width: 16px;
+		height: 16px;
+		cursor: se-resize;
+
+		/* Add visual styling */
+		background: linear-gradient(135deg, #007bff, #0056b3); /* Subtle gradient to make it look 3D */
+		border-radius: 50%; /* Make it circular */
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */
+		border: 2px solid #fff; /* White border for contrast */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		/* Transition effect for hover */
+		transition: background-color 0.3s, transform 0.2s;
+	}
+
+	.resize-handle:hover {
+		background: linear-gradient(135deg, #0056b3, #003e7e); /* Darken on hover */
+		transform: scale(1.2); /* Make it a bit larger when hovered over */
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Make the shadow stronger on hover */
+	}
+
+	/* Optional: Use an SVG icon for the resize handle */
+	.resize-handle::before {
+		content: '⤡'; /* Diagonal resize icon */
+		font-size: 12px;
+		color: #fff;
 	}
 }
 
