@@ -704,6 +704,11 @@ async function setupGraph() {
 		}
 	});
 
+	const background = document.createElement("div");
+	background.classList.add("pano-background");
+	background.classList.add("pano-fill-area");
+	editorArea.area.content.add(background);
+
 	// Apply "classic" preset for default node appearance
 	render.addPreset(Presets.classic.setup({
 		customize: {
