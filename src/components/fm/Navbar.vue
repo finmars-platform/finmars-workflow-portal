@@ -1,8 +1,14 @@
 <template>
-	<div class="flex flex-col h-screen p-3 bg-pageBackground w-40 overflow-y-auto navbar min-w-40">
-		<NuxtLink :to='`/${store.realm_code}/${store.space_code}/w/home`'>
-			<img :src="logoPath" class="sidenav-logo h-10" alt="Finmars logo"/>
+	<div :class="`flex flex-col h-screen p-3 bg-pageBackground overflow-y-auto navbar ${isCollapsed ? 'w-16' : 'w-48'} min-w-16`">
+		<NuxtLink :to='`/${store.realm_code}/${store.space_code}/w/home`' class="flex justify-center">
+			<img :src="logoPath" class="sidenav-logo" alt="Finmars logo"/>
 		</NuxtLink>
+		<!-- Collapse Button -->
+		<button @click="toggleCollapse" class="flex items-center justify-center p-2 mt-4 hover:bg-stateActiveBackground rounded-full">
+			<span v-if="!isCollapsed" class="text-secondary font-semibold text-left text-xs leading-loose tracking-normal">Collapse</span>
+			<span v-else class="text-secondary font-semibold text-left text-xs leading-loose tracking-normal">Expand</span>
+		</button>
+
 		<div class="space-y-3">
 			<div class="flex-1">
 				<ul class="pt-2 pb-4 space-y-1 text-sm">
@@ -13,12 +19,12 @@
 						<template v-if="linkItem.isExternal">
 							<a :href="linkItem.link" target="_blank" rel="noopener noreferrer"
 							   class="flex items-center p-2 space-x-3 hover:bg-stateActiveBackground rounded-full">
-								<span class="text-secondary font-semibold text-left text-xs leading-loose tracking-normal">{{ linkItem.name }}</span>
+								<span v-show="!isCollapsed" class="text-secondary font-semibold text-left text-xs leading-loose tracking-normal">{{ linkItem.name }}</span>
 							</a>
 						</template>
 						<template v-else>
 							<NuxtLink :to="linkItem.link" class="flex items-center p-2 space-x-3 hover:bg-stateActiveBackground rounded-full">
-								<span class="text-secondary font-semibold text-left text-xs leading-loose tracking-normal">{{ linkItem.name }}</span>
+								<span v-show="!isCollapsed" class="text-secondary font-semibold text-left text-xs leading-loose tracking-normal">{{ linkItem.name }}</span>
 							</NuxtLink>
 						</template>
 					</li>
@@ -29,8 +35,10 @@
 </template>
 
 <script setup>
+import { ref, computed } from 'vue';
 
-let store = useStore()
+let store = useStore();
+const isCollapsed = ref(false); // Track collapse state
 
 const navLinks = [
 	{name: 'Home', link: `/${store.realm_code}/${store.space_code}/w/home`},
@@ -45,28 +53,21 @@ const logoPath = computed(() => {
 	return store.darkModeActive ? '/img/logo-dark.png' : '/img/logo.png';
 });
 
+// Function to toggle collapse state
+const toggleCollapse = () => {
+	isCollapsed.value = !isCollapsed.value;
+};
 </script>
 
 <style lang="postcss" scoped>
 .navbar {
 	border-right: 1px solid var(--border-color);
-	min-width: 160px;
-	padding: 1rem;
-	display: flex;
 	transition: all 0.3s ease;
-}
-
-/* Logo container */
-.logo-container {
-	display: flex;
-	justify-content: center;
-	margin-bottom: 1rem;
 }
 
 /* Logo image */
 .sidenav-logo {
-	max-width: 140px;
-	width: 140px;
+	width: 100%;
 	transition: all 0.3s ease;
 }
 
