@@ -6,6 +6,13 @@
 		data-testid="node"
 		ref="nodeElement"
 	>
+		<div
+			class="action"
+
+		>
+			<fm-btn @click.stop="onCopy" :icon="'content_copy'"/>
+			<fm-btn @click.stop="onEdit" :icon="'edit'"/>
+		</div>
 		<div class="title" data-testid="title" @pointerdown.stop="">{{ data.data.node.name }}</div>
 		<div class="sub-title" data-testid="sub-title" @pointerdown.stop="">{{ data.data.node.user_code }}</div>
 		<div>
@@ -17,22 +24,22 @@
 				<div class="node-info-content">
 					<div class="info-item" @pointerdown.stop="">
 						<span class="info-label">Node User Code:</span>
-						<b>{{data.data.node.user_code}}</b>
+						<b>{{ data.data.node.user_code }}</b>
 					</div>
 
 					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.user_code">
 						<span class="info-label">Workflow User Code:</span>
-						<b>{{data.data.workflow.user_code}}</b>
+						<b>{{ data.data.workflow.user_code }}</b>
 					</div>
 
 					<div class="info-item" @pointerdown.stop="" v-if="data.data.workflow.name">
 						<span class="info-label">Workflow Name:</span>
-						<b>{{data.data.workflow.name}}</b>
+						<b>{{ data.data.workflow.name }}</b>
 					</div>
 
 					<div class="info-item" @pointerdown.stop="">
 						<span class="info-label">Notes:</span>
-						<textarea v-model="data.data.node.notes" class="info-value" rows="3" />
+						<textarea v-model="data.data.node.notes" class="info-value" rows="3"/>
 					</div>
 				</div>
 			</div>
@@ -42,7 +49,8 @@
 			<div v-if="data.data.node.type === 'source_code' || data.data.node.type === 'condition'">
 				<div class="node-source-code-panel">
 					<p>Source Code:</p>
-					<button class="node-source-code-panel-edit-button" @click="isSourceCodeDialogOpen = true">Edit</button>
+					<button class="node-source-code-panel-edit-button" @click="isSourceCodeDialogOpen = true">Edit
+					</button>
 				</div>
 				<v-ace-editor
 					v-model:value="data.data.source_code"
@@ -149,7 +157,7 @@
 			</template>
 		</fm-base-modal>
 
-		<div class="resize-handle"  @pointerdown.stop=""  @mousedown="initResize"></div>
+		<div class="resize-handle" @pointerdown.stop="" @mousedown="initResize"></div>
 
 	</div>
 </template>
@@ -176,7 +184,8 @@ function sortByIndex(entries) {
 
 export default defineComponent({
 	props: ['data', 'emit', 'seed'],
-	setup(props, { emit }) {
+	emits: ['copyBlock'],
+	setup(props, {emit}) {
 		const isSourceCodeDialogOpen = ref(false)
 		const nodeElement = ref(null)
 
@@ -184,6 +193,14 @@ export default defineComponent({
 
 		let startX, startY, startWidth, startHeight
 		let requestId = null
+
+		const onCopy = () => {
+			emit('copyBlock', node.id, 'copy')
+		}
+
+		const onEdit = () => {
+			emit('copyBlock', node.id, 'edit')
+		}
 
 		const initResize = (e) => {
 			startX = e.clientX
@@ -204,7 +221,6 @@ export default defineComponent({
 		}
 
 
-
 		const doResize = (e) => {
 			const minWidth = 300
 			const minHeight = 350
@@ -220,7 +236,6 @@ export default defineComponent({
 				nodeElement.value.style.height = newHeight + 'px';
 				node.height = newHeight;
 			}
-
 
 
 		}
@@ -239,6 +254,8 @@ export default defineComponent({
 			isSourceCodeDialogOpen,
 			nodeElement,
 			initResize,
+			onCopy,
+			onEdit,
 		}
 	},
 	methods: {
@@ -306,6 +323,11 @@ export default defineComponent({
 	&:hover {
 		opacity: 1; /* Slight increase in opacity */
 		box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+
+		.action {
+			opacity: 1;
+			pointer-events: unset;
+		}
 	}
 
 	&.selected {
@@ -320,6 +342,7 @@ export default defineComponent({
 		font-weight: bold; /* Bold for better emphasis */
 		cursor: auto;
 	}
+
 	.sub-title {
 		font-size: 14px;
 		cursor: auto;
@@ -394,6 +417,7 @@ export default defineComponent({
 	}
 
 	/* Optional: Use an SVG icon for the resize handle */
+
 	.resize-handle::before {
 		content: '⤡'; /* Diagonal resize icon */
 		font-size: 12px;
@@ -475,4 +499,17 @@ export default defineComponent({
 	width: 100%;
 }
 
+.action {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+
+	display: flex;
+	gap: 4px;
+
+	opacity: 0;
+	pointer-events: none;
+
+	transition: opacity 0.2s;
+}
 </style>
