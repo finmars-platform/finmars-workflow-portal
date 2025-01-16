@@ -14,12 +14,14 @@
 					<th>User Code</th>
 					<th>Notes</th>
 					<th>Created</th>
+					<th></th>
 				</tr>
 				</thead>
 				<tbody>
 				<tr v-for="item in workflowTemplates" :key="item.id">
 					<td>
-						<NuxtLink :to="useGetNuxtLink(`/workflow-template/${item.id}`, $route.params)" class="table-link">
+						<NuxtLink :to="useGetNuxtLink(`/workflow-template/${item.id}`, $route.params)"
+								  class="table-link">
 							{{ item.id }}
 						</NuxtLink>
 					</td>
@@ -27,6 +29,14 @@
 					<td>{{ item.user_code }}</td>
 					<td>{{ item.notes }}</td>
 					<td>{{ formatDate(item.created_at) }}</td>
+					<td>
+						<div class="action">
+							<fm-btn
+								@click.stop="openCopyModal({data: item.data, notes: item.notes, name: item.name, userCode: item.user_code})"
+								:icon="'content_copy'"/>
+							<fm-btn :size="12" @click.stop="deleteWorkflowTemplate(item.id)" :icon="'delete'"/>
+						</div>
+					</td>
 				</tr>
 				</tbody>
 			</table>
@@ -35,13 +45,22 @@
 
 		<fm-btn @click="goToNewWorkflowPage">Create New</fm-btn>
 
+		<EditTemplateModal
+			v-if="editTemplate"
+			:data="editTemplate.data"
+			:notes="editTemplate.notes"
+			:name="editTemplate.name"
+			:userCode="editTemplate.userCode"
+			@close="editTemplate = null"
+			@update="getWorkflowTemplates"
+		/>
 	</div>
 </template>
 
 <script setup>
-
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
+import EditTemplateModal from "~/components/modals/EditTemplateModal.vue";
 
 const router = useRouter();
 let store = useStore();
@@ -51,6 +70,7 @@ definePageMeta({
 });
 
 let workflowTemplates = ref([]);
+const editTemplate = ref(null)
 
 async function getWorkflowTemplates() {
 	const data = await useApi('workflowTemplateList.get');
@@ -60,13 +80,51 @@ async function getWorkflowTemplates() {
 
 function formatDate(dateString) {
 	// Format date in a more readable way
-	const options = { year: 'numeric', month: 'short', day: 'numeric' };
+	const options = {year: 'numeric', month: 'short', day: 'numeric'};
 	return new Date(dateString).toLocaleDateString(undefined, options);
 }
 
 
 function goToNewWorkflowPage() {
 	router.push(`/${store.realm_code}/${store.space_code}/w/workflow-template/new`);
+}
+
+async function openCopyModal({data, notes, name, userCode}) {
+	editTemplate.value = {
+		data,
+		notes,
+		name,
+		userCode,
+	}
+}
+
+async function deleteWorkflowTemplate(templateId) {
+
+	const isConfirm = await useConfirm({
+		text: `Are you sure you want to delete Workflow Template?`,
+	})
+	if (!isConfirm) return false
+
+	const res = await useApi('workflowTemplate.delete', {
+		params: {id: templateId}
+	});
+
+	if (res?._$error) {
+		useNotify({
+			type: 'error',
+			title: 'Error',
+			text: 'Failed to delete the Workflow Template.'
+		});
+
+		return;
+	}
+	useNotify({
+		type: 'success',
+		title: 'Success',
+		text: 'Workflow Template deleted successfully!'
+	});
+
+	getWorkflowTemplates();
 }
 
 
@@ -148,6 +206,11 @@ onMounted(async () => {
 
 .table-link:hover {
 	text-decoration: underline;
+}
+
+.action {
+	display: flex;
+	gap: 4px;
 }
 
 /* Responsive design for smaller screens */

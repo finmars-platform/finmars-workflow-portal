@@ -12,23 +12,23 @@
 			<h2>Workflow Template Details</h2>
 
 			<div class="button-group">
-<!--				<fm-btn @click="refresh()" class="action-btn">-->
-<!--					<fm-icon :icon="'refresh'" title="Refresh" />-->
-<!--				</fm-btn>-->
+				<!--				<fm-btn @click="refresh()" class="action-btn">-->
+				<!--					<fm-icon :icon="'refresh'" title="Refresh" />-->
+				<!--				</fm-btn>-->
 				<fm-btn @click="openLaunchDialog()" class="action-btn">
-					<fm-icon :icon="'play_arrow'" title="Launch" />
+					<fm-icon :icon="'play_arrow'" title="Launch"/>
 				</fm-btn>
 				<fm-btn @click="save()" class="action-btn">
-					<fm-icon :icon="'save'" title="Save" />
+					<fm-icon :icon="'save'" title="Save"/>
 				</fm-btn>
 				<fm-btn @click="openTemplateFile()" class="action-btn">
-					<fm-icon :icon="'file_open'" title="Save" />
+					<fm-icon :icon="'file_open'" title="Save"/>
 				</fm-btn>
 				<fm-btn @click="arrangeNodes()" class="action-btn">
-					<fm-icon :icon="'layers'" title="Arrange Nodes" />
+					<fm-icon :icon="'layers'" title="Arrange Nodes"/>
 				</fm-btn>
 				<fm-btn @click="showEditAsJsonDialog()" class="action-btn">
-					<fm-icon :icon="'code'" title="Edit as JSON" />
+					<fm-icon :icon="'code'" title="Edit as JSON"/>
 				</fm-btn>
 			</div>
 
@@ -50,7 +50,8 @@
 
 						<div class="form-group">
 
-							<input id="user_code" v-model="workflow.name" type="text" required class="form-control" placeholder="Daily" />
+							<input id="user_code" v-model="workflow.name" type="text" required class="form-control"
+								   placeholder="Daily"/>
 						</div>
 
 					</td>
@@ -61,7 +62,8 @@
 
 						<div class="form-group">
 
-							<input id="user_code" v-model="workflow.notes" type="text" required class="form-control" placeholder="Daily for ..." />
+							<input id="user_code" v-model="workflow.notes" type="text" required class="form-control"
+								   placeholder="Daily for ..."/>
 						</div>
 
 					</td>
@@ -240,6 +242,21 @@
 			</template>
 		</fm-base-modal>
 
+		<EditBlockModal
+			v-if="editBlock"
+			:action="editBlock.action"
+			:nodeId="editBlock.nodeId"
+			:nodeName="editBlock.nodeName"
+			:nodeUserCode="editBlock.nodeUserCode"
+			:nodeNotes="editBlock.nodeNotes"
+			:nodeType="editBlock.nodeType"
+			:selectedWorkflow="editBlock.selectedWorkflow"
+			:availableWorkflows="availableWorkflows"
+			:sourceCode="editBlock.sourceCode"
+			@close="editBlock = null"
+			@save="onSaveEditBlock"
+		/>
+
 	</div>
 
 </template>
@@ -256,11 +273,12 @@ import {ClassicPreset, NodeEditor} from "rete";
 import {AreaExtensions, AreaPlugin} from 'rete-area-plugin';
 import {ConnectionPlugin, Presets as ConnectionPresets} from "rete-connection-plugin"
 import {Presets, VuePlugin} from 'rete-vue-plugin';
-import { AutoArrangePlugin, Presets as ArrangePresets } from "rete-auto-arrange-plugin";
-import { CommentPlugin } from "rete-comment-plugin";
+import {AutoArrangePlugin, Presets as ArrangePresets} from "rete-auto-arrange-plugin";
+import {CommentPlugin} from "rete-comment-plugin";
 
 import WorkflowNode from "~/components/WorkflowNode.vue";
 import WorkflowTemplateNode from "~/components/WorkflowTemplateNode.vue";
+import EditBlockModal from "~/components/modals/EditBlockModal.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -277,6 +295,7 @@ let launchPayload = ref('')
 let defaultPayload = ref(`
 {"report_date": "2024-10-10"}
 `)
+const editBlock = ref(null)
 
 const selectedWorkflow = ref(null);
 let availableWorkflows = ref([]);
@@ -525,7 +544,6 @@ async function initGraph() {
 	}
 
 
-
 	// editorArea.on('nodetranslated', (node, position) => {
 	// 	console.log(`Node ${node.name} was moved to`, position);
 	// 	node.position = position; // Update the node's position in the editor model
@@ -718,7 +736,14 @@ async function setupGraph() {
 				// 	return WorkflowNode;
 				// }
 				// return Presets.classic.Node;
-				return WorkflowTemplateNode;
+				return defineComponent({
+					name: 'NodeWrapper',
+					setup() {
+						return () => h(WorkflowTemplateNode, {
+							onCopyBlock: openCopyModal
+						})
+					}
+				});
 			}
 		}
 	}));
@@ -775,6 +800,88 @@ async function saveAsJson() {
 	await refresh();
 
 }
+
+async function openCopyModal(nodeId, action) {
+	const originalNode = await editor.getNode(nodeId);
+	if (!originalNode) return;
+
+	const nodeData = originalNode.data;
+	editBlock.value = {
+		action,
+		nodeId,
+		nodeName: nodeData.node?.name,
+		nodeUserCode: nodeData.node?.user_code,
+		nodeNotes: nodeData.node?.notes,
+		nodeType: nodeData.node?.type,
+		selectedWorkflow: availableWorkflows.value?.find(item => item?.user_code === nodeData?.workflow?.user_code) || {},
+		sourceCode: nodeData.source_code || '',
+	}
+}
+
+async function onSaveEditBlock(payload) {
+	const originalNode = await editor.getNode(payload.nodeId);
+	if (!originalNode) return;
+
+	if (payload.action === 'edit') {
+		originalNode.data.node.name = payload.nodeName;
+		originalNode.data.name = payload.nodeName;
+		originalNode.name = payload.nodeName;
+		originalNode.data.node.type = payload.nodeType;
+		originalNode.data.node.notes = payload.nodeNotes;
+		originalNode.data.node.user_code = payload.nodeUserCode;
+		originalNode.data.source_code = payload.sourceCode;
+		originalNode.data.workflow.name = payload.selectedWorkflow?.name;
+		originalNode.data.workflow.user_code = payload.selectedWorkflow?.user_code;
+
+		if (payload.isNodeTypeChanged) {
+			const connections = await editor.getConnections()
+
+			for (const connection of connections) {
+
+				if (originalNode.id === connection.source || originalNode.id === connection.target) {
+					await editor.removeConnection(connection.id);
+				}
+
+			}
+		}
+
+
+		editorArea.update('node', originalNode.id);
+	} else if (payload.action === 'copy') {
+		const nodeData = originalNode.data;
+		const position = originalNode.position
+
+		const nodeName = nodeData.node?.name !== payload.nodeName ? payload.nodeName : nodeData.node?.name + ' (copy)';
+		const nodeUserCode = nodeData.node?.user_code;
+		const nodeType = nodeData.node?.type;
+		const nodeNotes = nodeData.node?.notes;
+		const sourceCode = nodeData.source_code || '';
+		const workflowRef = nodeData.workflow || {};
+
+		const newNode = await createNode(
+			workflowRef,
+			nodeUserCode,
+			nodeName,
+			nodeType,
+			nodeNotes,
+			sourceCode,
+			position.x + 40,
+			position.y + 40,
+		);
+
+		await editor.addNode(newNode);
+		await editorArea.translate(newNode.id, {x: position.x + 40, y: position.y + 40});
+
+		blocks.value.push({
+			id: newNode.id,
+			node: {
+				name: nodeName,
+				user_code: nodeUserCode
+			}
+		});
+	}
+}
+
 // Rete.js Setup
 onMounted(async () => {
 
@@ -899,7 +1006,8 @@ h3 {
 	padding: 10px 20px;
 	margin-top: 40px !important;
 }
-.btn.delete-btn:hover  {
+
+.btn.delete-btn:hover {
 	opacity: .8;
 }
 
