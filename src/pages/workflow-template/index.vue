@@ -20,7 +20,7 @@
 				<tbody>
 				<tr v-for="item in workflowTemplates" :key="item.id">
 					<td>
-						<NuxtLink :to="useGetNuxtLink(`/workflow-template/${item.id}`, $route.params)"
+						<NuxtLink :to="getLinkToItem(item)"
 								  class="table-link">
 							{{ item.id }}
 						</NuxtLink>
@@ -61,8 +61,10 @@
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
 import EditTemplateModal from "~/components/modals/EditTemplateModal.vue";
+import isEmpty from 'lodash/isEmpty';
 
 const router = useRouter();
+const route = useRoute();
 let store = useStore();
 store.init();
 definePageMeta({
@@ -73,7 +75,9 @@ let workflowTemplates = ref([]);
 const editTemplate = ref(null)
 
 async function getWorkflowTemplates() {
-	const data = await useApi('workflowTemplateList.get');
+	const data = await useApi('workflowTemplateList.get', {
+		filters: { pageSize: 100 }
+	});
 	workflowTemplates.value = data['results'];
 	console.log('workflowTemplates', workflowTemplates);
 }
@@ -125,6 +129,10 @@ async function deleteWorkflowTemplate(templateId) {
 	});
 
 	getWorkflowTemplates();
+}
+
+function getLinkToItem(item) {
+	return useGetNuxtLink(`/workflow-template/${item.id}${isEmpty(item.data) ? '/old' : ''}`, route.params)
 }
 
 

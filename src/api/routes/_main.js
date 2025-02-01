@@ -33,6 +33,14 @@ export default {
 		post: prefix + '/workflow/{id}/cancel/'
 	},
 
+	relaunchWorkflow: {
+		post: prefix + '/workflow/{id}/relaunch/'
+	},
+
+	refreshStorage: {
+		get: prefix + '/refresh-storage/'
+	},
+
 
 	scheduleList: {
 		get: prefix + '/schedule/'
