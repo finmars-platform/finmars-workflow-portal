@@ -32,7 +32,7 @@
 					<td>
 						<div class="action">
 							<fm-btn
-								@click.stop="openCopyModal({data: item.data, notes: item.notes, name: item.name, userCode: item.user_code})"
+								@click.stop="openCopyModal({data: item.data, notes: item.notes, name: item.name})"
 								:icon="'content_copy'"/>
 							<fm-btn :size="12" @click.stop="deleteWorkflowTemplate(item.id)" :icon="'delete'"/>
 						</div>
@@ -50,7 +50,7 @@
 			:data="editTemplate.data"
 			:notes="editTemplate.notes"
 			:name="editTemplate.name"
-			:userCode="editTemplate.userCode"
+			:userCode="''"
 			@close="editTemplate = null"
 			@update="getWorkflowTemplates"
 		/>
@@ -91,12 +91,11 @@ function goToNewWorkflowPage() {
 	router.push(`/${store.realm_code}/${store.space_code}/w/workflow-template/new`);
 }
 
-async function openCopyModal({data, notes, name, userCode}) {
+async function openCopyModal({data, notes, name}) {
 	editTemplate.value = {
 		data,
 		notes,
 		name,
-		userCode,
 	}
 }
 

@@ -5,12 +5,14 @@
 		<form @submit.prevent class="workflow-form">
 			<div class="form-group">
 				<label for="name">Workflow Name</label>
-				<input id="name" v-model="formState.name" type="text" required class="form-control" placeholder="Daily" />
+				<input id="name" v-model="formState.name" type="text" required class="form-control"
+					   placeholder="Daily"/>
 			</div>
 
 			<div class="form-group">
 				<label for="user_code">User Code</label>
-				<input id="user_code" v-model="formState.user_code" type="text" required class="form-control" placeholder="com.finmars.local:daily" />
+				<input id="user_code" v-model="formState.user_code" type="text" required class="form-control"
+					   placeholder="com.finmars.local:daily"/>
 			</div>
 		</form>
 		<template #footer>
@@ -45,13 +47,14 @@ async function createWorkflow() {
 			data: props.data,
 			notes: props.notes,
 		},
+		notifyError: false
 	});
 
 	if (res?._$error) {
 		useNotify({
 			type: 'error',
 			title: 'Error',
-			text: 'Failed to create the Workflow Template.'
+			text: res?._$error.error?.details?.errors?.[0]?.detail || 'Failed to create the Workflow Template.'
 		});
 
 		return;
