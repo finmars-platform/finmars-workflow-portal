@@ -9,42 +9,42 @@
 
 			<div class="button-group">
 				<fm-btn @click="refresh">
-					<fm-icon icon="refresh" title="Refresh" />
+					<fm-icon icon="refresh" title="Refresh"/>
 				</fm-btn>
 				<fm-btn @click="confirmRelaunch">
-					<fm-icon icon="play_circle" title="Relaunch" />
+					<fm-icon icon="play_circle" title="Relaunch"/>
 				</fm-btn>
 				<fm-btn @click="cancelWorkflow">
-					<fm-icon icon="cancel" title="Terminate" />
+					<fm-icon icon="cancel" title="Terminate"/>
 				</fm-btn>
 				<fm-btn @click="payloadDialog = true">
-					<fm-icon icon="format_list_bulleted" title="Payload" />
+					<fm-icon icon="format_list_bulleted" title="Payload"/>
 				</fm-btn>
 				<fm-btn @click="goToWorkerLogs">
-					<fm-icon icon="receipt_long" :title="`Worker ${selectedTask?.worker_name} Logs`" />
+					<fm-icon icon="receipt_long" :title="`Worker ${selectedTask?.worker_name} Logs`"/>
 				</fm-btn>
 				<fm-btn @click.stop="refreshStorage()" class="btn-depressed">
-					<fm-icon icon="cloud_sync" title="Refresh Storage" />
+					<fm-icon icon="cloud_sync" title="Refresh Storage"/>
 				</fm-btn>
 			</div>
 
-			<div v-if="selectedWorkflow" class="workflow">
+			<div v-if="workflow" class="workflow">
 				<div class="overline mb-3">
-					{{ formatDate(selectedWorkflow.created_at) }}
+					{{ formatDate(workflow.created_at) }}
 				</div>
 				<div>
 					<div class="headline">
-						{{ selectedWorkflow.fullname }}
-						<div v-if="selectedWorkflow.periodic">periodic</div>
+						{{ workflow.fullname }}
+						<div v-if="workflow.periodic">periodic</div>
 						<div class="chip" :style="{ backgroundColor: getColor(selectedTask.status) }">
-							{{ selectedWorkflow.status }}
+							{{ workflow.status }}
 						</div>
 					</div>
 					<div>
-						<u>Tasks :</u> Total <strong>{{ selectedWorkflow.tasks.length }}</strong> / Success
-						<strong>{{ selectedWorkflow.tasks | countTasksByStatus('success') }}</strong>
+						<u>Tasks :</u> Total <strong>{{ workflow.tasks.length }}</strong> / Success
+						<strong>{{ workflow.tasks | countTasksByStatus('success') }}</strong>
 						/ Error
-						<strong>{{ selectedWorkflow.tasks | countTasksByStatus('error') }}</strong>
+						<strong>{{ workflow.tasks | countTasksByStatus('error') }}</strong>
 					</div>
 				</div>
 			</div>
@@ -97,7 +97,7 @@
 				<div class="row mt-4" v-if="!selectedTask.result">
 					<div class="col">
 						<div class="notice">
-							<fm-icon icon="info" />
+							<fm-icon icon="info"/>
 							No task result
 						</div>
 					</div>
@@ -112,7 +112,7 @@
 						<div class="row">
 							<div class="col">
 								<div class="alert">
-									<fm-icon icon="info" />
+									<fm-icon icon="info"/>
 
 									{{ selectedTask.result.exception }}
 								</div>
@@ -125,12 +125,12 @@
 			<div
 				class="footer"
 				v-if="
-          selectedTask && (selectedWorkflow.status === 'success' || selectedTask.is_hook === false)
+          selectedTask && (workflow.status === 'success' || selectedTask.is_hook === false)
         "
 			>
 				<a target="_blank" :href="getFlowerTaskUrl()" class="pa-6">
 					<fm-btn>
-						<fm-icon icon="launch" />
+						<fm-icon icon="launch"/>
 						View in Flower
 					</fm-btn>
 				</a>
@@ -138,7 +138,7 @@
 
 			<fm-base-modal v-model="payloadDialog" title="Workflow's Payload" width="500">
 				<div>
-					<pre>{{ selectedWorkflow.payload }}</pre>
+					<pre>{{ workflow.payload }}</pre>
 				</div>
 				<template #footer>
 					<div class="flex flex-row justify-between">
@@ -150,13 +150,17 @@
 	</div>
 </template>
 <script setup>
-import { onMounted } from 'vue';
+import {onMounted} from 'vue';
 
 const route = useRoute();
 const store = useStore();
 
-const selectedWorkflow = ref(null);
-const selectedTask = ref(null);
+const props = defineProps({
+	workflow: Object,
+});
+const emit = defineEmits(['update'])
+
+const selectedTask = ref(props.workflow.tasks?.[0]);
 
 const payloadDialog = ref(false);
 
@@ -172,7 +176,7 @@ function getColor(status) {
 }
 
 function countTasksByStatus(status) {
-	return selectedWorkflow.value.tasks?.filter((task) => task.status === status)?.length;
+	return props.workflow.tasks?.filter((task) => task.status === status)?.length;
 }
 
 function getFlowerTaskUrl() {
@@ -181,14 +185,6 @@ function getFlowerTaskUrl() {
 		`/${store.realm_code}/workflow/flower/task/` +
 		selectedTask.value.celery_task_id
 	);
-}
-
-async function getWorkflow() {
-	selectedWorkflow.value = await useApi('workflow.get', {params: {id: route.params.id}});
-
-	if (selectedWorkflow.value) {
-		selectedTask.value = selectedWorkflow.value.tasks?.[0];
-	}
 }
 
 async function refreshStorage() {
@@ -219,14 +215,15 @@ async function cancelWorkflow() {
 }
 
 async function refresh() {
-	await getWorkflow();
+	emit('update');
 }
 
 async function confirmRelaunch() {
-	let isConfirm = await useConfirm({
+	const isConfirm = await useConfirm({
 		title: 'Relaunch the workflow',
 		text: `The workflow will be relaunched with the same payload. Note that a new workflow will be created, so the current one (created on ) will not be changed and will still be available in your history.`
 	});
+
 	if (!isConfirm) return false;
 
 	await useApi('relaunchWorkflow.post', {
@@ -241,10 +238,6 @@ function formatDate(dateString) {
 	const options = {year: 'numeric', month: 'short', day: 'numeric'};
 	return new Date(dateString).toLocaleDateString(undefined, options);
 }
-
-onMounted(async () => {
-	await getWorkflow();
-});
 </script>
 
 <style scoped>
