@@ -42,6 +42,36 @@
 			</table>
 		</div>
 
+		<div class="flex mb-4">
+			<FmBtn
+				class="button"
+				:type="currentPage === 1 ? 'disabled' : 'text'"
+				@click="openPreviousPage"
+			>
+				Previous
+			</FmBtn>
+
+			<div class="flex">
+				<div v-for="page in totalPages" :key="page">
+					<FmBtn
+						v-if="totalPages > currentPage"
+						:type="currentPage === page && 'filled'"
+						class="button"
+						@click="openPage(page)"
+					>
+						{{ page }}
+					</FmBtn>
+				</div>
+			</div>
+			<FmBtn
+				v-if="currentPage < totalPages"
+				type="text"
+				class="button"
+				@click="openNextPage"
+			>
+				Next
+			</FmBtn>
+		</div>
 
 		<fm-btn @click="goToNewWorkflowPage">Create New</fm-btn>
 
@@ -61,6 +91,7 @@
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
 import EditTemplateModal from "~/components/modals/EditTemplateModal.vue";
+import usePagination from "~/composables/usePagination";
 
 const router = useRouter();
 let store = useStore();
@@ -71,12 +102,37 @@ definePageMeta({
 
 let workflowTemplates = ref([]);
 const editTemplate = ref(null)
+const {currentPage, totalPages, pageSize} = usePagination();
+
+function openNextPage() {
+	if (currentPage.value >= totalPages.value) return
+
+	currentPage.value += 1
+
+	getWorkflowTemplates()
+}
+
+function openPreviousPage() {
+	if (currentPage.value <= 1) return
+
+	currentPage.value -= 1
+
+	getWorkflowTemplates()
+}
+
+function openPage(value) {
+	if (currentPage.value === value) return
+	currentPage.value = value
+
+	getWorkflowTemplates()
+}
 
 async function getWorkflowTemplates() {
 	const data = await useApi('workflowTemplateList.get', {
-		filters: { pageSize: 100 }
+		filters: {page_size: pageSize.value, page: currentPage.value}
 	});
 	workflowTemplates.value = data['results'];
+	totalPages.value = Math.ceil(data.count / pageSize.value);
 	console.log('workflowTemplates', workflowTemplates);
 }
 
@@ -105,6 +161,8 @@ async function deleteWorkflowTemplate(templateId) {
 		text: `Are you sure you want to delete Workflow Template?`,
 	})
 	if (!isConfirm) return false
+
+	currentPage.value = 1
 
 	const res = await useApi('workflowTemplate.delete', {
 		params: {id: templateId}

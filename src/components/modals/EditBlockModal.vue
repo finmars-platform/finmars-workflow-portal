@@ -2,6 +2,7 @@
 	<fm-base-modal
 		:title="title"
 		:modelValue="true">
+		{{ formState.nodeUserCode }}
 		<!-- Node Name -->
 		<div class="input-group">
 			<label for="node-user-code-modal">Node Name (Unique Step Name):</label>

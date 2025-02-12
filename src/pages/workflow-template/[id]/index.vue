@@ -852,10 +852,10 @@ async function onSaveEditBlock(payload) {
 		const position = originalNode.position
 
 		const nodeName = nodeData.node?.name !== payload.nodeName ? payload.nodeName : nodeData.node?.name + ' (copy)';
-		const nodeUserCode = nodeData.node?.user_code;
-		const nodeType = nodeData.node?.type;
-		const nodeNotes = nodeData.node?.notes;
-		const sourceCode = nodeData.source_code || '';
+		const nodeUserCode = nodeData.node?.user_code !== payload.nodeUserCode ? payload.nodeUserCode : + new Date();
+		const nodeType = payload.nodeType;
+		const nodeNotes = payload.nodeNotes;
+		const sourceCode = payload.sourceCode;
 		const workflowRef = nodeData.workflow || {};
 
 		const newNode = await createNode(
