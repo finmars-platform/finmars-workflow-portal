@@ -22,7 +22,7 @@
 					<fm-icon :icon="'save'" title="Save"/>
 				</fm-btn>
 				<fm-btn @click="openTemplateFile()" class="action-btn">
-					<fm-icon :icon="'file_open'" title="Save"/>
+					<fm-icon :icon="'file_open'" title="Open template"/>
 				</fm-btn>
 				<fm-btn @click="arrangeNodes()" class="action-btn">
 					<fm-icon :icon="'layers'" title="Arrange Nodes"/>
@@ -400,7 +400,7 @@ async function addComment() {
 async function createNode(workflow, node_user_code, node_name, node_type, node_notes, node_source_code, x, y) {
 	const node = await new ClassicPreset.Node(name);
 	node.position = [x, y];
-	node.height = 600;
+	node.height = undefined;
 	node.width = 400;
 	node.name = node_name;
 	node.data = {
@@ -740,7 +740,8 @@ async function setupGraph() {
 					name: 'NodeWrapper',
 					setup() {
 						return () => h(WorkflowTemplateNode, {
-							onCopyBlock: openCopyModal
+							onCopyBlock: openCopyModal,
+							onDeleteBlock: removeBlock
 						})
 					}
 				});

@@ -12,8 +12,9 @@
 		>
 			<fm-btn @click.stop="onCopy" :icon="'content_copy'"/>
 			<fm-btn @click.stop="onEdit" :icon="'edit'"/>
+			<fm-btn @click.stop="onDelete" :icon="'delete'"/>
 		</div>
-		<div class="title" data-testid="title" @pointerdown.stop="">{{ data.data.node.name }}</div>
+		<div class="title" data-testid="title" @pointerdown.stop=""><span>{{ data.data.node.name }}</span></div>
 		<div class="sub-title" data-testid="sub-title" @pointerdown.stop="">{{ data.data.node.user_code }}</div>
 		<div>
 			<div class="node-info">
@@ -184,7 +185,7 @@ function sortByIndex(entries) {
 
 export default defineComponent({
 	props: ['data', 'emit', 'seed'],
-	emits: ['copyBlock'],
+	emits: ['copyBlock', 'deleteBlock'],
 	setup(props, {emit}) {
 		const isSourceCodeDialogOpen = ref(false)
 		const nodeElement = ref(null)
@@ -200,6 +201,10 @@ export default defineComponent({
 
 		const onEdit = () => {
 			emit('copyBlock', node.id, 'edit')
+		}
+
+		const onDelete = () => {
+			emit('deleteBlock', node.id)
 		}
 
 		const initResize = (e) => {
@@ -256,6 +261,7 @@ export default defineComponent({
 			initResize,
 			onCopy,
 			onEdit,
+			onDelete,
 		}
 	},
 	methods: {
@@ -338,7 +344,7 @@ export default defineComponent({
 		color: #333; /* Darker text color for better readability */
 		font-family: 'Helvetica Neue', sans-serif;
 		font-size: 20px; /* Slightly larger font */
-		padding: 0;
+		padding: 0 116px 0 0;
 		font-weight: bold; /* Bold for better emphasis */
 		cursor: auto;
 	}
@@ -511,5 +517,10 @@ export default defineComponent({
 	pointer-events: none;
 
 	transition: opacity 0.2s;
+
+	.btn {
+		padding-right: 8px;
+		padding-left: 8px;
+	}
 }
 </style>
