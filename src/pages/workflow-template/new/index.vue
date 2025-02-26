@@ -38,7 +38,18 @@ async function createWorkflow() {
 				name: name.value,
 				user_code: userCode.value,
 			},
+			notifyError: false
 		});
+
+		if (response._$error) {
+			useNotify({
+				type: 'error',
+				title: 'Error',
+				text: response._$error.error?.details?.errors?.[0]?.detail || 'Failed to create the Workflow Template.'
+			});
+
+			throw response._$error;
+		}
 
 		// Redirect to the detail edit page after creation
 		const createdWorkflowId = response.id;
