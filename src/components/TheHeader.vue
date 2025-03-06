@@ -1,9 +1,22 @@
 <template>
-	<div></div>
+	<div>
+		<fm-btn @click.stop="refreshStorage()" class="header__btn-depressed">
+			<fm-icon icon="cloud_sync" title="Refresh Storage"/>
+		</fm-btn>
+	</div>
 </template>
 
 <script setup>
 
+async function refreshStorage() {
+	await useApi('refreshStorage.get');
+
+	useNotify({
+		type: 'success',
+		title: 'Success',
+		text: 'Storage refreshed'
+	});
+}
 
 
 </script>
@@ -40,6 +53,13 @@ header {
 .user-profile .user-profile-picture {
 	width: 32px;
 	margin-right: 8px;
+}
+
+.header__btn-depressed {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	z-index: 1;
 }
 
 

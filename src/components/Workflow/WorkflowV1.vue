@@ -23,9 +23,6 @@
 				<fm-btn @click="goToWorkerLogs">
 					<fm-icon icon="receipt_long" :title="`Worker ${selectedTask?.worker_name} Logs`"/>
 				</fm-btn>
-				<fm-btn @click.stop="refreshStorage()" class="btn-depressed">
-					<fm-icon icon="cloud_sync" title="Refresh Storage"/>
-				</fm-btn>
 			</div>
 
 			<div v-if="workflow" class="workflow">
@@ -185,18 +182,6 @@ function getFlowerTaskUrl() {
 		`/${store.realm_code}/workflow/flower/task/` +
 		selectedTask.value.celery_task_id
 	);
-}
-
-async function refreshStorage() {
-	await useApi('refreshStorage.get');
-
-	await refresh();
-
-	useNotify({
-		type: 'success',
-		title: 'Success',
-		text: 'Storage refreshed'
-	});
 }
 
 async function cancelWorkflow() {
