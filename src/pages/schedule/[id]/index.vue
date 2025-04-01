@@ -25,8 +25,8 @@
 				</tr>
 
 				<tr>
-					<th>Crontab Line</th>
-					<td><input v-model="schedule.crontab_line" type="text" required/></td>
+					<th>Crontab (UTC) Line</th>
+					<td><input v-model="schedule.crontab_line" placeholder="54 12 * * *" type="text" required/></td>
 				</tr>
 
 
