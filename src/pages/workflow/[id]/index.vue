@@ -1,10 +1,10 @@
 <template>
 	<fm-loader v-if="isLoading" class="w-8"/>
-	<template v-else>
+	<div v-else>
 		<WorkflowV1 @update="getWorkflow" :workflow="workflow" v-if="workflow?.workflow_version === 1"/>
 		<WorkflowV2 @update="getWorkflow" :workflow="workflow" v-else-if="workflow?.workflow_version === 2"/>
 		<div v-else>Not support workflow</div>
-	</template>
+	</div>
 </template>
 
 <script setup>
