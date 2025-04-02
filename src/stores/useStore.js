@@ -78,6 +78,14 @@ export default defineStore({
 
 			document.body.classList.toggle('dark', this.user.data.dark_mode);
 
+			if (this.user.data.dark_mode) {
+				document.body.classList.add('dark-theme');
+				document.body.classList.remove('light-theme');
+			} else {
+				document.body.classList.add('light-theme');
+				document.body.classList.remove('dark-theme');
+			}
+
 		},
 	},
 	getters: {
