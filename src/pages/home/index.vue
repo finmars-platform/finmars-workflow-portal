@@ -45,8 +45,12 @@
 
 			<template #footer>
 				<div class="modal-footer">
-					<fm-btn type="text" @click="isRunWorkflowDialog = !isRunWorkflowDialog">Cancel</fm-btn>
-					<fm-btn type="filled" @click="runWorkflow($event, activeWorkflowItem)">Run</fm-btn>
+					<FmButton type="secondary" @click="isRunWorkflowDialog = !isRunWorkflowDialog" rounded>
+						Cancel
+					</FmButton>
+					<FmButton type="primary" @click="runWorkflow($event, activeWorkflowItem)" rounded>
+						Run
+					</FmButton>
 				</div>
 			</template>
 		</fm-base-modal>
@@ -57,6 +61,7 @@
 
 <script setup>
 
+import { FmButton } from '@finmars/ui';
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-monokai';

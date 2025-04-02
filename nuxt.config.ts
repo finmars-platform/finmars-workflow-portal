@@ -54,6 +54,7 @@ export default defineNuxtConfig({
 	css: [
 		"~/assets/css/material-icons.css",
 		'@finmars/ui/dist/finmars-ui.css',
+		'@finmars/ui/dist/themes.css',
 		"~/assets/css/main.css",
 	],
 

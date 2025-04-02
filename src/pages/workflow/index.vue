@@ -34,87 +34,55 @@
 			</table>
 		</div>
 
-		<div class="flex mb-4">
-			<FmBtn
-				class="button"
-				:type="currentPage === 1 ? 'disabled' : 'text'"
-				@click="openPreviousPage"
-			>
-				Previous
-			</FmBtn>
-
-			<div class="flex">
-				<div v-for="page in totalPages" :key="page">
-					<FmBtn
-						v-if="totalPages > currentPage"
-						:type="currentPage === page && 'filled'"
-						class="button"
-						@click="openPage(page)"
-					>
-						{{ page }}
-					</FmBtn>
-				</div>
-			</div>
-			<FmBtn
-				v-if="currentPage < totalPages"
-				type="text"
-				class="button"
-				@click="openNextPage"
-			>
-				Next
-			</FmBtn>
-		</div>
+		<FmPagination
+			:with-info="true"
+			:total-items="count"
+			:items-per-page="pageSize"
+			:model-value="currentPage"
+			@update:modelValue="handlePageChange"
+		/>
 	</div>
 </template>
 
 <script setup>
-
+import { FmPagination } from '@finmars/ui';
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
 import StatusBadge from '~/components/StatusBadge.vue';
-import usePagination from "~/composables/usePagination"; // Import the component
 
-let store = useStore();
+const route = useRoute();
+const router = useRouter();
+const store = useStore();
+
 store.init();
 definePageMeta({
 	middleware: "auth",
 });
 
 let workflows = ref([]);
-const {currentPage, totalPages, pageSize} = usePagination();
+const count = ref(0);
+const pageSize = ref(8);
+const currentPage = ref(route.query.page ? parseInt(route.query.page) : 1);
 
-function openNextPage() {
-	if (currentPage.value >= totalPages.value) return
-
-	currentPage.value += 1
-
-	getWorkflows()
-}
-
-function openPreviousPage() {
-	if (currentPage.value <= 1) return
-
-	currentPage.value -= 1
-
-	getWorkflows()
-}
-
-function openPage(value) {
-	if (currentPage.value === value) return
-	currentPage.value = value
-
-	getWorkflows()
-}
-
-async function getWorkflows() {
+async function getWorkflows(newPage = 1) {
+	router.push({ query: { ...route.query, page: currentPage.value } });
+	const payload = {
+		page_size: pageSize.value,
+		page: newPage,
+	};
 	const data = await useApi('workflowListLight.get', {
-		filters: {page_size: pageSize.value, page: currentPage.value}
+		filters: payload,
+		query: { page: newPage }
 	});
 
+	count.value = data.count;
 	workflows.value = data['results'];
-	totalPages.value = Math.ceil(data.count / pageSize.value);
-	console.log('workflows', workflows);
 }
+
+const handlePageChange = (newPage) => {
+	currentPage.value = newPage;
+	getWorkflows()
+};
 
 function formatDate(dateString) {
 	// Format date in a more readable way

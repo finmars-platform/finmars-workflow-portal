@@ -31,10 +31,8 @@
 					<td>{{ formatDate(item.created_at) }}</td>
 					<td>
 						<div class="action">
-							<fm-btn
-								@click.stop="openCopyModal({data: item.data, notes: item.notes, name: item.name})"
-								:icon="'content_copy'"/>
-							<fm-btn :size="12" @click.stop="deleteWorkflowTemplate(item.id)" :icon="'delete'"/>
+							<FmIconButton size="normal" icon="mdi-content-copy" @click.stop="openCopyModal({data: item.data, notes: item.notes, name: item.name})" />
+							<FmIconButton size="normal" icon="mdi-delete" @click.stop="deleteWorkflowTemplate(item.id)" />
 						</div>
 					</td>
 				</tr>
@@ -42,36 +40,13 @@
 			</table>
 		</div>
 
-		<div class="flex mb-4">
-			<FmBtn
-				class="button"
-				:type="currentPage === 1 ? 'disabled' : 'text'"
-				@click="openPreviousPage"
-			>
-				Previous
-			</FmBtn>
-
-			<div class="flex">
-				<div v-for="page in totalPages" :key="page">
-					<FmBtn
-						v-if="totalPages > currentPage"
-						:type="currentPage === page && 'filled'"
-						class="button"
-						@click="openPage(page)"
-					>
-						{{ page }}
-					</FmBtn>
-				</div>
-			</div>
-			<FmBtn
-				v-if="currentPage < totalPages"
-				type="text"
-				class="button"
-				@click="openNextPage"
-			>
-				Next
-			</FmBtn>
-		</div>
+		<FmPagination
+			:with-info="true"
+			:total-items="count"
+			:items-per-page="pageSize"
+			:model-value="currentPage"
+			@update:modelValue="handlePageChange"
+		/>
 
 		<fm-btn @click="goToNewWorkflowPage">Create New</fm-btn>
 
@@ -88,13 +63,16 @@
 </template>
 
 <script setup>
+import { FmPagination, FmIconButton } from '@finmars/ui';
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
 import EditTemplateModal from "~/components/modals/EditTemplateModal.vue";
-import usePagination from "~/composables/usePagination";
 
+const route = useRoute();
 const router = useRouter();
-let store = useStore();
+
+const store = useStore();
+
 store.init();
 definePageMeta({
 	middleware: "auth",
@@ -102,39 +80,29 @@ definePageMeta({
 
 let workflowTemplates = ref([]);
 const editTemplate = ref(null)
-const {currentPage, totalPages, pageSize} = usePagination();
+const count = ref(0);
+const pageSize = ref(8);
+const currentPage = ref(route.query.page ? parseInt(route.query.page) : 1);
 
-function openNextPage() {
-	if (currentPage.value >= totalPages.value) return
-
-	currentPage.value += 1
-
-	getWorkflowTemplates()
-}
-
-function openPreviousPage() {
-	if (currentPage.value <= 1) return
-
-	currentPage.value -= 1
-
-	getWorkflowTemplates()
-}
-
-function openPage(value) {
-	if (currentPage.value === value) return
-	currentPage.value = value
-
-	getWorkflowTemplates()
-}
-
-async function getWorkflowTemplates() {
+async function getWorkflowTemplates(newPage = 1) {
+	router.push({ query: { ...route.query, page: currentPage.value } });
+	const payload = {
+		page_size: pageSize.value,
+		page: newPage,
+	};
 	const data = await useApi('workflowTemplateList.get', {
-		filters: {page_size: pageSize.value, page: currentPage.value}
+		filters: payload,
+		query: { page: newPage }
 	});
+
+	count.value = data.count;
 	workflowTemplates.value = data['results'];
-	totalPages.value = Math.ceil(data.count / pageSize.value);
-	console.log('workflowTemplates', workflowTemplates);
 }
+
+const handlePageChange = (newPage) => {
+	currentPage.value = newPage;
+	getWorkflowTemplates()
+};
 
 function formatDate(dateString) {
 	// Format date in a more readable way
@@ -183,7 +151,7 @@ async function deleteWorkflowTemplate(templateId) {
 		text: 'Workflow Template deleted successfully!'
 	});
 
-	getWorkflowTemplates();
+	await getWorkflowTemplates();
 }
 
 
