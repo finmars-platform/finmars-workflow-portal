@@ -2,46 +2,71 @@
 
 	<div>
 		<div class="workflow-detail-page" v-if="workflow">
-
-			<!-- Left side: Rete.js Workflow Graph -->
 			<div class="workflow-graph-section">
 				<div id="editor" class="editor"></div>
 			</div>
-
-			<!-- Divider for Resizing -->
 			<div class="resizer" @mousedown="initResize"></div>
-
-			<!-- Right side: Workflow Details -->
 			<div class="workflow-detail-section">
-				<h1>Workflow</h1>
+				<h1 >Workflow</h1>
 
-				<div style="display: flex">
-
-					<fm-btn @click="refresh()">
-						<fm-icon :icon="'refresh'" title="Refresh"/>
-					</fm-btn>
-					<fm-btn @click="openRelaunchDialog()" v-if="workflow?.status !== 'progress'">
-						<fm-icon :icon="'replay'" title="Relaunch"/>
-					</fm-btn>
-					<fm-btn @click="cancelWorkflow()"
-							v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
-						<fm-icon :icon="'cancel'" title="Cancel"/>
-					</fm-btn>
-
-					<fm-btn @click="activeTask = null" v-if="activeTask">
-						<fm-icon :icon="'home'" title="Show Workflow"/>
-					</fm-btn>
-
-
+				<div class="flex justify-start gap-2">
+					<FmIcon icon="mdi-refresh" @click="refresh" :size="32" >
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Refresh
+						</FmTooltip>
+					</FmIcon>
+					<FmIcon
+						v-if="workflow?.status !== 'progress'"
+						:size="32"
+						icon="mdi-replay"
+						@click="openRelaunchDialog"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Relaunch
+						</FmTooltip>
+					</FmIcon>
+					<FmIcon
+						v-if="workflow?.status === 'progress' || workflow?.status === 'init'"
+						:size="32"
+						icon="mdi-close-circle"
+						@click="cancelWorkflow"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Cancel
+						</FmTooltip>
+					</FmIcon>
+					<FmIcon
+						v-if="activeTask"
+						:size="32"
+						icon="mdi-home-account"
+						@click="activeTask = null"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Show Workflow
+						</FmTooltip>
+					</FmIcon>
 				</div>
-
 				<div>
-					<fm-btn @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
-						<fm-icon :icon="'pause'" title="Pause"/>
-					</fm-btn>
-					<fm-btn @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
-						<fm-icon :icon="'play_circle'" title="Resume"/>
-					</fm-btn>
+					<FmIcon
+						v-if="workflow?.status === 'progress'"
+						:size="32"
+						icon="mdi-pause-box"
+						@click="pauseWorkflow"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Pause
+						</FmTooltip>
+					</FmIcon>
+					<FmIcon
+						v-if="workflow?.status === 'wait'"
+						:size="32"
+						icon="mdi-play-circle-outline"
+						@click="openResumeDialog"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Resume
+						</FmTooltip>
+					</FmIcon>
 				</div>
 
 				<div class="workflow-detail-content-section" v-if="!activeTask">
@@ -135,7 +160,7 @@
 						<div>Celery Task ID: <strong>{{ activeTask.celery_task_id }}</strong></div>
 						<div>Worker: <strong>{{ activeTask.worker_name }}</strong></div>
 						<div>
-							<fm-btn @click="seeWorkerLogs()">See Worker Logs</fm-btn>
+							<FmButton @click="seeWorkerLogs()" rounded>See Worker Logs</FmButton>
 						</div>
 						<div :title="'Server Time: ' + activeTask.created_at">Created At:
 							<strong>{{ $formatDate(activeTask.created_at) }}</strong></div>
@@ -153,8 +178,11 @@
 
 					<div class="task-section collapsible">
 						<h4>Payload
-							<fm-icon :icon="payloadVisible ? 'arrow_upward' : 'arrow_downward'"
-									 @click="payloadVisible = !payloadVisible"/>
+							<FmIcon
+								@click="payloadVisible = !payloadVisible"
+								:icon="payloadVisible ? 'mdi-arrow-up' : 'mdi-arrow-down'"
+								:size="32"
+							/>
 						</h4>
 						<v-ace-editor
 							v-if="payloadVisible"
@@ -168,8 +196,11 @@
 
 					<div class="task-section collapsible">
 						<h4>Result
-							<fm-icon :icon="resultVisible ? 'arrow_upward' : 'arrow_downward'"
-									 @click="resultVisible = !resultVisible"/>
+							<FmIcon
+								@click="resultVisible = !resultVisible"
+								:icon="resultVisible ? 'mdi-arrow-up' : 'mdi-arrow-down'"
+								:size="32"
+							/>
 						</h4>
 						<v-ace-editor
 							v-if="resultVisible"
@@ -182,7 +213,11 @@
 					</div>
 
 					<div class="task-actions">
-						<fm-btn @click="viewInFlower">View in Flower</fm-btn>
+						<FmButton @click="viewInFlower" rounded>View in Flower
+							<template #prepend>
+								<FmIcon color="" icon="mdi-square-rounded-badge-outline" :size="24" />
+							</template>
+						</FmButton>
 					</div>
 				</div>
 
@@ -196,76 +231,59 @@
 			Loading...
 		</div>
 
-		<fm-base-modal
-			title="Relaunch Workflow"
-			v-model="isRelaunchDialogOpen"
-		>
+		<div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center gap-4 items-center z-90" v-if="isRelaunchDialogOpen">
+			<div class="flex flex-col gap-4 bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+				<span class="text-lg">Relaunch Workflow</span>
+				<p>	Note that a new workflow will be created, so the current one will not be changed and will still be available in your history.</p>
+				<p style="margin: 1rem 0">Payload</p>
+				<v-ace-editor
+					v-model:value="relaunchPayload"
+					@init="editorInit"
+					lang="json"
+					theme="monokai"
+					style="height: 300px;width: 100%;"/>
 
-			<p>
-				Note that a new workflow will be created, so the current one will not be changed and will still be
-				available
-				in your history.
-			</p>
-
-
-			<p style="margin-top: 1rem">Payload</p>
-			<v-ace-editor
-				v-model:value="relaunchPayload"
-				@init="editorInit"
-				lang="json"
-				theme="monokai"
-				style="height: 300px;width: 100%;"/>
-
-			<template #footer>
-				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</fm-btn>
-
-					<fm-btn type="filled" @click="relaunch($event)">Relaunch</fm-btn>
+				<div class="w-full flex place-content-between">
+					<FmButton type="secondary" rounded @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</FmButton>
+					<FmButton type="primary" rounded @click="relaunch($event)">Relaunch</FmButton>
 				</div>
-			</template>
-		</fm-base-modal>
+			</div>
+		</div>
 
-		<fm-base-modal
-			title="Resume Workflow"
-			v-model="isResumeDialogOpen"
-		>
+		<div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center gap-4 items-center z-90" v-if="isResumeDialogOpen">
+			<div class="flex flex-col gap-4 bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+				<span class="text-lg">Resume Workflow</span>
+				<p style="margin: 1rem 0">Payload</p>
+				<v-ace-editor
+					v-model:value="resumePayload"
+					@init="editorInit"
+					lang="json"
+					theme="monokai"
+					style="height: 300px;width: 100%;"/>
 
-			<p style="margin-top: 1rem">Payload</p>
-			<v-ace-editor
-				v-model:value="resumePayload"
-				@init="editorInit"
-				lang="json"
-				theme="monokai"
-				style="height: 300px;width: 100%;"/>
-
-			<template #footer>
-				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</fm-btn>
-
-					<fm-btn type="filled" @click="resumeWorkflow($event)">Relaunch</fm-btn>
+				<div class="w-full flex place-content-between">
+					<FmButton type="secondary" rounded @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</FmButton>
+					<FmButton type="primary" rounded @click="resumeWorkflow($event)">Resume</FmButton>
 				</div>
-			</template>
-		</fm-base-modal>
-
+			</div>
+		</div>
 	</div>
 
 </template>
 
 <script setup>
+import {FmButton, FmTooltip, FmIcon } from "@finmars/ui";
 
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-monokai';
 
-
-import {onMounted, ref} from 'vue';
 import {ClassicPreset, NodeEditor} from "rete";
 import {AreaExtensions, AreaPlugin} from 'rete-area-plugin';
 import {Presets, VuePlugin} from 'rete-vue-plugin';
 
 import WorkflowNode from "~/components/WorkflowNode.vue";
 import StatusBadge from "~/components/StatusBadge.vue";
-
 
 const router = useRouter();
 const route = useRoute();

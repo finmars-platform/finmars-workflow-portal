@@ -1,12 +1,19 @@
 <template>
 	<div class="workflow-template-page">
-
-		<!-- Page Title -->
-		<h1 class="page-title">Workflow Template Page</h1>
-
-		<!-- Workflow Templates Table -->
+		<div class="pb-4">
+			<FmBreadcrumbs :crumbs="crumbs" />
+		</div>
 		<div class="table-container">
-			<table class="workflow-table">
+			<div v-if="isLoading" class="w-full min-h-40 flex items-center justify-center">
+				<FmProgressCircular :size="34" indeterminate/>
+			</div>
+			<div
+				v-else-if="!workflowTemplates.length"
+				class="flex w-full min-h-36 justify-center items-center"
+			>
+				<span>No data available!</span>
+			</div>
+			<table v-else class="workflow-table">
 				<thead>
 				<tr>
 					<th>ID</th>
@@ -18,21 +25,16 @@
 				</tr>
 				</thead>
 				<tbody>
-				<tr v-for="item in workflowTemplates" :key="item.id">
-					<td>
-						<NuxtLink :to="useGetNuxtLink(`/workflow-template/${item.id}`, $route.params)"
-								  class="table-link">
-							{{ item.id }}
-						</NuxtLink>
-					</td>
+				<tr v-for="item in workflowTemplates" :key="item.id" @click="generateLink(item.id)">
+					<td>{{ item.id }}</td>
 					<td>{{ item.name }}</td>
 					<td>{{ item.user_code }}</td>
 					<td>{{ item.notes }}</td>
 					<td>{{ formatDate(item.created_at) }}</td>
 					<td>
 						<div class="action">
-							<FmIconButton size="normal" icon="mdi-content-copy" @click.stop="openCopyModal({data: item.data, notes: item.notes, name: item.name})" />
-							<FmIconButton size="normal" icon="mdi-delete" @click.stop="deleteWorkflowTemplate(item.id)" />
+							<FmIcon :size="24" icon="mdi-content-copy" @click="openCopyModal({data: item.data, notes: item.notes, name: item.name})" />
+							<FmIcon :size="24" icon="mdi-delete" @click="deleteWorkflowTemplate(item.id)" />
 						</div>
 					</td>
 				</tr>
@@ -48,7 +50,7 @@
 			@update:modelValue="handlePageChange"
 		/>
 
-		<fm-btn @click="goToNewWorkflowPage">Create New</fm-btn>
+		<FmButton @click="generateLink('new')" rounded>Create New</FmButton>
 
 		<EditTemplateModal
 			v-if="editTemplate"
@@ -63,9 +65,7 @@
 </template>
 
 <script setup>
-import { FmPagination, FmIconButton } from '@finmars/ui';
-import {useGetNuxtLink} from "~/composables/useMeta";
-import {onMounted, ref} from "vue";
+import {FmPagination, FmIcon, FmBreadcrumbs, FmProgressCircular, FmButton} from '@finmars/ui';
 import EditTemplateModal from "~/components/modals/EditTemplateModal.vue";
 
 const route = useRoute();
@@ -78,41 +78,58 @@ definePageMeta({
 	middleware: "auth",
 });
 
-let workflowTemplates = ref([]);
+const crumbs = ref([
+	{ title: 'Workflow template', path: 'workflow-template' }
+]);
+
+const isLoading = ref(false);
+const workflowTemplates = ref([]);
 const editTemplate = ref(null)
 const count = ref(0);
 const pageSize = ref(8);
 const currentPage = ref(route.query.page ? parseInt(route.query.page) : 1);
 
+const handlePageChange = (newPage) => {
+	currentPage.value = newPage;
+	getWorkflowTemplates(currentPage.value)
+};
+
+function generateLink(pathEnd) {
+	usePrefixedRouterPush(
+		router,
+		route,
+		`/workflow-template/${pathEnd}`
+	);
+}
+
 async function getWorkflowTemplates(newPage = 1) {
 	router.push({ query: { ...route.query, page: currentPage.value } });
+	isLoading.value = true;
+
 	const payload = {
 		page_size: pageSize.value,
 		page: newPage,
 	};
-	const data = await useApi('workflowTemplateList.get', {
+	const res = await useApi('workflowTemplateList.get', {
 		filters: payload,
 		query: { page: newPage }
 	});
 
-	count.value = data.count;
-	workflowTemplates.value = data['results'];
+	if (res && res._$error) {
+		useNotify({
+			type: 'error',
+			title: res._$error.message || res._$error.error.details
+		});
+	} else {
+		count.value = res.count || res.length;
+		workflowTemplates.value = res.results;
+	}
+	isLoading.value = false;
 }
-
-const handlePageChange = (newPage) => {
-	currentPage.value = newPage;
-	getWorkflowTemplates()
-};
 
 function formatDate(dateString) {
-	// Format date in a more readable way
 	const options = {year: 'numeric', month: 'short', day: 'numeric'};
 	return new Date(dateString).toLocaleDateString(undefined, options);
-}
-
-
-function goToNewWorkflowPage() {
-	router.push(`/${store.realm_code}/${store.space_code}/w/workflow-template/new`);
 }
 
 async function openCopyModal({data, notes, name}) {
@@ -124,11 +141,10 @@ async function openCopyModal({data, notes, name}) {
 }
 
 async function deleteWorkflowTemplate(templateId) {
-
 	const isConfirm = await useConfirm({
 		text: `Are you sure you want to delete Workflow Template?`,
 	})
-	if (!isConfirm) return false
+	if (!isConfirm) return false;
 
 	currentPage.value = 1
 
@@ -136,28 +152,25 @@ async function deleteWorkflowTemplate(templateId) {
 		params: {id: templateId}
 	});
 
-	if (res?._$error) {
+	if (res && res._$error) {
 		useNotify({
 			type: 'error',
-			title: 'Error',
-			text: 'Failed to delete the Workflow Template.'
+			title: res._$error.message || res._$error.error.details
 		});
-
-		return;
+	} else {
+		useNotify({
+			type: 'success',
+			text: 'Workflow Template deleted successfully!'
+		});
+		await getWorkflowTemplates();
 	}
-	useNotify({
-		type: 'success',
-		title: 'Success',
-		text: 'Workflow Template deleted successfully!'
-	});
+}
 
+async function init() {
 	await getWorkflowTemplates();
 }
 
-
-onMounted(async () => {
-	await getWorkflowTemplates();
-});
+init();
 
 </script>
 
@@ -166,15 +179,6 @@ onMounted(async () => {
 /* Container for the page */
 .workflow-template-page {
 	padding: 20px;
-}
-
-/* Page title styling */
-.page-title {
-	font-size: 2rem;
-	font-weight: bold;
-	margin-bottom: 20px;
-	text-align: center;
-	color: var(--primary-color);
 }
 
 /* Table container for responsiveness */
@@ -207,6 +211,7 @@ onMounted(async () => {
 
 .workflow-table tr:hover {
 	background-color: #f1f1f1;
+	cursor: pointer;
 }
 
 /* Status column styling */
@@ -229,10 +234,6 @@ onMounted(async () => {
 	color: var(--primary-color);
 	text-decoration: none;
 	font-weight: bold;
-}
-
-.table-link:hover {
-	text-decoration: underline;
 }
 
 .action {

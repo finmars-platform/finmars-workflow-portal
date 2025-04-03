@@ -1,20 +1,28 @@
+/* Default to light mode */
 :root {
+	/* Light mode variables */
+	--primary-color: #8F4C36;
 	--onPrimary-color: #FFFFFF;
 
 	--secondary-color: #53433F;
 	--onSecondary-color: #FFDBD0;
 
+	--baseText-color: #231917; /* default color for every text in finmars figma_keyword=surface */
 	--baseHeading-color: #53433F; /* h1-h6 */
 	--base-backgroundColor: #FFFFFF; /* body, page */
 
-	--container-backgroundColor: #F7E4DF; /* NEW */ /* dropdowns, menu */
-	--tableHeader-backgroundColor: #FFF1ED; /* NEW */ /* table-header */
+	--container-backgroundColor: #F7E4DF; /* NEW */
+	/* dropdowns, menu */
+	--tableHeader-backgroundColor: #FFF1ED; /* NEW */
+	/* table-header */
 
 	--activeState-backgroundColor: #FFDBD0; /* NEW */
 	--activeState-color: #2C160E;
 
-	--border-color: #85736E; /* NEW */ /* button borders, segments, inputs, dividers figma_keyword=outline  */
-	--light-borderColor: #D8C2BC; /* NEW */ /* cards, tables, */
+	--border-color: #85736E; /* NEW */
+	/* button borders, segments, inputs, dividers figma_keyword=outline  */
+	--light-borderColor: #D8C2BC; /* NEW */
+	/* cards, tables, */
 	--base-border: 1px solid var(--border-color);
 
 	--hover-opacity: 0.92; /* NEW */
@@ -23,6 +31,9 @@
 
 	--success-color: #F4E2A7; /* NEW */
 	--error-color: #BA1A1A; /* NEW */
+
+
+	/* region Temporary variables. Will be deleted or changed after conversation about variables ends.*/
 	--card-border-color: #85736E;
 	--card-background-color: #FFF1ED;
 
@@ -35,40 +46,28 @@
 	--primary-hover: rgb(152, 90, 70);
 	--secondary-hover: #f69470;
 	--scrole-color: #85736E;
-	--outline-background-color: rgba(103, 80, 164, 0.12);
-	--state-active-background-color: #FFDBD0;
-	--card-secondary-text-color: #1C1B1F;
-	--table-header-background-color: rgba(241, 223, 218, .5);
+	/* endregion */
 
-	--primary-color-rgb: 143, 76, 54;
-	--primary-color: rgb(var(--primary-color-rgb));
-
-	--baseText-color: rgb(35, 25, 23); /* NEW */ /* default color for every text in finmars figma_keyword=surface */
-	--baseText-fontSize: 0.875rem;
-	--baseText-fontWeight: 400;
-	--baseText-lineHeight: 1.25rem;
-	--baseText-letterSpacing: 0.01563rem;
-	--baseText-fontFamily: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue";
-
-	--base-heading-color: #53433F; /* NEW */ /* h1-h6 */
-
-	--container-background-color: #F7E4DF; /* NEW */ /* dropdowns, menu */
-	--table-header-background-color: #FFF1ED; /* NEW */ /* table-header */
-
-	--active-state-background-color: #FFDBD0; /* NEW */
-	--active-state-color: #2C160E; /* NEW */
-
-	--icon-disabled-opacity: 0.38;
-	--button-disabled-opacity: var(--disabled-opacity);
-
-	--icon-padding: 0.5rem;
+	--sidebar-backgroundColor-hover: rgba(29, 27, 32, 0.08);
+	--sidebar-backgroundColor-focus: rgba(29, 27, 32, 0.12);
 }
 
-body.dark {
+/* Switch to dark mode when .dark-mode class is present on body */
+body.dark-mode {
+	/* General usage variables*/
+	/* --[?special]-[?state]-[styleProperty] */
+	/* always kebab-case */
+	/* variable [segment] mast be camelCase */
+	/* [?segment] is optional */
+	/* [?special] - e.g. light, activeState, onPrimary */
+
+	--primary-color: #FFB59D;
+	--onPrimary-color: #55200D;
 
 	--secondary-color: #FFDBD0;
 	--onSecondary-color: #53433F;
 
+	--baseText-color: #F1DFDA; /* NEW */ /* default color for every text in finmars */
 	--baseHeading-color: #D8C2BC; /* NEW */ /* h1-h6 */
 	--base-backgroundColor: #1A110F; /* NEW */ /* body, page figma_keyword=surface */
 
@@ -85,11 +84,23 @@ body.dark {
 	--primary-hover-backgroundColor: rgba(255, 181, 157, var(--hover-opacity));
 
 	--focus-opacity: 0.88; /* NEW */
+	--disabled-opacity: 0.88; /* NEW */
 
 	--success-color: #52461A;
-	--tableBody-backgroundColor: var(--base-backgroundColor);
+	--error-color: #BA1A1A;
+
+	/* Component specific variables */
+	/* --[component]-[?type]-[?state]-[styleProperty] */
+	/* always kebab-case for pieces of variable */
+	/* variable [segment] mast be camelCase */
+	/* [?segment] is optional */
+
+	/*--table-body-background-color: transparent; !* NEW *! !* table-body *!*/
+	--tableBody-backgroundColor: var(--base-backgroundColor); /* NEW */ /* table-body */
 
 
+	/* region Temporary variables. Will be deleted or changed after conversation about variables ends. */
+	--tableHeader-backgroundColor: #332b2a; /* NEW */ /* table-header */
 	--card-border-color: rgba(83, 67, 63, 1);
 	--card-background-color: #1A110F;
 
@@ -102,26 +113,8 @@ body.dark {
 	--primary-hover: rgb(239, 169, 154);
 	--secondary-hover: #f69470;
 	--scrole-color: #85736E;
-	--outline-background-color: rgba(208, 188, 255, 0.12);
-	--state-active-background-color: #5D4036;
-	--card-secondary-text-color: #F1DFDA;
-	--table-header-background-color: rgba(230, 224, 233, 0.12);
+	/* endregion */
 
-	--primary-color-rgb: 255, 181, 157;
-	--primary-color: rgb(var(--primary-color-rgb));
-	--onPrimary-color: rgb(85, 32, 13);
-	--base-backgroundColor: rgba(26, 17, 15, 1);
-	--baseText-color: rgb(241, 223, 218); /* NEW */ /* default color for every text in finmars */
-	--baseBackground-color: #1A110F; /* NEW */ /* body, page figma_keyword=surface */
-
-	--light-border-color: #D8C2BC; /* NEW */ /* cards, tables, figma_keyword=outline */
-
-	--hover-primary-color: rgba(255, 181, 157, var(--hover-opacity));
-	--hover-primary-backgroundColor: rgba(255, 181, 157, var(--hover-opacity));
-
-	--disabled-opacity: 0.38; /* NEW */
-
-	--error-color: rgb(186, 26, 26);
-
-	--tableHeader-backgroundColor: #1A110F; /* NEW */ /* table-header */
+	--sidebar-backgroundColor-hover: rgba(230, 224, 233, 0.08);
+	--sidebar-backgroundColor-focus: rgba(230, 224, 233, 0.12);
 }

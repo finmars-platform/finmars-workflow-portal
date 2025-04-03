@@ -1,28 +1,35 @@
 <template>
 	<div class="workflow-detail-page">
-		<!-- Left side: Rete.js Workflow Graph -->
 		<div class="workflow-graph-section">No data</div>
-
-		<!-- Right side: Workflow Details -->
 		<div class="workflow-detail-section">
-			<h2>Workflow Template Details</h2>
+			<h2 class="mb-2">Workflow Template Details</h2>
 
 			<div class="button-group">
-				<fm-btn @click="refresh">
-					<fm-icon icon="refresh" title="Refresh"/>
-				</fm-btn>
-				<fm-btn @click="confirmRelaunch">
-					<fm-icon icon="play_circle" title="Relaunch"/>
-				</fm-btn>
-				<fm-btn @click="cancelWorkflow">
-					<fm-icon icon="cancel" title="Terminate"/>
-				</fm-btn>
-				<fm-btn @click="payloadDialog = true">
-					<fm-icon icon="format_list_bulleted" title="Payload"/>
-				</fm-btn>
-				<fm-btn @click="goToWorkerLogs">
-					<fm-icon icon="receipt_long" :title="`Worker ${selectedTask?.worker_name} Logs`"/>
-				</fm-btn>
+				<FmIcon icon="mdi-refresh" @click="refresh" :size="32" >
+					<FmTooltip activator="parent" type="secondary" location="bottom">
+						Refresh
+					</FmTooltip>
+				</FmIcon>
+				<FmIcon icon="mdi-play-circle" @click="confirmRelaunch" :size="32" >
+					<FmTooltip activator="parent" type="secondary" location="bottom">
+						Relaunch
+					</FmTooltip>
+				</FmIcon>
+				<FmIcon icon="mdi-close-circle" @click="cancelWorkflow" :size="32" >
+					<FmTooltip activator="parent" type="secondary" location="bottom">
+						Terminate
+					</FmTooltip>
+				</FmIcon>
+				<FmIcon icon="mdi-format-list-bulleted" @click="payloadDialog = true" :size="32" >
+					<FmTooltip activator="parent" type="secondary" location="bottom">
+						Payload
+					</FmTooltip>
+				</FmIcon>
+				<FmIcon icon="mdi-paper-roll-outline" @click="goToWorkerLogs" :size="32" >
+					<FmTooltip activator="parent" type="secondary" location="bottom">
+						Worker {{selectedTask?.worker_name}} Logs
+					</FmTooltip>
+				</FmIcon>
 			</div>
 
 			<div v-if="workflow" class="workflow">
@@ -83,7 +90,7 @@
 
 				<div v-if="selectedTask.log">
 					<h2 class="text-center" style="margin-bottom: 8px">Log</h2>
-					<code style="max-height: 300px">{{ selectedTask.log }}</code>
+					<code>{{ selectedTask.log }}</code>
 				</div>
 
 				<div v-if="selectedTask.progress">
@@ -94,7 +101,7 @@
 				<div class="row mt-4" v-if="!selectedTask.result">
 					<div class="col">
 						<div class="notice">
-							<fm-icon icon="info"/>
+							<FmIcon icon="mdi-information-slab-circle-outline" :size="32" />
 							No task result
 						</div>
 					</div>
@@ -109,8 +116,7 @@
 						<div class="row">
 							<div class="col">
 								<div class="alert">
-									<fm-icon icon="info"/>
-
+									<FmIcon icon="mdi-information-slab-circle-outline" :size="32" />
 									{{ selectedTask.result.exception }}
 								</div>
 							</div>
@@ -125,29 +131,28 @@
           selectedTask && (workflow.status === 'success' || selectedTask.is_hook === false)
         "
 			>
-				<a target="_blank" :href="getFlowerTaskUrl()" class="pa-6">
-					<fm-btn>
-						<fm-icon icon="launch"/>
-						View in Flower
-					</fm-btn>
-				</a>
+				<FmButton @click="getFlowerTaskUrl" rounded>View in Flower
+					<template #prepend>
+						<FmIcon color="" icon="mdi-square-rounded-badge-outline" :size="24" />
+					</template>
+				</FmButton>
 			</div>
 
-			<fm-base-modal v-model="payloadDialog" title="Workflow's Payload" width="500">
-				<div>
+			<div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center gap-4 items-center z-90" v-if="payloadDialog">
+				<div class="flex flex-col gap-4 bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+					<span class="text-lg">Workflow's Payload</span>
 					<pre>{{ workflow.payload }}</pre>
-				</div>
-				<template #footer>
-					<div class="flex flex-row justify-between">
-						<fm-btn type="text" @click="payloadDialog = false">Cancel</fm-btn>
+					<div class="w-full flex justify-end">
+						<FmButton type="primary" rounded @click="payloadDialog = false">Close</FmButton>
 					</div>
-				</template>
-			</fm-base-modal>
+				</div>
+			</div>
+
 		</div>
 	</div>
 </template>
 <script setup>
-import {onMounted} from 'vue';
+import {FmButton, FmTooltip, FmIcon } from "@finmars/ui";
 
 const route = useRoute();
 const store = useStore();
@@ -177,11 +182,7 @@ function countTasksByStatus(status) {
 }
 
 function getFlowerTaskUrl() {
-	return (
-		window.location.origin +
-		`/${store.realm_code}/workflow/flower/task/` +
-		selectedTask.value.celery_task_id
-	);
+	window.open(`/${store.realm_code}/workflow/flower/task/` + selectedTask.value.celery_task_id, '_blank');
 }
 
 async function cancelWorkflow() {
@@ -258,6 +259,10 @@ h3 {
 	font-size: 1.2rem;
 }
 
+table{
+	width: 100%;
+}
+
 /* Button Group Styles */
 .button-group {
 	display: flex;
@@ -286,7 +291,8 @@ h3 {
 }
 
 code {
-	max-height: 300px;
+	max-height: 400px;
+	max-width: 66vw;
 	white-space: pre;
 	overflow-x: auto;
 	display: block !important;

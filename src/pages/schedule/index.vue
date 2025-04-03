@@ -1,12 +1,19 @@
 <template>
 	<div class="schedule-page">
-
-		<!-- Page Title -->
-		<h1 class="page-title">Schedule Page</h1>
-
-		<!-- Schedules Table -->
+		<div class="pb-4">
+			<FmBreadcrumbs :crumbs="crumbs" />
+		</div>
 		<div class="table-container">
-			<table class="schedule-table">
+			<div v-if="isLoading" class="w-full min-h-40 flex items-center justify-center">
+				<FmProgressCircular :size="34" indeterminate/>
+			</div>
+			<div
+				v-else-if="!schedules.length"
+				class="flex w-full min-h-36 justify-center items-center"
+			>
+				<span>No data available!</span>
+			</div>
+			<table v-else class="schedule-table">
 				<thead>
 				<tr>
 					<th>ID</th>
@@ -20,94 +27,122 @@
 				</tr>
 				</thead>
 				<tbody>
-				<tr v-for="item in schedules" :key="item.id" :style="{ opacity: !item.enabled ? 0.5 : 1 }">
-					<td>
-						<NuxtLink :to="useGetNuxtLink(`/schedule/${item.id}`, $route.params)" class="table-link">
-							{{ item.id }}
-						</NuxtLink>
-					</td>
+				<tr v-for="item in schedules" :key="item.id" :style="{ opacity: !item.enabled ? 0.5 : 1 }" @click="generateLink(item.id)">
+					<td>{{ item.id }}</td>
 					<td>{{ item.name }}</td>
 					<td>{{ item.user_code }}</td>
 					<td>{{ formatCrontab(item.crontab_line) }}</td>
 					<td><span v-if="item.enabled">Yes</span> <span v-if="!item.enabled">No</span></td>
 					<td>{{ item.notes }}</td>
-					<td><span :title="'Server Time: ' + item.next_run_at"> {{formatDate(item.next_run_at)}} </span></td>
-					<td><span :title="'Server Time: ' + item.last_run_at"> {{formatDate(item.last_run_at)}} </span></td>
+					<td><span :title="'Server Time: ' + item.next_run_at"> {{ formatDate(item.next_run_at) }} </span>
+					</td>
+					<td><span :title="'Server Time: ' + item.last_run_at"> {{ formatDate(item.last_run_at) }} </span>
+					</td>
 				</tr>
 				</tbody>
 			</table>
+			<FmPagination
+				:with-info="true"
+				:total-items="count"
+				:items-per-page="pageSize"
+				:model-value="currentPage"
+				@update:modelValue="handlePageChange"
+			/>
 		</div>
 
-		<fm-btn @click="goToNewSchedulePage">Create New</fm-btn>
+		<FmButton type="primary" rounded @click="generateLink('new')">Create New</FmButton>
 
 	</div>
 </template>
 
 <script setup>
+import {FmButton, FmProgressCircular, FmBreadcrumbs, FmPagination} from "@finmars/ui";
 
-import {useGetNuxtLink} from "~/composables/useMeta";
-import {onMounted, ref} from "vue";
-
-const router = useRouter();
-let store = useStore();
-store.init();
 definePageMeta({
 	middleware: "auth",
 });
 
-let schedules = ref([]);
+const route = useRoute();
+const router = useRouter();
 
-async function getSchedules() {
-	const data = await useApi('scheduleList.get');
-	schedules.value = data['results'];
-	console.log('schedules', schedules);
+const store = useStore();
+store.init();
+
+const crumbs = ref([
+	{ title: 'Schedule', path: 'schedule' }
+]);
+
+const isLoading = ref(false);
+const schedules = ref([]);
+const count = ref(0);
+const pageSize = ref(8);
+const currentPage = ref(route.query.page ? parseInt(route.query.page) : 1);
+
+async function getSchedules(newPage = 1) {
+	isLoading.value = true;
+	router.push({ query: { ...route.query, page: currentPage.value } });
+
+	const payload = {
+		page_size: pageSize.value,
+		page: newPage,
+	};
+	const res = await useApi('scheduleList.get',{
+		filters: payload,
+		query: { page: newPage }
+	});
+
+	if (res && res._$error) {
+		useNotify({
+			type: 'error',
+			title: res._$error.message || res._$error.error.details
+		});
+	} else {
+		count.value = res.count || res.length;
+		schedules.value = res.results;
+	}
+	isLoading.value = false;
 }
 
-function goToNewSchedulePage() {
-	router.push(`/${store.realm_code}/${store.space_code}/w/schedule/new`);
-}
+const handlePageChange = (newPage) => {
+	currentPage.value = newPage;
+	getSchedules(currentPage.value);
+};
 
+function generateLink(pathEnd) {
+	usePrefixedRouterPush(
+		router,
+		route,
+		`/schedule/${pathEnd}`
+	);
+}
 
 function formatDate(dateString) {
-	// Format the created date in a more readable way
-	const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+	const options = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'};
 	return new Date(dateString).toLocaleDateString(undefined, options);
 }
 
 function formatCrontab(crontab) {
-	// If needed, you can format the crontab line here to make it more readable
 	return crontab;
 }
 
-onMounted(async () => {
+async function init() {
 	await getSchedules();
-});
+}
+
+init();
 
 </script>
 
 <style scoped lang="postcss">
-
-/* Container for the page */
 .schedule-page {
 	padding: 20px;
 }
 
-/* Page title styling */
-.page-title {
-	font-size: 2rem;
-	font-weight: bold;
-	margin-bottom: 20px;
-	text-align: center;
-	color: var(--primary-color);
-}
-
-/* Table container for responsiveness */
 .table-container {
 	width: 100%;
 	overflow-x: auto;
 }
 
-/* Table styling */
 .schedule-table {
 	width: 100%;
 	border-collapse: collapse;
@@ -131,17 +166,6 @@ onMounted(async () => {
 
 .schedule-table tr:hover {
 	background-color: #f1f1f1;
-}
-
-/* Links in table */
-.table-link {
-	color: var(--primary-color);
-	text-decoration: none;
-	font-weight: bold;
-}
-
-.table-link:hover {
-	text-decoration: underline;
 }
 
 /* Responsive design for smaller screens */

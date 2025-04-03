@@ -1,9 +1,15 @@
 <template>
 	<div class="schedule-edit-page">
-		<h1>Edit Schedule</h1>
-
-		<!-- Schedule Form -->
-		<form @submit.prevent="saveSchedule" class="schedule-form">
+		<div class="pb-4">
+			<FmBreadcrumbs :crumbs="crumbs" @update-crumbs="handleCrumbs" />
+		</div>
+		<div
+			v-if="!schedule?.id"
+			class="flex w-full min-h-36 justify-center items-center"
+		>
+			<span>No data available!</span>
+		</div>
+		<form v-else class="schedule-form">
 			<table class="schedule-info-table">
 				<tr>
 					<th>ID</th>
@@ -11,45 +17,78 @@
 				</tr>
 				<tr>
 					<th>User Code</th>
-					<td><input v-model="schedule.user_code" type="text" required/></td>
+					<td>
+						<FmTextField
+							v-model="schedule.user_code"
+							:rules="[rules.required]"
+							outlined
+							clearable
+						/>
+					</td>
 				</tr>
 
 				<tr>
 					<th>Name</th>
-					<td><input v-model="schedule.name" type="text" required/></td>
+					<td>
+						<FmTextField
+							v-model="schedule.name"
+							:rules="[rules.required]"
+							outlined
+							clearable
+						/>
+					</td>
 				</tr>
 
 				<tr>
 					<th>Workflow User Code</th>
-					<td><input v-model="schedule.workflow_user_code" type="text" required/></td>
+					<td>
+						<FmTextField
+							v-model="schedule.workflow_user_code"
+							:rules="[rules.required]"
+							outlined
+							clearable
+						/>
+					</td>
 				</tr>
 
 				<tr>
 					<th>Crontab (UTC) Line</th>
-					<td><input v-model="schedule.crontab_line" placeholder="54 12 * * *" type="text" required/></td>
+					<td>
+						<FmTextField
+							v-model="schedule.crontab_line"
+							:rules="[rules.required]"
+							placeholder="54 12 * * *"
+							outlined
+							clearable
+						/>
+					</td>
 				</tr>
 
 
 				<tr>
 					<th>Notes</th>
-					<td><input v-model="schedule.notes" type="text"/></td>
+					<td>
+						<textarea
+							id="notes"
+							name="notes"
+							rows="4"
+							cols="50"
+							v-model="schedule.notes"
+						/>
+					</td>
 				</tr>
 
 				<tr>
 					<th>Payload</th>
 					<td>
-
 						<v-ace-editor
 							v-model:value="schedulePayload"
 							@init="payloadEditorInit"
 							lang="json"
 							theme="monokai"
 							style="height: 300px;width: 100%;"/>
-
-
 					</td>
 				</tr>
-
 
 				<tr>
 					<th>Created</th>
@@ -76,94 +115,126 @@
 				<tr>
 					<th>Manager</th>
 					<td>
-						<select v-model="schedule.is_manager">
-							<option :value="true">Yes</option>
-							<option :value="false">No</option>
-						</select>
+						<FmSelect
+							v-model="schedule.is_manager"
+							variant="outlined"
+							:options="managerOptions"
+							@update:modelValue="updateManagerOpt"
+						/>
 					</td>
 				</tr>
 				<tr>
 					<th>Enabled</th>
 					<td>
-						<select v-model="schedule.enabled">
-							<option :value="true">Yes</option>
-							<option :value="false">No</option>
-						</select>
+						<FmSelect
+							v-model="schedule.enabled"
+							variant="outlined"
+							:options="enableOptions"
+							@update:modelValue="updateEnableOpt"
+						/>
 					</td>
 				</tr>
 			</table>
 
-			<!-- Actions -->
-			<div class="action-buttons">
-				<fm-btn type="submit" class="save-btn">Save</fm-btn>
+			<div class="flex flex-row gap-2">
+				<div>
+					<FmButton rounded @click.prevent="saveSchedule">Save</FmButton>
+				</div>
+				<div @click="deleteSchedule">
+					<FmButton type="primary" rounded>Delete</FmButton>
+				</div>
 			</div>
 
 		</form>
 
-
-		<div style="margin-top: 8px;">
-			<fm-btn  @click="deleteSchedule" class="delete-btn">Delete</fm-btn>
-		</div>
-
 		<hr style="margin: 24px 0">
 
-		<fm-btn @click="runManual"  class="save-btn">Run Manually</fm-btn>
+		<FmButton type="primary" @click="runManual" rounded>Run Manually</FmButton>
 	</div>
 </template>
 
 <script setup>
-
+import {FmBreadcrumbs, FmButton, FmSelect, FmTextField } from '@finmars/ui';
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-monokai';
 
-import {onMounted, ref} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
-
-let schedulePayload = ref('')
-
-
-const route = useRoute();
-const router = useRouter();
-
-let store = useStore();
-store.init();
 definePageMeta({
 	middleware: "auth",
 });
 
-let schedule = ref({});
+const route = useRoute();
+const router = useRouter();
 
-// Fetch the schedule data
+const store = useStore();
+store.init();
+
+const crumbs = ref([
+	{ title: 'Schedule', path: 'schedule' },
+	{ title: 'Edit Schedule', path: 'edit' }
+]);
+
+const schedulePayload = ref('');
+const schedule = ref({});
+
+const managerOptions = [
+	{ title: 'Yes', value: true },
+	{ title: 'No', value: false }
+];
+
+const enableOptions = [
+	{ title: 'Yes', value: true },
+	{ title: 'No', value: false }
+];
+
+const rules = {
+	required: value => value ? '' : 'Field is required'
+}
+
+const handleCrumbs = (newCrumbs, newPath) => {
+	router.push(`/${store.realm_code}/${store.space_code}/w` + newPath);
+};
+
+function updateManagerOpt(val){
+	schedule.value.is_manager = val;
+}
+
+function updateEnableOpt(val){
+	schedule.value.enabled = val;
+}
+
 async function getSchedule() {
-	const response = await useApi('schedule.get', {params: {id: route.params.id}});
-	schedule.value = response;
-
-	if (schedule.value.payload) {
-		schedulePayload.value = JSON.stringify(schedule.value.payload, null, 4)
+	const res = await useApi('schedule.get', {params: {id: route.params.id}});
+	if (res && res._$error) {
+		useNotify({
+			type: 'error',
+			title: res._$error.message || res._$error.error.details
+		});
+	} else {
+		schedule.value = res;
+		if (schedule.value.payload) {
+			schedulePayload.value = JSON.stringify(schedule.value.payload, null, 4)
+		}
 	}
 }
 
-// Save the updated schedule
 async function saveSchedule() {
-	try {
+	schedule.value.payload = JSON.parse(schedulePayload.value);
+	const res = await useApi('schedule.put', {
+		body: schedule.value,
+		params: {id: route.params.id}
+	});
 
-		schedule.value.payload = JSON.parse(schedulePayload.value)
-
-		await useApi('schedule.put', {
-			body: schedule.value,
-			params: {id: route.params.id}
+	if (res && res._$error) {
+		useNotify({
+			type: 'error',
+			title: res._$error.message || res._$error.error.details
 		});
+	} else {
 		useNotify({
 			type: 'success',
 			title: 'Success',
 			text: 'Schedule updated successfully!'
-		});
-	} catch (error) {
-		useNotify({
-			type: 'error',
-			title: 'Error',
-			text: 'Failed to update the schedule.'
 		});
 	}
 }
@@ -178,8 +249,6 @@ function payloadEditorInit(payloadEditor) {
 	payloadEditor.navigateFileStart();
 }
 
-
-// Delete the schedule
 async function deleteSchedule() {
 	try {
 
@@ -220,27 +289,20 @@ async function runManual() {
 	});
 }
 
-// Format the date to a more readable format
 function formatDate(dateString) {
 	const options = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'};
 	return new Date(dateString).toLocaleDateString(undefined, options);
 }
-
-// Fetch the schedule when the page loads
-onMounted(() => {
+function init(){
 	getSchedule();
-});
+}
+
+init();
 </script>
 
 <style scoped lang="postcss">
 .schedule-edit-page {
-	padding: 20px;
-}
-
-h1 {
-	font-size: 2rem;
-	font-weight: bold;
-	margin-bottom: 20px;
+	padding: 0 20px 20px 20px;
 }
 
 .schedule-info-table {
@@ -261,27 +323,10 @@ h1 {
 	font-weight: bold;
 }
 
-input, select {
+textarea {
 	width: 100%;
-	padding: 8px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-}
-
-.action-buttons {
-	margin-top: 20px;
-}
-
-.save-btn {
-	background-color: #007bff;
-	color: white;
-	padding: 10px 20px;
-	margin-right: 10px;
-}
-
-.btn.delete-btn {
-	background-color: #ff4d4f !important;
-	color: white !important;
-	padding: 10px 20px;
+	border-radius: var(--spacing-4);
+	padding: var(--spacing-8);
+	border: 1px solid var(--card-border-color);
 }
 </style>

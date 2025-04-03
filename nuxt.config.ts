@@ -1,10 +1,6 @@
 import dayjs from 'dayjs'
 
 export default defineNuxtConfig({
-	build: {
-		publicPath: process.env.NUXT_APP_BUILD_ASSETS_DIR || '/_nuxt/'
-	},
-
 	runtimeConfig: {
 		public: {
 			frontURL: process.env.FRONT_HOST || "==PROD_FRONT_HOST==",

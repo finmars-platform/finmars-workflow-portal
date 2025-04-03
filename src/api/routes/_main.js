@@ -69,4 +69,7 @@ export default {
 	systemMessages: {
 		get: prefix + '/system-messages/message/'
 	},
+	explorerViewFile: {
+		get: prefix + '/explorer/view/'
+	},
 };

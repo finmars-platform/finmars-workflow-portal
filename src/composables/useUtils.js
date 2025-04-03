@@ -15,7 +15,3 @@ export function useDebounce(func, wait, immediate) {
 
 }
 
-export const useToggleDarkMode = (darkMode=false) => {
-	document.body.classList.toggle('dark', darkMode);
-}
-

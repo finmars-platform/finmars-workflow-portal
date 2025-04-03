@@ -18,7 +18,6 @@ import { FmIconButton } from '@finmars/ui';
 import useStore from "~/stores/useStore";
 import TheHeader from "~/components/TheHeader.vue";
 import TheNavigation from "~/components/TheNavigation.vue";
-import {useToggleDarkMode} from "~/composables/useUtils";
 
 const store = useStore();
 
@@ -61,16 +60,13 @@ async function refreshStorage() {
 }
 </script>
 <style lang="postcss" scoped>
-.wrap {
-	display: flex;
-}
 .refresh-wrap{
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
 	width: 100%;
-	padding-top: 6px;
-	padding-right: 14px;
+	padding-top: 15px;
+	padding-right: 20px;
 }
 .main {
 	display: flex;

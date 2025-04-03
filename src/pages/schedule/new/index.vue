@@ -1,35 +1,72 @@
 <template>
 	<div class="schedule-edit-page">
-		<h1>Edit Schedule</h1>
-
-		<!-- Schedule Form -->
-		<form @submit.prevent="createSchedule" class="schedule-form">
+		<div class="pb-4">
+			<FmBreadcrumbs :crumbs="crumbs" @update-crumbs="handleCrumbs" />
+		</div>
+		<form class="schedule-form">
 			<table class="schedule-info-table">
 
 				<tr>
 					<th>User Code</th>
-					<td><input v-model="schedule.user_code" type="text" required /></td>
+					<td>
+						<FmTextField
+							v-model="schedule.user_code"
+							:rules="[rules.required]"
+							outlined
+							clearable
+						/>
+					</td>
 				</tr>
 
 				<tr>
 					<th>Name</th>
-					<td><input v-model="schedule.name" type="text" required /></td>
+					<td>
+						<FmTextField
+							v-model="schedule.name"
+							:rules="[rules.required]"
+							outlined
+							clearable
+						/>
+					</td>
 				</tr>
 
 				<tr>
 					<th>Workflow User Code</th>
-					<td><input v-model="schedule.workflow_user_code" type="text" required /></td>
+					<td>
+						<FmTextField
+							v-model="schedule.workflow_user_code"
+							:rules="[rules.required]"
+							outlined
+							clearable
+						/>
+					</td>
 				</tr>
 
 				<tr>
 					<th>Crontab (UTC) Line</th>
-					<td><input v-model="schedule.crontab_line" placeholder="54 12 * * *" type="text" required /></td>
+					<td>
+						<FmTextField
+							v-model="schedule.crontab_line"
+							:rules="[rules.required]"
+							placeholder="54 12 * * *"
+							outlined
+							clearable
+						/>
+					</td>
 				</tr>
 
 
 				<tr>
 					<th>Notes</th>
-					<td><input v-model="schedule.notes" type="text" /></td>
+					<td>
+						<textarea
+							id="notes"
+							name="notes"
+							rows="4"
+							cols="50"
+							v-model="schedule.notes"
+						/>
+					</td>
 				</tr>
 
 				<tr>
@@ -50,78 +87,103 @@
 				<tr>
 					<th>Manager</th>
 					<td>
-						<select v-model="schedule.is_manager">
-							<option :value="true">Yes</option>
-							<option :value="false">No</option>
-						</select>
+						<FmSelect
+							v-model="schedule.is_manager"
+							variant="outlined"
+							:options="managerOptions"
+							@update:modelValue="updateManagerOpt"
+						/>
 					</td>
 				</tr>
 				<tr>
 					<th>Enabled</th>
 					<td>
-						<select v-model="schedule.enabled">
-							<option :value="true">Yes</option>
-							<option :value="false">No</option>
-						</select>
+						<FmSelect
+							v-model="schedule.enabled"
+							variant="outlined"
+							:options="enableOptions"
+							@update:modelValue="updateEnableOpt"
+						/>
 					</td>
 				</tr>
 			</table>
 
-			<!-- Actions -->
 			<div class="action-buttons">
-				<fm-btn type="submit" class="save-btn">Create</fm-btn>
+				<FmButton type="primary" @click.prevent="createSchedule" rounded>Create</FmButton>
 			</div>
 		</form>
 	</div>
 </template>
 
 <script setup>
+import {FmBreadcrumbs, FmButton, FmSelect, FmTextField} from '@finmars/ui';
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-monokai';
-
-import {ref, onMounted} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
-
-
-let store = useStore();
-store.init();
-const route = useRoute();
-const router = useRouter();
-
-let schedulePayload = ref('')
 
 definePageMeta({
 	middleware: "auth",
 });
 
-let schedule = ref({is_manager: true, enabled: true});
+const route = useRoute();
+const router = useRouter();
 
-// Save the updated schedule
+const store = useStore();
+store.init();
+
+const crumbs = ref([
+	{ title: 'Schedule', path: 'schedule' },
+	{ title: 'New', path: 'new' }
+]);
+
+const schedulePayload = ref('');
+const schedule = ref({is_manager: true, enabled: true});
+
+const managerOptions = [
+	{ title: 'Yes', value: true },
+	{ title: 'No', value: false }
+];
+
+const enableOptions = [
+	{ title: 'Yes', value: true },
+	{ title: 'No', value: false }
+];
+
+const rules = {
+	required: value => value ? '' : 'Field is required'
+}
+
+const handleCrumbs = (newCrumbs, newPath) => {
+	router.push(`/${store.realm_code}/${store.space_code}/w` + newPath);
+};
+
+function updateManagerOpt(val){
+	schedule.value.is_manager = val;
+}
+
+function updateEnableOpt(val){
+	schedule.value.enabled = val;
+}
+
 async function createSchedule() {
-	try {
+	schedule.value.payload = JSON.parse(schedulePayload.value)
+	const res = await useApi('schedule.post', {
+		body: schedule.value,
+	});
 
-		schedule.value.payload = JSON.parse(schedulePayload.value)
-
-		const response = await useApi('schedule.post', {
-			body: schedule.value,
+	if (res && res._$error) {
+		useNotify({
+			type: 'error',
+			title: res._$error.message || res._$error.error.details
 		});
-
+	} else {
 		useNotify({
 			type: 'success',
 			title: 'Success',
 			text: 'Schedule created successfully!'
 		});
-
-		const id = response.id;
+		const id = res.id;
 		router.push(`/${store.realm_code}/${store.space_code}/w/schedule/${id}/`);
-
-	} catch (error) {
-		useNotify({
-			type: 'error',
-			title: 'Error',
-			text: 'Failed to create the schedule.'
-		});
 	}
 }
 
@@ -130,26 +192,15 @@ function payloadEditorInit(payloadEditor) {
 	payloadEditor.setShowPrintMargin(false);
 	payloadEditor.setFontSize(14)
 	payloadEditor.setBehavioursEnabled(true);
-
 	payloadEditor.focus();
 	payloadEditor.navigateFileStart();
 }
 
-// Fetch the schedule when the page loads
-onMounted(() => {
-
-});
 </script>
 
 <style scoped lang="postcss">
 .schedule-edit-page {
-	padding: 20px;
-}
-
-h1 {
-	font-size: 2rem;
-	font-weight: bold;
-	margin-bottom: 20px;
+	padding: 0 20px 20px 20px;
 }
 
 .schedule-info-table {
@@ -170,27 +221,10 @@ h1 {
 	font-weight: bold;
 }
 
-input, select {
+textarea {
 	width: 100%;
-	padding: 8px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-}
-
-.action-buttons {
-	margin-top: 20px;
-}
-
-.save-btn {
-	background-color: #007bff;
-	color: white;
-	padding: 10px 20px;
-	margin-right: 10px;
-}
-
-.delete-btn {
-	background-color: #ff4d4f;
-	color: white;
-	padding: 10px 20px;
+	border-radius: var(--spacing-4);
+	padding: var(--spacing-8);
+	border: 1px solid var(--card-border-color);
 }
 </style>
