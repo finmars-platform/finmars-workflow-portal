@@ -5,31 +5,31 @@
 			<h2 class="mb-2">Workflow Template Details</h2>
 
 			<div class="button-group">
-				<FmIcon icon="mdi-refresh" @click="refresh" :size="32" >
+				<FmIconButton icon="mdi-refresh" @click.stop.prevent="refresh" size="normal" >
 					<FmTooltip activator="parent" type="secondary" location="bottom">
 						Refresh
 					</FmTooltip>
-				</FmIcon>
-				<FmIcon icon="mdi-play-circle" @click="confirmRelaunch" :size="32" >
+				</FmIconButton>
+				<FmIconButton icon="mdi-play-circle" @click.stop.prevent="openConfirmRelaunch" size="normal" >
 					<FmTooltip activator="parent" type="secondary" location="bottom">
 						Relaunch
 					</FmTooltip>
-				</FmIcon>
-				<FmIcon icon="mdi-close-circle" @click="cancelWorkflow" :size="32" >
+				</FmIconButton>
+				<FmIconButton icon="mdi-close-circle" @click.stop.prevent="openCancelWorkflow" size="normal" >
 					<FmTooltip activator="parent" type="secondary" location="bottom">
 						Terminate
 					</FmTooltip>
-				</FmIcon>
-				<FmIcon icon="mdi-format-list-bulleted" @click="payloadDialog = true" :size="32" >
+				</FmIconButton>
+				<FmIconButton icon="mdi-format-list-bulleted" @click="payloadDialog = true" size="normal" >
 					<FmTooltip activator="parent" type="secondary" location="bottom">
 						Payload
 					</FmTooltip>
-				</FmIcon>
-				<FmIcon icon="mdi-paper-roll-outline" @click="goToWorkerLogs" :size="32" >
+				</FmIconButton>
+				<FmIconButton icon="mdi-paper-roll-outline" @click="goToWorkerLogs" size="normal" >
 					<FmTooltip activator="parent" type="secondary" location="bottom">
 						Worker {{selectedTask?.worker_name}} Logs
 					</FmTooltip>
-				</FmIcon>
+				</FmIconButton>
 			</div>
 
 			<div v-if="workflow" class="workflow">
@@ -138,21 +138,43 @@
 				</FmButton>
 			</div>
 
-			<div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center gap-4 items-center z-90" v-if="payloadDialog">
-				<div class="flex flex-col gap-4 bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-					<span class="text-lg">Workflow's Payload</span>
-					<pre>{{ workflow.payload }}</pre>
-					<div class="w-full flex justify-end">
-						<FmButton type="primary" rounded @click="payloadDialog = false">Close</FmButton>
-					</div>
-				</div>
-			</div>
+			<BaseModal
+				:title="'Workflow\'s Payload'"
+				:isOpen="payloadDialog"
+				width="30vw"
+				height="30%"
+				minHeight="400px"
+				@closeModal="payloadDialog = false"
+				@okModal="payloadDialog = false"
+			>
+				<pre>{{workflow.payload}}</pre>
+			</BaseModal>
+
+			<FmConfirm
+				title="Terminate Schedule"
+				:isOpen="isShowCancelWorkflowConfirm"
+				@closeModal="isShowCancelWorkflowConfirm = false"
+				@okModal="cancelWorkflow"
+			>
+				<span>Are you sure you want to terminate {{workflow.name}} ?</span>
+			</FmConfirm>
+
+			<FmConfirm
+				title="Relunch Workflow"
+				:isOpen="isShowRelunchConfirm"
+				@closeModal="isShowRelunchConfirm = false"
+				@okModal="confirmRelaunch"
+			>
+				<span>Are you sure you want to relunch {{workflow.name}} ?</span>
+			</FmConfirm>
 
 		</div>
 	</div>
 </template>
 <script setup>
 import {FmButton, FmTooltip, FmIcon } from "@finmars/ui";
+import BaseModal from '../base/Modal.vue'
+import FmConfirm from "~/components/fm/Confirm.vue";
 
 const route = useRoute();
 const store = useStore();
@@ -164,6 +186,8 @@ const emit = defineEmits(['update'])
 
 const selectedTask = ref(props.workflow.tasks?.[0]);
 
+const isShowCancelWorkflowConfirm = ref(false);
+const isShowRelunchConfirm = ref(false);
 const payloadDialog = ref(false);
 
 function getColor(status) {
@@ -185,39 +209,73 @@ function getFlowerTaskUrl() {
 	window.open(`/${store.realm_code}/workflow/flower/task/` + selectedTask.value.celery_task_id, '_blank');
 }
 
+function openCancelWorkflow() {
+	isShowCancelWorkflowConfirm.value = true;
+}
+
 async function cancelWorkflow() {
-	let isConfirm = await useConfirm({
-		title: 'Cancel the workflow',
-		text: `Are you sure you want to cancel Workflow?`
-	});
-	if (!isConfirm) return false;
-
-	await useApi('cancelWorkflow.post', {
-		params: {id: route.params.id},
-		body: JSON.stringify({})
-	});
-
-	await refresh();
+	try {
+		const res = await useApi('cancelWorkflow.post', {
+			params: {id: route.params.id},
+			body: JSON.stringify({})
+		});
+		if (res && res._$error) {
+			useNotify({
+				type: 'error',
+				title: res._$error.message || res._$error.error.details
+			});
+		} else {
+			useNotify({
+				type: 'success',
+				text: 'Workflow Template terminated successfully!'
+			});
+			await refresh();
+		}
+	} catch (e) {
+		useNotify({
+			type: 'error',
+			title: 'Error',
+			text: 'Failed to terminate the Workflow Template.'
+		});
+	} finally {
+		isShowCancelWorkflowConfirm.value = false;
+	}
 }
 
 async function refresh() {
 	emit('update');
 }
 
+function openConfirmRelaunch() {
+	isShowRelunchConfirm.value = true;
+}
 async function confirmRelaunch() {
-	const isConfirm = await useConfirm({
-		title: 'Relaunch the workflow',
-		text: `The workflow will be relaunched with the same payload. Note that a new workflow will be created, so the current one (created on ) will not be changed and will still be available in your history.`
-	});
-
-	if (!isConfirm) return false;
-
-	await useApi('relaunchWorkflow.post', {
-		params: {id: route.params.id},
-		body: JSON.stringify({})
-	});
-
-	await refresh();
+	try {
+		const res = await useApi('relaunchWorkflow.post', {
+			params: {id: route.params.id},
+			body: JSON.stringify({})
+		});
+		if (res && res._$error) {
+			useNotify({
+				type: 'error',
+				title: res._$error.message || res._$error.error.details
+			});
+		} else {
+			useNotify({
+				type: 'success',
+				text: 'Workflow Template terminated successfully!'
+			});
+			await refresh();
+		}
+	} catch (e) {
+		useNotify({
+			type: 'error',
+			title: 'Error',
+			text: 'Failed to relunch the Workflow Template.'
+		});
+	} finally {
+		isShowRelunchConfirm.value = false;
+	}
 }
 
 function formatDate(dateString) {
@@ -229,20 +287,17 @@ function formatDate(dateString) {
 <style scoped>
 .workflow-detail-page {
 	display: flex;
-	height: 100vh;
 }
 
 /* Left side for Rete.js Editor */
 .workflow-graph-section {
 	flex: 0.3;
-	background-color: #f5f5f5;
 	padding: 15px;
 }
 
 /* Right side for Workflow Details */
 .workflow-detail-section {
 	flex: 0.7;
-	background-color: #fff;
 	padding: 20px;
 	border-left: 1px solid #ccc;
 	overflow-y: auto;
@@ -310,7 +365,6 @@ td {
 	height: 48px;
 	padding: 0 16px;
 	border: 1px solid rgb(255, 219, 208);
-	color: rgb(35, 25, 23);
 }
 
 .footer {
@@ -329,11 +383,8 @@ td {
 	padding: 16px;
 	color: #E53935;
 	caret-color: #E53935;
-
 	border: thin solid #E53935;
 	border-radius: 4px;
-	background-color: rgba(229, 57, 53, 0.12);
-
 	margin-bottom: 16px;
 }
 
@@ -341,13 +392,9 @@ td {
 	display: flex;
 	gap: 16px;
 	padding: 16px;
-	color: #000000;
 	caret-color: #000000;
-
 	border: thin solid #000000;
 	border-radius: 4px;
-	background-color: rgba(000, 000, 000, 0.12);
-
 	margin-bottom: 16px;
 }
 </style>

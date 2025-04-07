@@ -37,6 +37,14 @@ input[type="file"] {
 	display: none;
 }
 
+input[type="text"] {
+	background: transparent;
+}
+
+textarea {
+	background: transparent;
+}
+
 /*region Scrollbar*/
 ::-webkit-scrollbar-thumb, .split_panel_main::-webkit-scrollbar-thumb {
 	background: transparent;
@@ -89,4 +97,24 @@ input[type="file"] {
 	background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
 	background-position: -3.2px -3.2px, -3.2px -3.2px, -1.6px -1.6px,
 	-1.6px -1.6px;
+}
+
+:deep(.v-input__control) {
+	.v-field.v-field--rounded {
+		border-radius: 4px;
+	}
+
+	.v-field {
+		.v-field__field {
+			.v-field__input,
+			.v-label {
+				color: var(--on-surface-variant);
+			}
+		}
+	}
+
+	.v-field__clearable,
+	.v-field__append-inner {
+		color: var(--on-surface-variant);
+	}
 }

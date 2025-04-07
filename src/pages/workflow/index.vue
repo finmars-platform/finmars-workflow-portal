@@ -132,7 +132,7 @@ init();
 
 <style scoped lang="postcss">
 .workflow-page {
-	padding: 20px;
+	padding: 0 20px 20px 20px;
 }
 .table-container {
 	width: 100%;
@@ -152,16 +152,10 @@ init();
 }
 
 .workflow-table th {
-	background-color: #f5f5f5;
 	font-weight: bold;
 }
 
-.workflow-table tr:nth-child(even) {
-	background-color: #f9f9f9;
-}
-
 .workflow-table tr:hover {
-	background-color: #f1f1f1;
 	cursor: pointer;
 }
 

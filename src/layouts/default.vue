@@ -66,7 +66,7 @@ async function refreshStorage() {
 	justify-content: flex-end;
 	width: 100%;
 	padding-top: 15px;
-	padding-right: 20px;
+	padding-right: 25px;
 }
 .main {
 	display: flex;
@@ -75,7 +75,7 @@ async function refreshStorage() {
 
 .content {
 	flex-grow: 1;
-	height: calc(100vh - 80px);
+	height: calc(100vh - 85px);
 	overflow: auto;
 }
 </style>

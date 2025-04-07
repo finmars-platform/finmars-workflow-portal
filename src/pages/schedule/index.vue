@@ -50,7 +50,7 @@
 			/>
 		</div>
 
-		<FmButton type="primary" rounded @click="generateLink('new')">Create New</FmButton>
+		<FmButton type="primary" rounded @click="generateLink('new')" class="mt-2">Create New</FmButton>
 
 	</div>
 </template>
@@ -135,7 +135,7 @@ init();
 
 <style scoped lang="postcss">
 .schedule-page {
-	padding: 20px;
+	padding: 0 20px 20px 20px;
 }
 
 .table-container {
@@ -156,16 +156,11 @@ init();
 }
 
 .schedule-table th {
-	background-color: #f5f5f5;
 	font-weight: bold;
 }
 
-.schedule-table tr:nth-child(even) {
-	background-color: #f9f9f9;
-}
-
 .schedule-table tr:hover {
-	background-color: #f1f1f1;
+	cursor: pointer;
 }
 
 /* Responsive design for smaller screens */

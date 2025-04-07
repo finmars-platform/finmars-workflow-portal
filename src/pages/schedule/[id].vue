@@ -3,13 +3,7 @@
 		<div class="pb-4">
 			<FmBreadcrumbs :crumbs="crumbs" @update-crumbs="handleCrumbs" />
 		</div>
-		<div
-			v-if="!schedule?.id"
-			class="flex w-full min-h-36 justify-center items-center"
-		>
-			<span>No data available!</span>
-		</div>
-		<form v-else class="schedule-form">
+		<form class="schedule-form">
 			<table class="schedule-info-table">
 				<tr>
 					<th>ID</th>
@@ -140,8 +134,8 @@
 				<div>
 					<FmButton rounded @click.prevent="saveSchedule">Save</FmButton>
 				</div>
-				<div @click="deleteSchedule">
-					<FmButton type="primary" rounded>Delete</FmButton>
+				<div>
+					<FmButton type="primary" rounded @click="openDeleteSchedule">Delete</FmButton>
 				</div>
 			</div>
 
@@ -150,6 +144,16 @@
 		<hr style="margin: 24px 0">
 
 		<FmButton type="primary" @click="runManual" rounded>Run Manually</FmButton>
+
+		<FmConfirm
+			title="Delete Schedule"
+			:isOpen="isShowConfirm"
+			@closeModal="isShowConfirm = false"
+			@okModal="deleteSchedule"
+		>
+			<span>Are you sure you want to delete {{schedule.name}} ?</span>
+		</FmConfirm>
+
 	</div>
 </template>
 
@@ -158,6 +162,8 @@ import {FmBreadcrumbs, FmButton, FmSelect, FmTextField } from '@finmars/ui';
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-monokai';
+
+import FmConfirm from "~/components/fm/Confirm.vue";
 
 definePageMeta({
 	middleware: "auth",
@@ -174,6 +180,7 @@ const crumbs = ref([
 	{ title: 'Edit Schedule', path: 'edit' }
 ]);
 
+const isShowConfirm = ref(false);
 const schedulePayload = ref('');
 const schedule = ref({});
 
@@ -249,14 +256,12 @@ function payloadEditorInit(payloadEditor) {
 	payloadEditor.navigateFileStart();
 }
 
+function openDeleteSchedule() {
+	isShowConfirm.value = true;
+}
+
 async function deleteSchedule() {
 	try {
-
-		let isConfirm = await useConfirm({
-			text: `Are you sure you want to delete Schedule?`,
-		})
-		if (!isConfirm) return false
-
 		await useApi('schedule.delete', {
 			params: {id: route.params.id}
 		});
@@ -274,6 +279,8 @@ async function deleteSchedule() {
 			title: 'Error',
 			text: 'Failed to delete the schedule.'
 		});
+	} finally {
+		isShowConfirm.value = false;
 	}
 }
 
@@ -318,7 +325,6 @@ init();
 }
 
 .schedule-info-table th {
-	background-color: #f5f5f5;
 	width: 150px;
 	font-weight: bold;
 }

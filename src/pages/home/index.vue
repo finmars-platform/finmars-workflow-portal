@@ -122,15 +122,6 @@ init();
 }
 
 .workflow-table th {
-	background-color: #f0f0f0;
 	font-weight: bold;
-}
-
-.workflow-table tr:nth-child(even) {
-	background-color: #f9f9f9;
-}
-
-.workflow-table tr:hover {
-	background-color: #f1f1f1;
 }
 </style>

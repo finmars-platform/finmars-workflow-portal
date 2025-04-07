@@ -61,6 +61,4 @@ getWorkflow();
 
 </script>
 
-<style lang="postcss" scoped>
-
-</style>
+<style lang="postcss" scoped></style>

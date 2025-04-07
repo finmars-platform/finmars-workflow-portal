@@ -6,13 +6,16 @@
 		data-testid="node"
 		ref="nodeElement"
 	>
-		<div
-			class="action"
-
-		>
-			<fm-btn @click.stop="onCopy" :icon="'content_copy'"/>
-			<fm-btn @click.stop="onEdit" :icon="'edit'"/>
-			<fm-btn @click.stop="onDelete" :icon="'delete'"/>
+		<div class="action">
+			<button @click.stop="onCopy" title="Copy">
+				<span class="material-icons">content_copy</span>
+			</button>
+			<button @click.stop="onEdit" title="Edit">
+				<span class="material-icons">edit</span>
+			</button>
+			<button @click.stop="onDelete" title="Delete">
+				<span class="material-icons">delete</span>
+			</button>
 		</div>
 		<div class="title" data-testid="title" @pointerdown.stop=""><span>{{ data.data.node.name }}</span></div>
 		<div class="sub-title" data-testid="sub-title" @pointerdown.stop="">{{ data.data.node.user_code }}</div>
@@ -52,6 +55,7 @@
 					<p>Source Code:</p>
 					<button class="node-source-code-panel-edit-button" @click="isSourceCodeDialogOpen = true">Edit
 					</button>
+
 				</div>
 				<v-ace-editor
 					v-model:value="data.data.source_code"
@@ -133,15 +137,12 @@
 				data-testid="input-control"
 			/>
 		</div>
-
-
-		<fm-base-modal
+		<BaseModal
 			title="Source code"
-			style="width: 80vw;"
-			v-model="isSourceCodeDialogOpen"
+			:isOpen="isSourceCodeDialogOpen"
+			@closeModal="isSourceCodeDialogOpen = false"
+			@okModal="isSourceCodeDialogOpen = !isSourceCodeDialogOpen"
 		>
-
-
 			<v-ace-editor
 				v-model:value="data.data.source_code"
 				@init="sourceCodeEditorInit"
@@ -150,13 +151,7 @@
 				style="height: 400px; width: 100%;"
 				@pointerdown.stop=""
 			/>
-
-			<template #footer>
-				<div class="flex flex-row justify-between">
-					<fm-btn type="filled" @click="isSourceCodeDialogOpen = !isSourceCodeDialogOpen">Save</fm-btn>
-				</div>
-			</template>
-		</fm-base-modal>
+		</BaseModal>
 
 		<div class="resize-handle" @pointerdown.stop="" @mousedown="initResize"></div>
 
@@ -164,14 +159,13 @@
 </template>
 
 <script lang="js">
-import {defineComponent, ref} from 'vue'
-import {Ref} from 'rete-vue-plugin'
+import {defineComponent, ref} from 'vue';
+import BaseModal from "~/components/base/Modal.vue";
+import {Ref} from 'rete-vue-plugin';
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/theme-monokai';
-
-import {BaseModal as FmBaseModal, FmBtn as FmBtn} from "@finmars/ui"
 
 function sortByIndex(entries) {
 	entries.sort((a, b) => {
@@ -299,8 +293,7 @@ export default defineComponent({
 	},
 	components: {
 		VAceEditor,
-		FmBaseModal,
-		FmBtn,
+		BaseModal,
 		Ref
 	}
 })
@@ -310,25 +303,22 @@ export default defineComponent({
 
 
 .node {
-	background: #f8f9fa; /* Light background for a cleaner look */
+	background: var(--surface-container-high);
 	border: 2px solid #ddd; /* Softer border color */
 	border-radius: 12px; /* More rounded corners */
 	cursor: pointer;
 	box-sizing: border-box;
 	width: 400px;
 	height: auto;
-	padding-bottom: 6px;
+	padding: 16px 16px 6px 16px;
 	position: relative;
 	user-select: none;
-	padding: 16px; /* Increase padding for breathing room */
 	box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 	transition: all 0.2s ease-in-out; /* Smooth transition for hover */
-	padding-top: 16px;
-	transition: width 0.1s ease-out, height 0.1s ease-out;
 
 	&:hover {
 		opacity: 1; /* Slight increase in opacity */
-		box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+		box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
 
 		.action {
 			opacity: 1;
@@ -341,7 +331,6 @@ export default defineComponent({
 	}
 
 	.title {
-		color: #333; /* Darker text color for better readability */
 		font-family: 'Helvetica Neue', sans-serif;
 		font-size: 20px; /* Slightly larger font */
 		padding: 0 116px 0 0;
@@ -377,7 +366,7 @@ export default defineComponent({
 	.input-title,
 	.output-title {
 		vertical-align: middle;
-		color: #555; /* Medium grey for labels */
+		color: #777777; /* Medium grey for labels */
 		display: inline-block;
 		font-family: 'Helvetica Neue', sans-serif;
 		font-size: 14px;
@@ -422,8 +411,6 @@ export default defineComponent({
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Make the shadow stronger on hover */
 	}
 
-	/* Optional: Use an SVG icon for the resize handle */
-
 	.resize-handle::before {
 		content: '⤡'; /* Diagonal resize icon */
 		font-size: 12px;
@@ -443,31 +430,14 @@ export default defineComponent({
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background: #f1f3f5; /* Light background for the panel */
+	background: var(--surface-container-high);
 	padding: 8px;
 	border-radius: 8px; /* Round corners for a modern look */
 }
 
-.node-source-code-panel-edit-button {
-	border: 1px solid #007bff;
-	border-radius: 4px;
-	padding: 6px 12px;
-	margin: 8px 4px;
-	background-color: #007bff;
-	color: #fff;
-	font-size: 14px;
-	cursor: pointer;
-	transition: background-color 0.2s ease-in-out;
-}
-
-.node-source-code-panel-edit-button:hover {
-	background-color: #0056b3; /* Darker blue on hover */
-	opacity: 0.9;
-}
-
 .node-info {
 	margin: 16px 0;
-	background: #f8f9fa;
+	background: var(--surface-container-high);
 	padding: 12px;
 	border-radius: 8px;
 	border: 1px solid #ddd;
@@ -479,7 +449,6 @@ export default defineComponent({
 	align-items: center;
 	cursor: pointer;
 	font-weight: bold;
-	color: #333;
 }
 
 .node-info-content {
@@ -509,18 +478,15 @@ export default defineComponent({
 	position: absolute;
 	top: 8px;
 	right: 8px;
-
 	display: flex;
 	gap: 4px;
-
 	opacity: 0;
 	pointer-events: none;
-
 	transition: opacity 0.2s;
+	color: var(--primary);
+}
 
-	.btn {
-		padding-right: 8px;
-		padding-left: 8px;
-	}
+textarea {
+	background: transparent !important;
 }
 </style>

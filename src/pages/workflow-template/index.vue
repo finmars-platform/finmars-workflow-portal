@@ -33,8 +33,8 @@
 					<td>{{ formatDate(item.created_at) }}</td>
 					<td>
 						<div class="action">
-							<FmIcon :size="24" icon="mdi-content-copy" @click="openCopyModal({data: item.data, notes: item.notes, name: item.name})" />
-							<FmIcon :size="24" icon="mdi-delete" @click="deleteWorkflowTemplate(item.id)" />
+							<FmIconButton size="small" icon="mdi-content-copy" @click.stop="openCopyModal({data: item.data, notes: item.notes, name: item.name})" />
+							<FmIconButton size="small" icon="mdi-delete" @click.stop="openDeleteWorkflowTemplate(item)" />
 						</div>
 					</td>
 				</tr>
@@ -50,23 +50,33 @@
 			@update:modelValue="handlePageChange"
 		/>
 
-		<FmButton @click="generateLink('new')" rounded>Create New</FmButton>
+		<FmButton @click="generateLink('new')" rounded class="mt-2">Create New</FmButton>
 
 		<EditTemplateModal
-			v-if="editTemplate"
+			v-if="editTemplate.data && editTemplate.name"
 			:data="editTemplate.data"
 			:notes="editTemplate.notes"
 			:name="editTemplate.name"
 			:userCode="''"
-			@close="editTemplate = null"
+			@close="editTemplate = {}"
 			@update="getWorkflowTemplates"
 		/>
+
+		<FmConfirm
+			title="Delete Workflow template"
+			:isOpen="isShowConfirm"
+			@closeModal="isShowConfirm = false"
+			@okModal="deleteWorkflowTemplate"
+		>
+			<span>Are you sure you want to delete {{deletableWorkflowTemplate.name}} ?</span>
+		</FmConfirm>
 	</div>
 </template>
 
 <script setup>
-import {FmPagination, FmIcon, FmBreadcrumbs, FmProgressCircular, FmButton} from '@finmars/ui';
+import {FmPagination, FmBreadcrumbs, FmProgressCircular, FmButton} from '@finmars/ui';
 import EditTemplateModal from "~/components/modals/EditTemplateModal.vue";
+import FmConfirm from "~/components/fm/Confirm.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -83,11 +93,14 @@ const crumbs = ref([
 ]);
 
 const isLoading = ref(false);
+const isShowConfirm = ref(false);
 const workflowTemplates = ref([]);
-const editTemplate = ref(null)
+const editTemplate = ref({})
 const count = ref(0);
 const pageSize = ref(8);
 const currentPage = ref(route.query.page ? parseInt(route.query.page) : 1);
+
+const deletableWorkflowTemplate = ref({});
 
 const handlePageChange = (newPage) => {
 	currentPage.value = newPage;
@@ -140,29 +153,38 @@ async function openCopyModal({data, notes, name}) {
 	}
 }
 
-async function deleteWorkflowTemplate(templateId) {
-	const isConfirm = await useConfirm({
-		text: `Are you sure you want to delete Workflow Template?`,
-	})
-	if (!isConfirm) return false;
+function openDeleteWorkflowTemplate(item) {
+	deletableWorkflowTemplate.value = item;
+	isShowConfirm.value = true;
+}
 
+async function deleteWorkflowTemplate() {
 	currentPage.value = 1
-
-	const res = await useApi('workflowTemplate.delete', {
-		params: {id: templateId}
-	});
-
-	if (res && res._$error) {
+	try {
+		const res = await useApi('workflowTemplate.delete', {
+			params: {id: deletableWorkflowTemplate.value.id}
+		});
+		if (res && res._$error) {
+			useNotify({
+				type: 'error',
+				title: res._$error.message || res._$error.error.details
+			});
+		} else {
+			useNotify({
+				type: 'success',
+				text: 'Workflow Template deleted successfully!'
+			});
+			await getWorkflowTemplates();
+		}
+	} catch (e) {
 		useNotify({
 			type: 'error',
-			title: res._$error.message || res._$error.error.details
+			title: 'Error',
+			text: 'Failed to delete the workflow template.'
 		});
-	} else {
-		useNotify({
-			type: 'success',
-			text: 'Workflow Template deleted successfully!'
-		});
-		await getWorkflowTemplates();
+	} finally {
+		isShowConfirm.value = false;
+		deletableWorkflowTemplate.value = {};
 	}
 }
 
@@ -178,7 +200,7 @@ init();
 
 /* Container for the page */
 .workflow-template-page {
-	padding: 20px;
+	padding: 0 20px 20px 20px;
 }
 
 /* Table container for responsiveness */
@@ -201,16 +223,10 @@ init();
 }
 
 .workflow-table th {
-	background-color: #f5f5f5;
 	font-weight: bold;
 }
 
-.workflow-table tr:nth-child(even) {
-	background-color: #f9f9f9;
-}
-
 .workflow-table tr:hover {
-	background-color: #f1f1f1;
 	cursor: pointer;
 }
 
@@ -227,13 +243,6 @@ init();
 
 .status-default {
 	color: gray;
-}
-
-/* Links in table */
-.table-link {
-	color: var(--primary-color);
-	text-decoration: none;
-	font-weight: bold;
 }
 
 .action {

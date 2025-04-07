@@ -216,7 +216,6 @@ function payloadEditorInit(payloadEditor) {
 }
 
 .schedule-info-table th {
-	background-color: #f5f5f5;
 	width: 150px;
 	font-weight: bold;
 }
