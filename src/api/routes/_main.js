@@ -66,4 +66,10 @@ export default {
 		delete: prefix + '/workflow-template/{id}/',
 		post: prefix + '/workflow-template/',
 	},
+	systemMessages: {
+		get: prefix + '/system-messages/message/'
+	},
+	explorerViewFile: {
+		get: prefix + '/explorer/view/'
+	},
 };

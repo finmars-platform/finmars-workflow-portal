@@ -117,9 +117,7 @@ export default defineComponent({
 </script>
 
 <style lang="postcss" scoped>
-
 .node {
-	background: #f9f9fb; /* Softer background */
 	border: 2px solid #ccc;
 	border-radius: 12px;
 	cursor: pointer;
@@ -140,7 +138,6 @@ export default defineComponent({
 }
 
 .task-badge {
-	background-color: #007bff; /* Vibrant color for the task badge */
 	color: #fff;
 	padding: 2px 8px;
 	border-radius: 12px;
@@ -168,11 +165,6 @@ export default defineComponent({
 	margin-bottom: 8px;
 }
 
-.input {
-	text-align: left;
-	margin-bottom: 8px;
-}
-
 .output-socket,
 .input-socket {
 	text-align: right;
@@ -187,7 +179,6 @@ export default defineComponent({
 .input-title,
 .output-title {
 	vertical-align: middle;
-	color: #333;
 	font-family: 'Arial', sans-serif;
 	font-size: 14px;
 	margin: 4px;
@@ -204,15 +195,9 @@ export default defineComponent({
 	padding: 4px;
 }
 
-.node-without-task {
-	opacity: 0.5;
-}
-
 /* Hover effect */
 .node:hover {
-	box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 	opacity: 1;
 }
-
-
 </style>

@@ -1,246 +1,254 @@
 <template>
-
 	<div class="workflow-detail-page">
-
-		<!-- Left side: Rete.js Workflow Graph -->
-		<div class="workflow-graph-section">
-			<div id="editor" class="editor"></div>
+		<div class="pb-2">
+			<FmBreadcrumbs :crumbs="crumbs" @update-crumbs="handleCrumbs"/>
 		</div>
-
-		<!-- Right side: Workflow Details -->
-		<div class="workflow-detail-section">
-			<h2>Workflow Template Details</h2>
-
-			<div class="button-group">
-				<!--				<fm-btn @click="refresh()" class="action-btn">-->
-				<!--					<fm-icon :icon="'refresh'" title="Refresh" />-->
-				<!--				</fm-btn>-->
-				<fm-btn @click="openLaunchDialog()" class="action-btn">
-					<fm-icon :icon="'play_arrow'" title="Launch"/>
-				</fm-btn>
-				<fm-btn @click="save()" class="action-btn">
-					<fm-icon :icon="'save'" title="Save"/>
-				</fm-btn>
-				<fm-btn @click="openTemplateFile()" class="action-btn">
-					<fm-icon :icon="'file_open'" title="Open template"/>
-				</fm-btn>
-				<fm-btn @click="arrangeNodes()" class="action-btn">
-					<fm-icon :icon="'layers'" title="Arrange Nodes"/>
-				</fm-btn>
-				<fm-btn @click="showEditAsJsonDialog()" class="action-btn">
-					<fm-icon :icon="'code'" title="Edit as JSON"/>
-				</fm-btn>
+		<div class="flex">
+			<div class="workflow-graph-section">
+				<div id="editor" class="editor"></div>
 			</div>
 
-			<!-- Workflow Information Table -->
-			<table class="workflow-info-table">
-				<tbody>
-				<tr>
-					<td>ID</td>
-					<td>{{ workflow.id }}</td>
-				</tr>
+			<div class="workflow-detail-section">
+				<h2 class="pb-2">Workflow Template Details</h2>
 
-				<tr>
-					<td>User Code</td>
-					<td>{{ workflow.user_code }}</td>
-				</tr>
-				<tr>
-					<td>Name</td>
-					<td>
-
-						<div class="form-group">
-
-							<input id="user_code" v-model="workflow.name" type="text" required class="form-control"
-								   placeholder="Daily"/>
-						</div>
-
-					</td>
-				</tr>
-				<tr>
-					<td>Notes</td>
-					<td>
-
-						<div class="form-group">
-
-							<input id="user_code" v-model="workflow.notes" type="text" required class="form-control"
-								   placeholder="Daily for ..."/>
-						</div>
-
-					</td>
-				</tr>
-
-				<tr>
-					<td>Created</td>
-					<td>{{ $formatDate(workflow.created_at) }}</td>
-				</tr>
-				<tr>
-					<td>Modified</td>
-					<td>{{ $formatDate(workflow.modified_at) }}</td>
-				</tr>
-				</tbody>
-			</table>
-
-			<!-- Default Payload Section -->
-			<div class="payload-section">
-				<h3>Default Payload</h3>
-				<v-ace-editor
-					v-model:value="defaultPayload"
-					@init="payloadEditorInit"
-					lang="json"
-					theme="monokai"
-					style="height: 300px;width: 100%;"/>
-			</div>
-
-			<!-- Workflow Designer Section -->
-			<div class="workflow-template-designer-section">
-				<h2>Workflow Designer</h2>
-
-				<!-- Node Name -->
-				<div class="input-group">
-					<label for="node-user-code">Node Name (Unique Step Name):</label>
-					<input id="node-user-code" v-model="nodeName" type="text" placeholder="e.g., Step 1"
-						   class="input-field"/>
+				<div class="button-group">
+					<FmIconButton icon="mdi-play" @click="openLaunchDialog" size="small">
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Launch
+						</FmTooltip>
+					</FmIconButton>
+					<FmIconButton icon="mdi-content-save" @click="save" size="small">
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Save
+						</FmTooltip>
+					</FmIconButton>
+					<FmIconButton icon="mdi-text-box-check" @click="openTemplateFile" size="small">
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Open template
+						</FmTooltip>
+					</FmIconButton>
+					<FmIconButton icon="mdi-arrange-bring-forward" @click="arrangeNodes" size="small">
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Arrange Nodes
+						</FmTooltip>
+					</FmIconButton>
+					<FmIconButton icon="mdi-code-tags" @click="showEditAsJsonDialog" size="small">
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Edit as JSON
+						</FmTooltip>
+					</FmIconButton>
 				</div>
 
-				<!-- Node User Code -->
-				<div class="input-group">
-					<label for="node-user-code">Node User Code (Unique Step Name ASCII only):</label>
-					<input id="node-user-code" v-model="nodeUserCode" type="text" placeholder="e.g., step1"
-						   class="input-field"/>
-				</div>
+				<table class="workflow-info-table">
+					<tbody>
+					<tr>
+						<td>ID</td>
+						<td>{{ workflow.id }}</td>
+					</tr>
+					<tr>
+						<td>User Code</td>
+						<td>{{ workflow.user_code }}</td>
+					</tr>
+					<tr>
+						<td>Name</td>
+						<td>
+							<div class="form-group">
+								<FmTextField
+									v-model="workflow.name"
+									:rules="[rules.required]"
+									label="Daily"
+									outlined
+									clearable
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>Notes</td>
+						<td>
+							<div class="form-group">
+								<FmTextField
+									v-model="workflow.notes"
+									label="Daily for ..."
+									outlined
+									clearable
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>Created</td>
+						<td>{{ $formatDate(workflow.created_at) }}</td>
+					</tr>
+					<tr>
+						<td>Modified</td>
+						<td>{{ $formatDate(workflow.modified_at) }}</td>
+					</tr>
+					</tbody>
+				</table>
 
-				<!-- Node Notes -->
-				<div class="input-group">
-					<label for="node-notes">Node Notes:</label>
-					<input id="node-notes" v-model="nodeNotes" type="text"
-						   placeholder="This task is going to do..." class="input-field"/>
-				</div>
-
-				<!-- Node Type Selector -->
-				<div class="input-group">
-					<label for="workflow-select">Select Node Type</label>
-					<select v-model="nodeType" id="workflow-select" class="input-field">
-						<option value="workflow">Workflow (external module)</option>
-						<option value="source_code">Source Code</option>
-						<option value="condition">Condition</option>
-					</select>
-				</div>
-
-				<!-- Conditional Sections -->
-				<div v-if="nodeType === 'workflow'" class="input-group">
-					<label for="workflow-select">Add Workflow Block</label>
-					<select v-model="selectedWorkflow" id="workflow-select" class="input-field">
-						<option v-for="workflow in availableWorkflows" :key="workflow.user_code" :value="workflow">
-							{{ workflow.user_code }}
-						</option>
-					</select>
-				</div>
-
-				<div v-if="nodeType === 'source_code'" class="input-group">
-					<label for="node-source-code">Enter Source Code:</label>
+				<!-- Default Payload Section -->
+				<div class="payload-section">
+					<h3>Default Payload</h3>
 					<v-ace-editor
-						v-model:value="sourceCode"
+						v-model:value="defaultPayload"
 						@init="payloadEditorInit"
-						lang="python"
+						lang="json"
 						theme="monokai"
-						style="height: 150px; width: 100%;"/>
+						style="height: 300px;width: 100%;"/>
 				</div>
 
-				<div v-if="nodeType === 'condition'" class="input-group">
-					<label for="node-condition-code">Enter Condition Logic:</label>
-					<v-ace-editor
-						v-model:value="conditionCode"
-						@init="payloadEditorInit"
-						lang="python"
-						theme="monokai"
-						style="height: 150px; width: 100%;"/>
-				</div>
+				<!-- Workflow Designer Section -->
+				<div class="workflow-template-designer-section">
+					<h2>Workflow Designer</h2>
 
-				<fm-btn @click="addBlock()" class="action-btn">Add Block</fm-btn>
-
-				<!-- Display Existing Blocks -->
-				<ul class="block-list">
-					<div v-for="block in blocks" :key="block.id" class="block-item">
-						{{ block.node.user_code }} - {{ block.name }}
-						<fm-btn @click="removeBlock(block.id)">Remove</fm-btn>
+					<!-- Node Name -->
+					<div class="input-group">
+						<label for="node-user-code">Node Name (Unique Step Name):</label>
+						<FmTextField
+							v-model="nodeName"
+							label="e.g., Step 1"
+							outlined
+							clearable
+						/>
 					</div>
-				</ul>
 
-			</div>
+					<!-- Node User Code -->
+					<div class="input-group">
+						<label for="node-user-code">Node User Code (Unique Step Name ASCII only):</label>
+						<FmTextField
+							v-model="nodeUserCode"
+							label="e.g., Step 1"
+							outlined
+							clearable
+						/>
+					</div>
 
-			<div class="workflow-template-designer-section">
-				<h2>Comments</h2>
+					<!-- Node Notes -->
+					<div class="input-group">
+						<label for="node-notes">Node Notes:</label>
+						<FmTextField
+							v-model="nodeNotes"
+							label="This task is going to do..."
+							outlined
+							clearable
+						/>
+					</div>
 
-				<!-- Node Name -->
-				<div class="input-group">
-					<label for="comment-text">Comment:</label>
-					<input id="comment-text" v-model="commentText" type="text" placeholder="This step is for..."
-						   class="input-field"/>
+					<!-- Node Type Selector -->
+					<div class="input-group">
+						<label for="workflow-select">Select Node Type</label>
+						<FmSelect
+							v-model="nodeType"
+							variant="outlined"
+							:options="nodeTypeOptions"
+							@update:modelValue="updateNodeTypeOpt"
+						/>
+					</div>
+
+					<!-- Conditional Sections -->
+					<div v-if="nodeType === 'workflow'" class="input-group">
+						<label for="workflow-select">Add Workflow Block</label>
+						<FmSelect
+							v-model="selectedWorkflow"
+							variant="outlined"
+							:options="getAvailableWorkflowsOpt"
+							@update:modelValue="updateAvailableWorkflows"
+						/>
+					</div>
+
+					<div v-if="nodeType === 'source_code'" class="input-group">
+						<label for="node-source-code">Enter Source Code:</label>
+						<v-ace-editor
+							v-model:value="sourceCode"
+							@init="payloadEditorInit"
+							lang="python"
+							theme="monokai"
+							style="height: 150px; width: 100%;"/>
+					</div>
+
+					<div v-if="nodeType === 'condition'" class="input-group">
+						<label for="node-condition-code">Enter Condition Logic:</label>
+						<v-ace-editor
+							v-model:value="conditionCode"
+							@init="payloadEditorInit"
+							lang="python"
+							theme="monokai"
+							style="height: 150px; width: 100%;"/>
+					</div>
+
+					<FmButton type="primary" rounded @click="addBlock">Add Block</FmButton>
+
+					<!-- Display Existing Blocks -->
+					<ul class="block-list">
+						<div v-for="block in blocks" :key="block.id" class="block-item">
+							{{ block.node.user_code }} - {{ block.name }}
+							<FmButton type="primary" rounded @click="removeBlock(block.id)">Remove</FmButton>
+						</div>
+					</ul>
+
 				</div>
 
-				<fm-btn @click="addComment()" class="action-btn">Add Comment</fm-btn>
+				<div class="workflow-template-designer-section">
+					<h2>Comments</h2>
+					<!-- Node Name -->
+					<div class="input-group">
+						<label for="comment-text">Comment:</label>
+						<FmTextField
+							v-model="commentText"
+							label="This step is for..."
+							outlined
+							clearable
+						/>
+					</div>
+					<FmButton type="primary" rounded @click="addComment">Add Comment</FmButton>
+				</div>
+				<div style="margin-top: 8px;">
+					<FmButton type="primary" rounded @click="openDeleteWorkflowTemplate">Delete Workflow Template
+					</FmButton>
+				</div>
 
 			</div>
-
-
-			<div style="margin-top: 8px;">
-				<fm-btn @click="deleteWorkflowTemplate" class="delete-btn">Delete Workflow Template</fm-btn>
-			</div>
-
 		</div>
 
-
-		<fm-base-modal
+		<BaseModal
 			title="Launch Workflow"
-			v-model="isLaunchDialogOpen"
+			text="Note that a new workflow will be created, so the current one will not be changed and will still be available in your history."
+			:isOpen="isLaunchDialogOpen"
+			@closeModal="isLaunchDialogOpen = !isLaunchDialogOpen"
+			@okModal="relaunch"
 		>
-
-			<p>
-				Note that a new workflow will be created, so the current one will not be changed and will still be
-				available
-				in your history.
-			</p>
-
-
-			<p style="margin-top: 1rem">Payload</p>
 			<v-ace-editor
 				v-model:value="launchPayload"
 				@init="payloadEditorInit"
 				lang="json"
 				theme="monokai"
 				style="height: 300px;width: 100%;"/>
+		</BaseModal>
 
-			<template #footer>
-				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isLaunchDialogOpen = !isLaunchDialogOpen">Cancel</fm-btn>
-
-					<fm-btn type="filled" @click="relaunch($event)">Launch</fm-btn>
-				</div>
-			</template>
-		</fm-base-modal>
-
-
-		<fm-base-modal
-			style="width: 80vw; height: 80vh;"
+		<BaseModal
 			title="Edit as JSON"
-			v-model="isEditAsJsonDialogOpen"
+			text="Note that a new workflow will be created, so the current one will not be changed and will still be available in your history."
+			:isOpen="isEditAsJsonDialogOpen"
+			@closeModal="isEditAsJsonDialogOpen = !isEditAsJsonDialogOpen"
+			@okModal="saveAsJson"
 		>
-
 			<v-ace-editor
 				v-model:value="workflowTemplateJson"
 				@init="payloadEditorInit"
 				lang="json"
 				theme="monokai"
 				style="height: 100%;width: 100%;"/>
+		</BaseModal>
 
-			<template #footer>
-				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isEditAsJsonDialogOpen = !isEditAsJsonDialogOpen">Cancel</fm-btn>
-
-					<fm-btn type="filled" @click="saveAsJson($event)">Save</fm-btn>
-				</div>
-			</template>
-		</fm-base-modal>
+		<FmConfirm
+			title="Delete Workflow template"
+			:isOpen="isShowConfirm"
+			@closeModal="isShowConfirm = false"
+			@okModal="deleteWorkflowTemplate"
+		>
+			<span>Are you sure you want to delete {{ selectedWorkflow.name }} ?</span>
+		</FmConfirm>
 
 		<EditBlockModal
 			v-if="editBlock"
@@ -256,19 +264,16 @@
 			@close="editBlock = null"
 			@save="onSaveEditBlock"
 		/>
-
 	</div>
-
 </template>
+
 <script setup>
-
-
+import {FmBreadcrumbs, FmButton, FmIconButton, FmTooltip, FmTextField, FmSelect} from "@finmars/ui";
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/theme-monokai';
 
-import {onMounted, ref} from 'vue';
 import {ClassicPreset, NodeEditor} from "rete";
 import {AreaExtensions, AreaPlugin} from 'rete-area-plugin';
 import {ConnectionPlugin, Presets as ConnectionPresets} from "rete-connection-plugin"
@@ -276,13 +281,16 @@ import {Presets, VuePlugin} from 'rete-vue-plugin';
 import {AutoArrangePlugin, Presets as ArrangePresets} from "rete-auto-arrange-plugin";
 import {CommentPlugin} from "rete-comment-plugin";
 
-import WorkflowNode from "~/components/WorkflowNode.vue";
 import WorkflowTemplateNode from "~/components/WorkflowTemplateNode.vue";
 import EditBlockModal from "~/components/modals/EditBlockModal.vue";
+import BaseModal from "~/components/base/Modal.vue";
+import FmConfirm from "~/components/fm/Confirm.vue";
 
 const router = useRouter();
 const route = useRoute();
-const store = useStore()
+
+const store = useStore();
+store.init();
 
 definePageMeta({
 	middleware: "auth",
@@ -297,7 +305,8 @@ let defaultPayload = ref(`
 `)
 const editBlock = ref(null)
 
-const selectedWorkflow = ref(null);
+const isShowConfirm = ref(false);
+const selectedWorkflow = ref({});
 let availableWorkflows = ref([]);
 let commentText = ref("");
 let nodeUserCode = ref("");
@@ -318,10 +327,14 @@ def main(self, *args, **kwargs):
 `);
 
 async function getWorkflows() {
-	availableWorkflows.value = await useApi('definitionList.get')
-
-	console.log('availableWorkflows', availableWorkflows)
+	availableWorkflows.value = await useApi('definitionList.get');
 }
+
+const nodeTypeOptions = [
+	{title: 'Workflow (external module)', value: 'workflow'},
+	{title: 'Source Code', value: 'source_code'},
+	{title: 'Condition', value: 'condition'}
+];
 
 let workflow = ref({});
 let editor;
@@ -331,9 +344,35 @@ let editorComment;
 
 const blocks = ref([]);
 
+const crumbs = ref([
+	{title: 'Workflow template', path: 'workflow-template'},
+	{title: 'Edit Workflow template', path: 'edit'}
+]);
+
+const rules = {
+	required: value => value ? '' : 'Field is required'
+}
+
+const getAvailableWorkflowsOpt = computed(() => {
+	return availableWorkflows.value.map(workflow => ({
+		title: workflow.user_code,
+		value: workflow.user_code,
+	}));
+});
+
+const handleCrumbs = (newCrumbs, newPath) => {
+	router.push(`/${store.realm_code}/${store.space_code}/w` + newPath);
+};
+
+function updateNodeTypeOpt(val) {
+	nodeType.value.enabled = val;
+}
+
+function updateAvailableWorkflows(val) {
+	selectedWorkflow.value = val;
+}
+
 async function addBlock() {
-
-
 	// Ensure the `node_user_code` is provided and unique
 	if (!nodeUserCode.value) {
 		alert("Please enter a unique Node User Code");
@@ -389,11 +428,8 @@ def main(self, *args, **kwargs):
 `;
 }
 
-
 async function addComment() {
-
 	await editorComment.addInline(commentText.value, [100, 100]);
-
 	commentText.value = "";
 }
 
@@ -422,61 +458,51 @@ async function createNode(workflow, node_user_code, node_name, node_type, node_n
 	const payloadInputSocket = new ClassicPreset.Socket("payload_socket");
 	node.addInput("payload_input", new ClassicPreset.Input(payloadInputSocket, "Payload"));
 
-	// Add sockets for input and output connections
 	const inputSocket = new ClassicPreset.Socket("socket");
 	node.addInput("in", new ClassicPreset.Input(inputSocket, "Input"));
 
-	// Add output sockets
 	if (node_type === 'condition') {
-		// Conditional nodes have two outputs: true and false
 		const outputTrueSocket = new ClassicPreset.Socket("socket_true");
 		const outputFalseSocket = new ClassicPreset.Socket("socket_false");
 		node.addOutput("out_true", new ClassicPreset.Output(outputTrueSocket, 'Output True', false));
 		node.addOutput("out_false", new ClassicPreset.Output(outputFalseSocket, 'Output False', false));
 	} else {
-		// Normal nodes have a single output
 		const outputSocket = new ClassicPreset.Socket("socket");
 		node.addOutput("out", new ClassicPreset.Output(outputSocket, "Output"));
 	}
-
 	return node;
 }
 
 async function removeBlock(id) {
 	const node = await editor.getNode(id);
-	console.log('removeBlock.node', node);
-
 	const connections = await editor.getConnections()
-	console.log('connections', connections);
-
 	for (const connection of connections) {
-
 		if (node.id === connection.source || node.id === connection.target) {
 			await editor.removeConnection(connection.id);
 		}
-
 	}
-
 	await editor.removeNode(node.id);
 	blocks.value = blocks.value.filter(block => block.id !== id);
 }
 
-
 async function getWorkflow() {
-
-	workflow.value = await useApi('workflowTemplate.get', {params: {id: route.params.id}});
-
-	if (workflow.value.data) {
-		defaultPayload.value = JSON.stringify(workflow.value.data.workflow.default_payload, null, 4) || ""
+	const res = await useApi('workflowTemplate.get', {params: {id: route.params.id}});
+	if (res && res._$error) {
+		useNotify({
+			type: 'error',
+			title: res._$error.message || res._$error.error.details
+		});
+	} else {
+		workflow.value = res;
+		if (workflow.value.data) {
+			defaultPayload.value = JSON.stringify(workflow.value.data.workflow.default_payload, null, 4) || ""
+		}
+		await initGraph();
 	}
-
-	await initGraph();
 }
 
 async function init() {
-
-	await getWorkflow()
-
+	await getWorkflow();
 }
 
 function payloadEditorInit(payloadEditor) {
@@ -489,139 +515,91 @@ function payloadEditorInit(payloadEditor) {
 	payloadEditor.navigateFileStart();
 }
 
-async function initGraph() {
+function initGraph() {
+	setTimeout(async () => {
+		await editor.clear();
+		if (workflow.value.data) {
+			const nodeMap = {};
+			blocks.value = []
 
-	await editor.clear();
-
-	if (workflow.value.data) {
-
-		const nodeMap = {};
-
-		blocks.value = []
-
-
-		for (const node of workflow.value.data.workflow.nodes) {
-
-			console.log('node', node);
-
-			blocks.value.push({id: node.id, name: node.name, node: node.data.node});
-
-			await editor.addNode(node);
-
-			await editorArea.translate(node.id, {x: node.position.x, y: node.position.y});
-
-			nodeMap[node.id] = node;
-		}
-
-		console.log('nodeMap', nodeMap);
-
-
-		for (const connectionItem of workflow.value.data.workflow.connections) {
-
-			const sourceNode = await editor.getNode(connectionItem.source);
-			const targetNode = await editor.getNode(connectionItem.target);
-
-			console.log('sourceNode', sourceNode);
-
-			const connection = new ClassicPreset.Connection(sourceNode, connectionItem.sourceOutput, targetNode, connectionItem.targetInput)
-
-			await editor.addConnection(
-				connection
-			);
-		}
-
-		console.log("Settings comments", editorComment);
-		if (workflow.value.data.workflow.comments) {
-			console.log("Settings comments", editorComment);
-
-			for (const comment of workflow.value.data.workflow.comments) {
-
-				await editorComment.addInline(comment.text, [comment.x, comment.y]);
+			for (const node of workflow.value.data.workflow.nodes) {
+				blocks.value.push({id: node.id, name: node.name, node: node.data.node});
+				await editor.addNode(node);
+				await editorArea.translate(node.id, {x: node.position.x, y: node.position.y});
+				nodeMap[node.id] = node;
 			}
 
+			for (const connectionItem of workflow.value.data.workflow.connections) {
+				const sourceNode = await editor.getNode(connectionItem.source);
+				const targetNode = await editor.getNode(connectionItem.target);
+				const connection = new ClassicPreset.Connection(sourceNode, connectionItem.sourceOutput, targetNode, connectionItem.targetInput)
+				await editor.addConnection(
+					connection
+				);
+			}
+
+			if (workflow.value.data.workflow.comments) {
+				for (const comment of workflow.value.data.workflow.comments) {
+					await editorComment.addInline(comment.text, [comment.x, comment.y]);
+				}
+			}
 		}
 
-	}
-
-
-	// editorArea.on('nodetranslated', (node, position) => {
-	// 	console.log(`Node ${node.name} was moved to`, position);
-	// 	node.position = position; // Update the node's position in the editor model
-	// });
-
-	// editor.addPipe(context => {
-	//
-	// 	console.log('context', context)
-	// 	// if (context.type === 'nodecreate') return
-	// 	return context
-	// })
-
-	editorArea.addPipe(async context => {
-
-
-		if (context.type === 'nodetranslated') {
-
-			const node = await editor.getNode(context.data.id);
-			node.position = context.data.position
-
-			// console.log('editorArea.context', context)
-			// console.log('editorArea.node', node)
-
-		}
-		return context
-	})
-
-	AreaExtensions.zoomAt(editorArea, editor.getNodes());
-
-
+		editorArea.addPipe(async context => {
+			if (context.type === 'nodetranslated') {
+				const node = await editor.getNode(context.data.id);
+				node.position = context.data.position
+			}
+			return context
+		})
+		await AreaExtensions.zoomAt(editorArea, editor.getNodes());
+	}, 2000)
 }
 
 // Delete the schedule
+function openDeleteWorkflowTemplate() {
+	isShowConfirm.value = true;
+}
+
 async function deleteWorkflowTemplate() {
 	try {
-
-		let isConfirm = await useConfirm({
-			text: `Are you sure you want to delete Workflow Template?`,
-		})
-		if (!isConfirm) return false
-
-		await useApi('workflowTemplate.delete', {
+		const res = await useApi('workflowTemplate.delete', {
 			params: {id: route.params.id}
 		});
-		useNotify({
-			type: 'success',
-			title: 'Success',
-			text: 'Workflow Template deleted successfully!'
-		});
-
-		router.push(`/${store.realm_code}/${store.space_code}/w/workflow-template/`);
-
+		if (res && res._$error) {
+			useNotify({
+				type: 'error',
+				title: res._$error.message || res._$error.error.details
+			});
+		} else {
+			useNotify({
+				type: 'success',
+				text: 'Workflow Template deleted successfully!'
+			});
+			router.push(`/${store.realm_code}/${store.space_code}/w/workflow-template/`);
+		}
 	} catch (error) {
 		useNotify({
 			type: 'error',
 			title: 'Error',
 			text: 'Failed to delete the Workflow Template.'
 		});
+	} finally {
+		isShowConfirm.value = false;
 	}
 }
 
-
-// Load workflow details on page load
-
 async function refresh() {
-	await init();
+	// await init();
+	await getWorkflow();
 }
 
 async function openLaunchDialog() {
-
 	isLaunchDialogOpen.value = true;
-
 	launchPayload.value = defaultPayload.value
-
 }
 
 async function relaunch() {
-
 	const result = await useApi('runWorkflow.post', {
 		body: JSON.stringify({
 			user_code: workflow.value.user_code,
@@ -630,15 +608,10 @@ async function relaunch() {
 	})
 
 	isLaunchDialogOpen.value = false;
-
 	router.push(`/${store.realm_code}/${store.space_code}/w/workflow/${result.id}`)
-
-
 }
 
 async function exportToJson() {
-
-
 	const data = {
 		version: '2',
 		workflow: {
@@ -665,10 +638,6 @@ async function exportToJson() {
 		data.workflow.connections.push(connection)
 	}
 
-	console.log('editorComment', editorComment);
-	console.log('editorArea', editorArea);
-	console.log('editor', editor);
-
 	const comments = Array.from(editorComment.comments.values())
 
 	for (const comment of comments) {
@@ -680,18 +649,12 @@ async function exportToJson() {
 }
 
 async function save() {
-
 	const jsonData = await exportToJson()
-
 	workflow.value.data = jsonData
-
-	console.log('workflow.value', workflow.value)
-
 	const result = await useApi('workflowTemplate.put', {
 		params: {id: route.params.id},
 		body: JSON.stringify(workflow.value)
 	})
-
 	useNotify({
 		type: 'success',
 		title: 'Success',
@@ -700,9 +663,7 @@ async function save() {
 }
 
 async function setupGraph() {
-
 	const container = document.getElementById('editor');
-
 	// Initialize the Rete.js editor
 	editor = new NodeEditor('demo@0.1.0', container);
 
@@ -731,11 +692,6 @@ async function setupGraph() {
 	render.addPreset(Presets.classic.setup({
 		customize: {
 			node(context) {
-				console.log(context.payload, WorkflowNode);
-				// if (context.payload.label === "WorkflowNode") {
-				// 	return WorkflowNode;
-				// }
-				// return Presets.classic.Node;
 				return defineComponent({
 					name: 'NodeWrapper',
 					setup() {
@@ -759,12 +715,9 @@ async function setupGraph() {
 }
 
 function openTemplateFile() {
-
 	let pieces = workflow.value.user_code.split(':')
 	let workflow_user_code = pieces[1]
 	let workflow_path = pieces[0].split('.').join('/')
-
-	// const link = window.location.origin + '/realm00000/space00000/api/storage/workflows/' + workflow_path + '/' + workflow_user_code + '/workflow.json'
 	const link = window.location.origin + `/${store.realm_code}/${store.space_code}/a/#!/explorer/workflows/${workflow_path}/${workflow_user_code}/workflow.json`
 
 	window.open(link, '_blank')
@@ -776,15 +729,11 @@ async function arrangeNodes() {
 }
 
 function showEditAsJsonDialog() {
-
 	workflowTemplateJson.value = JSON.stringify(workflow.value, null, 4)
-
 	isEditAsJsonDialogOpen.value = true
-
 }
 
 async function saveAsJson() {
-
 	const result = await useApi('workflowTemplate.put', {
 		params: {id: route.params.id},
 		body: workflowTemplateJson.value
@@ -797,9 +746,7 @@ async function saveAsJson() {
 	})
 
 	isEditAsJsonDialogOpen.value = false
-
 	await refresh();
-
 }
 
 async function openCopyModal(nodeId, action) {
@@ -836,13 +783,10 @@ async function onSaveEditBlock(payload) {
 
 		if (payload.isNodeTypeChanged) {
 			const connections = await editor.getConnections()
-
 			for (const connection of connections) {
-
 				if (originalNode.id === connection.source || originalNode.id === connection.target) {
 					await editor.removeConnection(connection.id);
 				}
-
 			}
 		}
 
@@ -853,7 +797,7 @@ async function onSaveEditBlock(payload) {
 		const position = originalNode.position
 
 		const nodeName = nodeData.node?.name !== payload.nodeName ? payload.nodeName : nodeData.node?.name + ' (copy)';
-		const nodeUserCode = nodeData.node?.user_code !== payload.nodeUserCode ? payload.nodeUserCode : + new Date();
+		const nodeUserCode = nodeData.node?.user_code !== payload.nodeUserCode ? payload.nodeUserCode : +new Date();
 		const nodeType = payload.nodeType;
 		const nodeNotes = payload.nodeNotes;
 		const sourceCode = payload.sourceCode;
@@ -885,25 +829,22 @@ async function onSaveEditBlock(payload) {
 
 // Rete.js Setup
 onMounted(async () => {
-
-	await setupGraph();
-	await init();
+	await getWorkflow();
 	await getWorkflows();
+	await setupGraph();
+	await initGraph();
+})
 
-
-});
 </script>
 
 <style scoped>
 .workflow-detail-page {
-	display: flex;
-	height: 100vh;
+	padding: 0 20px 20px 20px;
 }
 
 /* Left side for Rete.js Editor */
 .workflow-graph-section {
 	flex: 0.7;
-	background-color: #f5f5f5;
 	padding: 15px;
 }
 
@@ -917,11 +858,10 @@ onMounted(async () => {
 /* Right side for Workflow Details */
 .workflow-detail-section {
 	flex: 0.3;
-	background-color: #fff;
-	padding: 20px;
+	padding: 15px 35px 15px 15px;
 	border-left: 1px solid #ccc;
+	height: calc(100vh - 220px);
 	overflow-y: auto;
-	z-index: 0;
 }
 
 h2 {
@@ -941,20 +881,6 @@ h3 {
 	margin-bottom: 15px;
 }
 
-.action-btn {
-	padding: 10px 15px;
-	margin-right: 10px;
-	background-color: #007bff;
-	color: #fff;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-}
-
-.action-btn:hover {
-	background-color: #0056b3;
-}
-
 /* Workflow Information Table */
 .workflow-info-table {
 	width: 100%;
@@ -970,14 +896,6 @@ h3 {
 /* Input Group Styles */
 .input-group {
 	margin-bottom: 15px;
-}
-
-.input-field {
-	width: 100%;
-	padding: 10px;
-	border: 1px solid #ccc;
-	border-radius: 5px;
-	box-sizing: border-box;
 }
 
 /* Block List Styles */
@@ -1000,25 +918,4 @@ h3 {
 .payload-section {
 	margin-top: 20px;
 }
-
-.btn.delete-btn {
-	background-color: #ff4d4f !important;
-	color: white !important;
-	padding: 10px 20px;
-	margin-top: 40px !important;
-}
-
-.btn.delete-btn:hover {
-	opacity: .8;
-}
-
-.form-control {
-	width: 100%;
-	padding: 10px;
-	font-size: 1rem;
-	border-radius: 5px;
-	border: 1px solid #ddd;
-	transition: border-color 0.3s, box-shadow 0.3s;
-}
-
 </style>

@@ -4,31 +4,20 @@
 			class="modal-overlay"
 			v-if="isOpen"
 		>
-			<div class="modal-content">
+			<div class="modal-content" :style="{ width, height, minHeight }">
 				<!-- Header -->
 				<span class="modal-title">{{ title }}</span>
+				<FmIcon class="close-icon" icon="mdi-window-close" :size="24" @click="handleClose" />
 
 				<!-- Content with slot-->
-				<div class="modal-body">
+				<div class="modal-body scrollable">
 					<slot></slot>
 				</div>
 
 				<!-- Footer -->
 				<div class="modal-footer">
-					<FmButton
-						type="secondary"
-						rounded
-						@click="handleClose"
-					>
-						Cancel
-					</FmButton>
-					<FmButton
-						type="primary"
-						rounded
-						@click="handleOk"
-					>
-						Ok
-					</FmButton>
+					<FmButton type="secondary" rounded @click="handleClose">Cancel</FmButton>
+					<FmButton type="primary" rounded @click="handleOk">Ok</FmButton>
 				</div>
 			</div>
 		</div>
@@ -47,6 +36,18 @@ const props = defineProps({
 		type: Boolean,
 		required: true,
 		default: false,
+	},
+	width: {
+		type: String,
+		default: '70vw',
+	},
+	height: {
+		type: String,
+		default: '70%',
+	},
+	minHeight: {
+		type: String,
+		default: '400px',
 	},
 });
 
@@ -77,12 +78,13 @@ const handleOk = () => {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
-	background-color: var(--surface-container-high);
+	background: var(--surface-container-high);
 	padding: 1.5rem;
 	border-radius: 0.5rem;
 	box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-	max-width: 32rem; /* roughly Tailwind's max-w-lg */
 	width: 100%;
+	position: relative;
+	max-width: 100%;
 }
 
 .modal-title {
@@ -90,8 +92,18 @@ const handleOk = () => {
 	font-weight: 600;
 }
 
+.close-icon {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	cursor: pointer;
+}
+
 .modal-body {
 	width: 100%;
+	height: 100%;
+	overflow: auto;
+	padding-right: 8px;
 }
 
 .modal-footer {

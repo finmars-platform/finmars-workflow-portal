@@ -1,9 +1,18 @@
 <template>
-
 	<div class="workflow-table-container">
-
-		<!-- Workflow Definitions Table -->
-		<table class="workflow-table">
+		<div class="pb-4">
+			<FmBreadcrumbs :crumbs="crumbs" />
+		</div>
+		<div v-if="isLoading" class="w-full min-h-40 flex items-center justify-center">
+			<FmProgressCircular :size="34" indeterminate />
+		</div>
+		<div
+			v-else-if="!definitions.length"
+			class="flex w-full min-h-36 justify-center items-center"
+		>
+			<span>No data available!</span>
+		</div>
+		<table v-else class="workflow-table">
 			<thead>
 			<tr>
 				<th>Name</th>
@@ -18,106 +27,87 @@
 				<td>{{ item.user_code }}</td>
 				<td>{{ item.is_manager ? 'Yes' : 'No' }}</td>
 				<td>
-					<fm-btn class="run-btn" @click="openRunWorkflowDialog($event, item)">Run</fm-btn>
+					<FmButton type="primary" rounded @click="generateLink(item, 'run')">Run</FmButton>
 				</td>
 			</tr>
 			</tbody>
 		</table>
-
-		<!-- Run Workflow Modal -->
-		<fm-base-modal
-			title="Run Workflow"
-			v-model="isRunWorkflowDialog"
-			class="run-workflow-modal"
-		>
-			<h3>{{ activeWorkflowItem?.user_code }}</h3>
-
-			<div class="payload-editor-container">
-				<p>Payload:</p>
-				<v-ace-editor
-					v-model:value="activeWorkflowPayload"
-					@init="editorInit"
-					lang="json"
-					theme="monokai"
-					class="payload-editor"
-				/>
-			</div>
-
-			<template #footer>
-				<div class="modal-footer">
-					<fm-btn type="text" @click="isRunWorkflowDialog = !isRunWorkflowDialog">Cancel</fm-btn>
-					<fm-btn type="filled" @click="runWorkflow($event, activeWorkflowItem)">Run</fm-btn>
-				</div>
-			</template>
-		</fm-base-modal>
-
+		<FmPagination
+			:with-info="true"
+			:total-items="count"
+			:items-per-page="pageSize"
+			:model-value="currentPage"
+			@update:modelValue="handlePageChange"
+		/>
 	</div>
-
 </template>
 
 <script setup>
+import {FmBreadcrumbs, FmButton, FmPagination, FmProgressCircular} from '@finmars/ui';
 
-import {VAceEditor} from 'vue3-ace-editor';
-import 'ace-builds/src-noconflict/mode-json';
-import 'ace-builds/src-noconflict/theme-monokai';
-
-let store = useStore()
-store.init();
 definePageMeta({
 	middleware: "auth",
 });
 
-let isRunWorkflowDialog = ref(false);
-let activeWorkflowItem = ref(null);
-let activeWorkflowPayload = ref('');
+const route = useRoute();
+const router = useRouter();
 
-function openRunWorkflowDialog($event, item) {
-	isRunWorkflowDialog.value = true;
-	activeWorkflowItem.value = item;
+const store = useStore();
+store.init();
 
-	if (item.default_payload) {
-		activeWorkflowPayload.value = JSON.stringify(item.default_payload, null, 4);
+const crumbs = ref([
+	{ title: 'Home', path: 'home' }
+]);
+
+const isLoading = ref(false);
+const definitions = ref([]);
+const count = ref(0);
+const pageSize = ref(8);
+const currentPage = ref(route.query.page ? parseInt(route.query.page) : 1);
+
+function generateLink(item, linkEnd = '') {
+	store.setWorkflowItem(item);
+	usePrefixedRouterPush(router, route, `/home/${linkEnd}`);
+}
+
+const handlePageChange = (newPage) => {
+	currentPage.value = newPage;
+	init(currentPage.value);
+};
+
+async function init(newPage = 1) {
+	isLoading.value = true;
+	router.push({ query: { ...route.query, page: currentPage.value } });
+
+	const payload = {
+		page_size: pageSize.value,
+		page: newPage,
+	};
+
+	const res = await useApi('definitionList.get',{
+		filters: payload,
+		query: { page: newPage }
+	});
+
+	if (res && res._$error) {
+		useNotify({
+			type: 'error',
+			title: res._$error.message || res._$error.error.details
+		});
+	} else {
+		count.value = res.count || res.length;
+		definitions.value = res;
 	}
-
-	console.log('openRunWorkflowDialog', activeWorkflowItem);
+	isLoading.value = false;
 }
 
-async function runWorkflow($event, item) {
-	const result = await useApi('runWorkflow.post', {
-		body: JSON.stringify({
-			user_code: item.user_code,
-			payload: activeWorkflowPayload.value ? JSON.parse(activeWorkflowPayload.value) : {},
-		})
-	});
-
-	console.log('result', result);
-
-	isRunWorkflowDialog.value = false;
-
-	useNotify({
-		type: 'success',
-		title: 'Workflow Executed',
-		text: `Task ID: ${result.id}`
-	});
-}
-
-function editorInit(editor) {
-	editor.setHighlightActiveLine(false);
-	editor.setShowPrintMargin(false);
-	editor.setFontSize(14);
-	editor.setBehavioursEnabled(true);
-	editor.focus();
-	editor.navigateFileStart();
-}
-
-const definitions = await useApi('definitionList.get');
-console.log('definitions', definitions);
+init();
 
 </script>
 
 <style scoped lang="postcss">
 .workflow-table-container {
-	margin: 20px;
+	margin: 0 20px 20px 20px;
 }
 
 .workflow-table {
@@ -132,54 +122,6 @@ console.log('definitions', definitions);
 }
 
 .workflow-table th {
-	background-color: #f0f0f0;
 	font-weight: bold;
 }
-
-.workflow-table tr:nth-child(even) {
-	background-color: #f9f9f9;
-}
-
-.workflow-table tr:hover {
-	background-color: #f1f1f1;
-}
-
-.run-btn {
-	background-color: #007bff;
-	color: white;
-	border-radius: 4px;
-	padding: 8px 12px;
-	cursor: pointer;
-	transition: background-color 0.3s ease;
-}
-
-.run-btn:hover {
-	background-color: #0056b3;
-}
-
-.run-workflow-modal {
-	max-width: 700px;
-	width: 100%;
-}
-
-.payload-editor-container {
-	margin-top: 1rem;
-}
-
-.payload-editor {
-	width: 100%;
-	height: 300px;
-	border: 1px solid #ddd;
-}
-
-.modal-footer {
-	display: flex;
-	justify-content: space-between;
-	margin-top: 1rem;
-}
-
-.modal-footer fm-btn {
-	padding: 10px 20px;
-}
-
 </style>

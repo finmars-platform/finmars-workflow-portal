@@ -1,12 +1,19 @@
 <template>
 	<div class="workflow-page">
-
-		<!-- Page Title -->
-		<h1 class="page-title">Workflow Page</h1>
-
-		<!-- Workflows Table -->
+		<div class="pb-4">
+			<FmBreadcrumbs :crumbs="crumbs" />
+		</div>
 		<div class="table-container">
-			<table class="workflow-table">
+			<div v-if="isLoading" class="w-full min-h-40 flex items-center justify-center">
+				<FmProgressCircular :size="34" indeterminate/>
+			</div>
+			<div
+				v-else-if="!workflows.length"
+				class="flex w-full min-h-36 justify-center items-center"
+			>
+				<span>No data available!</span>
+			</div>
+			<table v-else class="workflow-table">
 				<thead>
 				<tr>
 					<th>ID</th>
@@ -17,12 +24,8 @@
 				</tr>
 				</thead>
 				<tbody>
-				<tr v-for="item in workflows" :key="item.id">
-					<td>
-						<NuxtLink :to="useGetNuxtLink(`/workflow/${item.id}`, $route.params)" class="table-link">
-							{{ item.id }}
-						</NuxtLink>
-					</td>
+				<tr v-for="item in workflows" :key="item.id" @click="generateLink(item.id)">
+					<td>{{ item.id }}</td>
 					<td>{{ item.name }}</td>
 					<td>{{ item.user_code }}</td>
 					<td :class="getStatusClass(item.status)">
@@ -33,97 +36,85 @@
 				</tbody>
 			</table>
 		</div>
-
-		<div class="flex mb-4">
-			<FmBtn
-				class="button"
-				:type="currentPage === 1 ? 'disabled' : 'text'"
-				@click="openPreviousPage"
-			>
-				Previous
-			</FmBtn>
-
-			<div class="flex">
-				<div v-for="page in totalPages" :key="page">
-					<FmBtn
-						v-if="totalPages > currentPage"
-						:type="currentPage === page && 'filled'"
-						class="button"
-						@click="openPage(page)"
-					>
-						{{ page }}
-					</FmBtn>
-				</div>
-			</div>
-			<FmBtn
-				v-if="currentPage < totalPages"
-				type="text"
-				class="button"
-				@click="openNextPage"
-			>
-				Next
-			</FmBtn>
-		</div>
+		<FmPagination
+			:with-info="true"
+			:total-items="count"
+			:items-per-page="pageSize"
+			:model-value="currentPage"
+			@update:modelValue="handlePageChange"
+		/>
 	</div>
 </template>
 
 <script setup>
-
-import {useGetNuxtLink} from "~/composables/useMeta";
-import {onMounted, ref} from "vue";
+import {FmBreadcrumbs, FmPagination,  FmProgressCircular} from '@finmars/ui';
 import StatusBadge from '~/components/StatusBadge.vue';
-import usePagination from "~/composables/usePagination"; // Import the component
 
-let store = useStore();
-store.init();
 definePageMeta({
 	middleware: "auth",
 });
 
-let workflows = ref([]);
-const {currentPage, totalPages, pageSize} = usePagination();
+const route = useRoute();
+const router = useRouter();
 
-function openNextPage() {
-	if (currentPage.value >= totalPages.value) return
+const store = useStore();
+store.init();
 
-	currentPage.value += 1
+const crumbs = ref([
+	{ title: 'Workflow', path: 'workflow' }
+]);
 
-	getWorkflows()
-}
+const isLoading = ref(false);
+const workflows = ref([]);
+const count = ref(0);
+const pageSize = ref(8);
+const currentPage = ref(route.query.page ? parseInt(route.query.page) : 1);
 
-function openPreviousPage() {
-	if (currentPage.value <= 1) return
+async function getWorkflows(newPage = 1) {
+	router.push({ query: { ...route.query, page: currentPage.value } });
+	isLoading.value = true;
 
-	currentPage.value -= 1
+	const payload = {
+		page_size: pageSize.value,
+		page: newPage,
+	};
 
-	getWorkflows()
-}
-
-function openPage(value) {
-	if (currentPage.value === value) return
-	currentPage.value = value
-
-	getWorkflows()
-}
-
-async function getWorkflows() {
-	const data = await useApi('workflowListLight.get', {
-		filters: {page_size: pageSize.value, page: currentPage.value}
+	const res = await useApi('workflowListLight.get', {
+		filters: payload,
+		query: { page: newPage }
 	});
 
-	workflows.value = data['results'];
-	totalPages.value = Math.ceil(data.count / pageSize.value);
-	console.log('workflows', workflows);
+	if (res && res._$error) {
+		useNotify({
+			type: 'error',
+			title: res._$error.message || res._$error.error.details
+		});
+	} else {
+		count.value = res.count || res.length;
+		workflows.value = res.results;
+	}
+	isLoading.value = false;
+}
+
+const handlePageChange = (newPage) => {
+	currentPage.value = newPage;
+	getWorkflows(currentPage.value);
+};
+
+function generateLink(pathEnd) {
+	usePrefixedRouterPush(
+		router,
+		route,
+		`/workflow/${pathEnd}`
+	);
 }
 
 function formatDate(dateString) {
-	// Format date in a more readable way
 	const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
 	return new Date(dateString).toLocaleDateString(undefined, options);
 }
 
 function getStatusClass(status) {
-	// Return CSS class based on the status
 	switch (status) {
 		case 'active': return 'status-active';
 		case 'inactive': return 'status-inactive';
@@ -131,35 +122,23 @@ function getStatusClass(status) {
 	}
 }
 
-onMounted(async () => {
+async function init() {
 	await getWorkflows();
-});
+}
+
+init();
 
 </script>
 
 <style scoped lang="postcss">
-
-/* Container for the page */
 .workflow-page {
-	padding: 20px;
+	padding: 0 20px 20px 20px;
 }
-
-/* Page title styling */
-.page-title {
-	font-size: 2rem;
-	font-weight: bold;
-	margin-bottom: 20px;
-	text-align: center;
-	color: var(--primary-color);
-}
-
-/* Table container for responsiveness */
 .table-container {
 	width: 100%;
 	overflow-x: auto;
 }
 
-/* Table styling */
 .workflow-table {
 	width: 100%;
 	border-collapse: collapse;
@@ -173,19 +152,13 @@ onMounted(async () => {
 }
 
 .workflow-table th {
-	background-color: #f5f5f5;
 	font-weight: bold;
 }
 
-.workflow-table tr:nth-child(even) {
-	background-color: #f9f9f9;
-}
-
 .workflow-table tr:hover {
-	background-color: #f1f1f1;
+	cursor: pointer;
 }
 
-/* Status column styling */
 .status-active {
 	color: green;
 	font-weight: bold;
@@ -198,17 +171,6 @@ onMounted(async () => {
 
 .status-default {
 	color: gray;
-}
-
-/* Links in table */
-.table-link {
-	color: var(--primary-color);
-	text-decoration: none;
-	font-weight: bold;
-}
-
-.table-link:hover {
-	text-decoration: underline;
 }
 
 /* Responsive design for smaller screens */

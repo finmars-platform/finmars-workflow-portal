@@ -9,6 +9,7 @@ export default defineStore({
 			realms: [],
 			member: {},
 			systemErrors: [],
+			workflowItem: {},
 		}
 	},
 	actions: {
@@ -41,6 +42,49 @@ export default defineStore({
 
 			await Promise.all([]);
 
+		},
+
+		async getTheme(user) {
+			if (!user.data.theme) {
+				// if no theme selected, use default one
+				return;
+			}
+
+			// User selected specific theme
+
+			const themePath = user.data.theme.split('.').join('/');
+			const itemPath = `.system/ui/themes/${themePath}/theme.css`;
+
+			try {
+				const blob = await useApi('explorerViewFile.get', {
+					filters: { path: itemPath },
+					notifyError: false
+				});
+
+				// seems useApi somehow Parse blob already
+				var styleElement = document.createElement('style');
+				styleElement.textContent = blob;
+
+				document.head.appendChild(styleElement);
+
+				// const reader = new FileReader();
+				//
+				// reader.addEventListener("loadend", function (e) {
+				//
+				// 	var styleElement = document.createElement('style');
+				// 	styleElement.textContent = reader.result;
+				//
+				// 	document.head.appendChild(styleElement);
+				//
+				// });
+				//
+				// reader.readAsText(blob);
+			} catch (error) {
+				console.error(
+					'[portalController loadTheme] Could not fetch theme',
+					error
+				);
+			}
 		},
 
 		async getUser() {
@@ -76,9 +120,27 @@ export default defineStore({
 				this.user.data.autosave_layouts = true
 			}
 
-			document.body.classList.toggle('dark', this.user.data.dark_mode);
+			document.body.classList.toggle('dark-mode', this.user.data.dark_mode);
+
+			if (this.user.data.dark_mode) {
+				document.body.classList.add('dark-theme');
+				document.body.classList.remove('light-theme');
+			} else {
+				document.body.classList.add('light-theme');
+				document.body.classList.remove('dark-theme');
+			}
+
+			await this.getTheme(this.user);
 
 		},
+
+		setWorkflowItem(item) {
+			this.workflowItem = item;
+		},
+
+		clearWorkflowItem() {
+			this.workflowItem = {};
+		}
 	},
 	getters: {
 		darkModeActive(state) {

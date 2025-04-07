@@ -1,33 +1,60 @@
 <template>
 	<div class="new-workflow-page">
+		<div class="pb-2">
+			<FmBreadcrumbs :crumbs="crumbs" @update-crumbs="handleCrumbs"/>
+		</div>
 		<h1>Create New Workflow</h1>
 
 		<!-- Workflow Creation Form -->
-		<form @submit.prevent="createWorkflow" class="workflow-form">
+		<form class="workflow-form">
 			<div class="form-group">
 				<label for="name">Workflow Name</label>
-				<input id="name" v-model="name" type="text" required class="form-control" placeholder="Daily" />
+				<FmTextField
+					v-model="name"
+					:rules="[rules.required]"
+					label="Daily"
+					outlined
+					clearable
+				/>
 			</div>
 
 			<div class="form-group">
 				<label for="user_code">User Code</label>
-				<input id="user_code" v-model="userCode" type="text" required class="form-control" placeholder="com.finmars.local:daily" />
+				<FmTextField
+					v-model="userCode"
+					:rules="[rules.required]"
+					label="com.finmars.local:daily"
+					outlined
+					clearable
+				/>
 			</div>
 
-			<fm-btn type="submit" class="submit-btn">Create</fm-btn>
+			<FmButton type="primary" rounded @click="createWorkflow">Create</FmButton>
 		</form>
 	</div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import {FmBreadcrumbs, FmButton, FmTextField} from "@finmars/ui";
 
 const router = useRouter();
 let store = useStore();
 
 let name = ref('');
 let userCode = ref('');
+
+const crumbs = ref([
+	{title: 'Workflow template', path: 'workflow-template'},
+	{title: 'Create New Workflow', path: 'new'}
+]);
+
+const rules = {
+	required: value => value ? '' : 'Field is required'
+}
+
+const handleCrumbs = (newCrumbs, newPath) => {
+	router.push(`/${store.realm_code}/${store.space_code}/w` + newPath);
+};
 
 // Function to create the new workflow
 async function createWorkflow() {
@@ -63,10 +90,9 @@ async function createWorkflow() {
 
 <style scoped>
 .new-workflow-page {
-	padding: 30px;
+	padding: 0 20px 20px 20px;
 	max-width: 600px;
 	margin: 48px auto; /* Center the form */
-	background-color: #f9f9f9;
 	border-radius: 10px;
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
@@ -109,27 +135,5 @@ label {
 	border-color: #007bff; /* Blue border on focus */
 	box-shadow: 0 0 8px rgba(0, 123, 255, 0.2); /* Subtle glow effect */
 	outline: none;
-}
-
-.submit-btn {
-	padding: 12px 20px;
-	background-color: #007bff;
-	color: white;
-	font-size: 1rem;
-	font-weight: bold;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-	transition: background-color 0.3s ease;
-	text-align: center;
-}
-
-.submit-btn:hover {
-	background-color: #0056b3;
-}
-
-.submit-btn:focus {
-	outline: none;
-	box-shadow: 0 0 8px rgba(0, 123, 255, 0.4); /* Focus shadow effect on button */
 }
 </style>

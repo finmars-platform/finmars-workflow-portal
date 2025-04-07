@@ -1,47 +1,71 @@
 <template>
-
 	<div>
 		<div class="workflow-detail-page" v-if="workflow">
-
-			<!-- Left side: Rete.js Workflow Graph -->
 			<div class="workflow-graph-section">
 				<div id="editor" class="editor"></div>
 			</div>
-
-			<!-- Divider for Resizing -->
 			<div class="resizer" @mousedown="initResize"></div>
-
-			<!-- Right side: Workflow Details -->
 			<div class="workflow-detail-section">
 				<h1>Workflow</h1>
 
-				<div style="display: flex">
-
-					<fm-btn @click="refresh()">
-						<fm-icon :icon="'refresh'" title="Refresh"/>
-					</fm-btn>
-					<fm-btn @click="openRelaunchDialog()" v-if="workflow?.status !== 'progress'">
-						<fm-icon :icon="'replay'" title="Relaunch"/>
-					</fm-btn>
-					<fm-btn @click="cancelWorkflow()"
-							v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
-						<fm-icon :icon="'cancel'" title="Cancel"/>
-					</fm-btn>
-
-					<fm-btn @click="activeTask = null" v-if="activeTask">
-						<fm-icon :icon="'home'" title="Show Workflow"/>
-					</fm-btn>
-
-
+				<div class="flex justify-start gap-2">
+					<FmIconButton icon="mdi-refresh" @click="refresh" size="normal" >
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Refresh
+						</FmTooltip>
+					</FmIconButton>
+					<FmIconButton
+						v-if="workflow?.status !== 'progress'"
+						size="normal"
+						icon="mdi-replay"
+						@click="openRelaunchDialog"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Relaunch
+						</FmTooltip>
+					</FmIconButton>
+					<FmIconButton
+						v-if="workflow?.status === 'progress' || workflow?.status === 'init'"
+						size="normal"
+						icon="mdi-close-circle"
+						@click="openCancelWorkflow"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Cancel
+						</FmTooltip>
+					</FmIconButton>
+					<FmIconButton
+						v-if="activeTask"
+						size="normal"
+						icon="mdi-home-account"
+						@click="activeTask = null"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Show Workflow
+						</FmTooltip>
+					</FmIconButton>
 				</div>
-
 				<div>
-					<fm-btn @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
-						<fm-icon :icon="'pause'" title="Pause"/>
-					</fm-btn>
-					<fm-btn @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
-						<fm-icon :icon="'play_circle'" title="Resume"/>
-					</fm-btn>
+					<FmIconButton
+						v-if="workflow?.status === 'progress'"
+						size="normal"
+						icon="mdi-pause-box"
+						@click="pauseWorkflow"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Pause
+						</FmTooltip>
+					</FmIconButton>
+					<FmIconButton
+						v-if="workflow?.status === 'wait'"
+						size="normal"
+						icon="mdi-play-circle-outline"
+						@click="openResumeDialog"
+					>
+						<FmTooltip activator="parent" type="secondary" location="bottom">
+							Resume
+						</FmTooltip>
+					</FmIconButton>
 				</div>
 
 				<div class="workflow-detail-content-section" v-if="!activeTask">
@@ -135,7 +159,7 @@
 						<div>Celery Task ID: <strong>{{ activeTask.celery_task_id }}</strong></div>
 						<div>Worker: <strong>{{ activeTask.worker_name }}</strong></div>
 						<div>
-							<fm-btn @click="seeWorkerLogs()">See Worker Logs</fm-btn>
+							<FmButton @click="seeWorkerLogs()" rounded>See Worker Logs</FmButton>
 						</div>
 						<div :title="'Server Time: ' + activeTask.created_at">Created At:
 							<strong>{{ $formatDate(activeTask.created_at) }}</strong></div>
@@ -153,8 +177,11 @@
 
 					<div class="task-section collapsible">
 						<h4>Payload
-							<fm-icon :icon="payloadVisible ? 'arrow_upward' : 'arrow_downward'"
-									 @click="payloadVisible = !payloadVisible"/>
+							<FmIcon
+								@click="payloadVisible = !payloadVisible"
+								:icon="payloadVisible ? 'mdi-arrow-up' : 'mdi-arrow-down'"
+								:size="32"
+							/>
 						</h4>
 						<v-ace-editor
 							v-if="payloadVisible"
@@ -168,8 +195,11 @@
 
 					<div class="task-section collapsible">
 						<h4>Result
-							<fm-icon :icon="resultVisible ? 'arrow_upward' : 'arrow_downward'"
-									 @click="resultVisible = !resultVisible"/>
+							<FmIcon
+								@click="resultVisible = !resultVisible"
+								:icon="resultVisible ? 'mdi-arrow-up' : 'mdi-arrow-down'"
+								:size="32"
+							/>
 						</h4>
 						<v-ace-editor
 							v-if="resultVisible"
@@ -182,90 +212,77 @@
 					</div>
 
 					<div class="task-actions">
-						<fm-btn @click="viewInFlower">View in Flower</fm-btn>
+						<FmButton @click="viewInFlower" rounded>View in Flower
+							<template #prepend>
+								<FmIcon color="" icon="mdi-square-rounded-badge-outline" :size="24" />
+							</template>
+						</FmButton>
 					</div>
 				</div>
-
-
 			</div>
-
-
 		</div>
 
 		<div v-if="!workflow">
 			Loading...
 		</div>
 
-		<fm-base-modal
+		<BaseModal
 			title="Relaunch Workflow"
-			v-model="isRelaunchDialogOpen"
+			:isOpen="isRelaunchDialogOpen"
+			@closeModal="isRelaunchDialogOpen = !isRelaunchDialogOpen"
+			@okModal="relaunch"
 		>
-
-			<p>
-				Note that a new workflow will be created, so the current one will not be changed and will still be
-				available
-				in your history.
-			</p>
-
-
-			<p style="margin-top: 1rem">Payload</p>
+			<p style="margin: 1rem 0">Payload</p>
 			<v-ace-editor
 				v-model:value="relaunchPayload"
 				@init="editorInit"
 				lang="json"
 				theme="monokai"
 				style="height: 300px;width: 100%;"/>
+		</BaseModal>
 
-			<template #footer>
-				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</fm-btn>
-
-					<fm-btn type="filled" @click="relaunch($event)">Relaunch</fm-btn>
-				</div>
-			</template>
-		</fm-base-modal>
-
-		<fm-base-modal
+		<BaseModal
 			title="Resume Workflow"
-			v-model="isResumeDialogOpen"
+			:isOpen="isResumeDialogOpen"
+			@closeModal="isResumeDialogOpen = !isResumeDialogOpen"
+			@okModal="resumeWorkflow"
 		>
-
-			<p style="margin-top: 1rem">Payload</p>
+			<p style="margin: 1rem 0">Payload</p>
 			<v-ace-editor
 				v-model:value="resumePayload"
 				@init="editorInit"
 				lang="json"
 				theme="monokai"
 				style="height: 300px;width: 100%;"/>
+		</BaseModal>
 
-			<template #footer>
-				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</fm-btn>
-
-					<fm-btn type="filled" @click="resumeWorkflow($event)">Relaunch</fm-btn>
-				</div>
-			</template>
-		</fm-base-modal>
-
+		<FmConfirm
+			title="Cancel Schedule"
+			:isOpen="isShowCancelWorkflowConfirm"
+			@closeModal="isShowCancelWorkflowConfirm = false"
+			@okModal="cancelWorkflow"
+		>
+			<span>Are you sure you want to cancel {{workflow.name}} ?</span>
+		</FmConfirm>
 	</div>
 
 </template>
 
 <script setup>
+import {FmButton, FmTooltip, FmIcon } from "@finmars/ui";
 
 import {VAceEditor} from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-monokai';
 
-
-import {onMounted, ref} from 'vue';
 import {ClassicPreset, NodeEditor} from "rete";
 import {AreaExtensions, AreaPlugin} from 'rete-area-plugin';
 import {Presets, VuePlugin} from 'rete-vue-plugin';
 
 import WorkflowNode from "~/components/WorkflowNode.vue";
 import StatusBadge from "~/components/StatusBadge.vue";
-
+import BaseModal from "~/components/base/Modal.vue";
+import FmConfirm from "~/components/fm/Confirm.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -285,6 +302,7 @@ let workflowPayloadPretty = ref('')
 let editor;
 let editorArea;
 
+const isShowCancelWorkflowConfirm = ref(false);
 let activeTask = ref(null)
 let resultVisible = ref(false)
 let payloadVisible = ref(false)
@@ -344,7 +362,6 @@ async function initGraph() {
 
 		// Iterate over nodes to render them in their defined positions
 		for (const node of nodes) {
-			console.log('node', node);
 
 			await editor.addNode(node);
 
@@ -396,8 +413,6 @@ async function initGraph() {
 
 			await editor.addNode(node);
 
-			console.log('node', node);
-
 			await editorArea.translate(node.id, {x: 100 * index, y: 100});
 
 		})
@@ -406,19 +421,13 @@ async function initGraph() {
 
 	editorArea.addPipe(async context => {
 
-		// console.log('context', context);
-
 		if (context.type === 'nodepicked') {
 
 			const node = await editor.getNode(context.data.id);
 
-			console.log('node', node);
-			console.log('taskMap', taskMap);
-
 			activeTask.value = taskMap.get(node.data.taskId)
 			// node.position = context.data.position
 
-			// console.log('editorArea.context', context)
 			console.log('activeTask', activeTask.value)
 
 		}
@@ -461,19 +470,37 @@ async function relaunch() {
 
 }
 
+function openCancelWorkflow() {
+	isShowCancelWorkflowConfirm.value = true;
+}
+
 async function cancelWorkflow() {
-	let isConfirm = await useConfirm({
-		text: `Are you sure you want to cancel Workflow?`,
-	})
-	if (!isConfirm) return false
-
-	const result = await useApi('cancelWorkflow.post', {
-		params: {id: route.params.id},
-		body: JSON.stringify({})
-	})
-
-	await refresh();
-
+	try {
+		const res = await useApi('cancelWorkflow.post', {
+			params: {id: route.params.id},
+			body: JSON.stringify({})
+		});
+		if (res && res._$error) {
+			useNotify({
+				type: 'error',
+				title: res._$error.message || res._$error.error.details
+			});
+		} else {
+			useNotify({
+				type: 'success',
+				text: 'Workflow Template terminated successfully!'
+			});
+			await refresh();
+		}
+	} catch (e) {
+		useNotify({
+			type: 'error',
+			title: 'Error',
+			text: 'Failed to cancel the Workflow Template.'
+		});
+	} finally {
+		isShowCancelWorkflowConfirm.value = false;
+	}
 }
 
 async function pauseWorkflow() {
@@ -503,13 +530,10 @@ async function openResumeDialog() {
 
 
 async function resumeWorkflow() {
-
 	const result = await useApi('resumeWorkflow.put', {
 		params: {id: route.params.id},
 		body: JSON.stringify({payload: JSON.parse(resumePayload.value)})
 	})
-
-	console.log('result', result);
 
 	if (result._$error) {
 		useNotify({
@@ -664,7 +688,6 @@ function seeWorkerLogs() {
 <style lang="postcss" scoped>
 .workflow-detail-page {
 	display: flex;
-	height: 100vh;
 	position: relative;
 }
 
@@ -677,7 +700,6 @@ function seeWorkerLogs() {
 
 .workflow-graph-section {
 	flex: 0 0 70%; /* Initial width for the left side */
-	background-color: #f0f0f0;
 	padding: 10px;
 	transition: width 0.2s ease;
 }
@@ -685,15 +707,9 @@ function seeWorkerLogs() {
 .resizer {
 	width: 5px; /* Increase the width to make it easier to hover over */
 	cursor: col-resize;
-	background-color: #ccc;
 	position: relative;
 	flex: 0 0 5px; /* Initial width for the right side */
 }
-
-.resizer:hover {
-	background-color: #aaa; /* Darken the color slightly when hovered */
-}
-
 
 #editor {
 	width: 100%;
@@ -704,14 +720,12 @@ function seeWorkerLogs() {
 /* Right side for Workflow Details */
 .workflow-detail-section {
 	flex: 0 0 29%; /* Initial width for the right side */
-	background-color: #fff;
 	padding: 4px;
 	border-left: 1px solid #ccc;
 	overflow-y: auto;
 	transition: width 0.2s ease;
 	z-index: 0;
 }
-
 
 h2, h3 {
 	margin-top: 0;
@@ -740,10 +754,6 @@ li {
 	margin: 4px;
 	cursor: pointer;
 	padding: 4px 8px;
-
-	&:hover {
-		background: #ddd;
-	}
 }
 
 .active-task-section {
@@ -766,7 +776,6 @@ li {
 
 .workflow-detail-section {
 	flex: 0 0 29%; /* Adjusted width */
-	background-color: #ffffff;
 	padding: 4px; /* Increased padding for a cleaner layout */
 	border-left: 1px solid #ddd; /* Separate left and right sections visually */
 	overflow-y: auto;
@@ -790,15 +799,9 @@ li {
 .action-buttons fm-btn,
 .pause-resume-buttons fm-btn {
 	padding: 10px 15px;
-	background-color: #007bff; /* Primary button color */
 	color: white;
 	border-radius: 5px;
 	transition: background-color 0.3s;
-}
-
-.action-buttons fm-btn:hover,
-.pause-resume-buttons fm-btn:hover {
-	background-color: #0056b3; /* Darken button on hover */
 }
 
 .workflow-detail-content-section table {
@@ -814,7 +817,6 @@ li {
 }
 
 .workflow-detail-content-section table th {
-	background-color: #f5f5f5;
 	font-weight: bold;
 }
 
@@ -837,20 +839,14 @@ li {
 	transition: background-color 0.2s;
 }
 
-.task-item:hover {
-	background-color: #f1f1f1;
-}
-
 .active-task-section {
 	margin-top: 20px;
 	padding: 15px;
 	border: 1px solid #ddd;
 	border-radius: 4px;
-	background-color: #f9f9f9;
 }
 
 .log-container {
-	background-color: #000;
 	color: #fff;
 	padding: 10px;
 	overflow-y: auto;
@@ -859,13 +855,6 @@ li {
 	font-family: monospace; /* For log readability */
 }
 
-.modal-footer {
-	display: flex;
-	justify-content: space-between;
-	margin-top: 20px;
-}
-
-
 .task-list {
 	list-style: none;
 	padding: 0;
@@ -873,17 +862,12 @@ li {
 }
 
 .task-item {
-	background: #f8f9fa;
 	border: 1px solid #ddd;
 	border-radius: 8px;
 	padding: 12px;
 	margin-bottom: 12px;
 	cursor: pointer;
 	transition: all 0.3s ease;
-}
-
-.task-item:hover {
-	background: #e9ecef;
 }
 
 .task-header {
@@ -904,15 +888,7 @@ li {
 	color: #555;
 }
 
-.StatusBadge {
-	padding: 2px 8px;
-	border-radius: 12px;
-	font-size: 12px;
-	color: #fff;
-}
-
 .active-task-section {
-	background-color: #f9f9fb;
 	border: 1px solid #ddd;
 	border-radius: 8px;
 	padding: 16px;
@@ -950,7 +926,6 @@ li {
 }
 
 .log-container {
-	background: #f0f0f0;
 	border: 1px solid #ccc;
 	border-radius: 4px;
 	padding: 8px;
@@ -962,7 +937,6 @@ li {
 }
 
 .collapsible {
-	background: #fafafa;
 	padding: 12px;
 	border: 1px solid #ddd;
 	border-radius: 8px;
@@ -977,5 +951,4 @@ li {
 .task-actions fm-btn {
 	margin-right: 8px;
 }
-
 </style>

@@ -1,31 +1,42 @@
 <template>
-	<fm-base-modal
+	<BaseModal
 		title="Copy workflow template"
-		:modelValue="true">
-		<form @submit.prevent class="workflow-form">
+		:isOpen="true"
+		width="40vw"
+		height="40%"
+		minHeight="400px"
+		@closeModal="closeModal"
+		@okModal="createWorkflow"
+	>
+		<form class="workflow-form">
 			<div class="form-group">
 				<label for="name">Workflow Name</label>
-				<input id="name" v-model="formState.name" type="text" required class="form-control"
-					   placeholder="Daily"/>
+				<FmTextField
+					v-model="formState.name"
+					label="Daily"
+					:rules="[rules.required]"
+					outlined
+					clearable
+				/>
 			</div>
-
 			<div class="form-group">
 				<label for="user_code">User Code</label>
-				<input id="user_code" v-model="formState.user_code" type="text" required class="form-control"
-					   placeholder="com.finmars.local:daily"/>
+				<FmTextField
+					v-model="formState.user_code"
+					label="com.finmars.local:daily"
+					:rules="[rules.required]"
+					outlined
+					clearable
+				/>
 			</div>
 		</form>
-		<template #footer>
-			<div class="flex flex-row justify-between">
-				<fm-btn type="text" @click="closeModal">CANCEL</fm-btn>
-
-				<fm-btn type="filled" @click="createWorkflow">Save</fm-btn>
-			</div>
-		</template>
-	</fm-base-modal>
+	</BaseModal>
 </template>
 
 <script setup>
+import BaseModal from "~/components/base/Modal.vue";
+import {FmTextField} from "@finmars/ui";
+
 const props = defineProps({
 	name: String,
 	userCode: String,
@@ -38,6 +49,10 @@ const formState = reactive({
 	name: props.name,
 	user_code: props.userCode,
 })
+
+const rules = {
+	required: value => value ? '' : 'Field is required'
+}
 
 async function createWorkflow() {
 	const res = await useApi('workflowTemplate.post', {
@@ -89,21 +104,5 @@ label {
 	font-size: 1.1rem;
 	font-weight: 600;
 	margin-bottom: 8px;
-	color: #555;
-}
-
-.form-control {
-	width: 100%;
-	padding: 10px;
-	font-size: 1rem;
-	border-radius: 5px;
-	border: 1px solid #ddd;
-	transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.form-control:focus {
-	border-color: #007bff; /* Blue border on focus */
-	box-shadow: 0 0 8px rgba(0, 123, 255, 0.2); /* Subtle glow effect */
-	outline: none;
 }
 </style>

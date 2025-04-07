@@ -74,13 +74,9 @@
             </div>
         </template>
     </notifications>
-	<fm-confirm></fm-confirm>
 </template>
 
 <script setup>
-	import FmConfirm from '~/components/fm/Confirm.vue';
-
-    // import FmNavbar from "~/components/fm/Navbar.vue";
 	function copy( value ) {
         navigator.clipboard.writeText( JSON.stringify(value, null, 2) );
     }
