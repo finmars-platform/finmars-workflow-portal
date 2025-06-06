@@ -132,20 +132,13 @@ console.log('definitions', definitions);
 }
 
 .workflow-table th {
-	background-color: #f0f0f0;
+	//background-color: #f0f0f0;
 	font-weight: bold;
 }
 
-.workflow-table tr:nth-child(even) {
-	background-color: #f9f9f9;
-}
-
-.workflow-table tr:hover {
-	background-color: #f1f1f1;
-}
 
 .run-btn {
-	background-color: #007bff;
+	//background-color: #007bff;
 	color: white;
 	border-radius: 4px;
 	padding: 8px 12px;
@@ -154,7 +147,8 @@ console.log('definitions', definitions);
 }
 
 .run-btn:hover {
-	background-color: #0056b3;
+	//background-color: #0056b3;
+	opacity: .9;
 }
 
 .run-workflow-modal {

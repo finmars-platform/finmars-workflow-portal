@@ -20,7 +20,7 @@ export default defineStore({
 			})
 		},
 		async init() {
-			await this.getUser()
+
 
 			const pathname = window.location.pathname;
 
@@ -39,12 +39,25 @@ export default defineStore({
 				// throw new Error("useStore.init: no space_code in the pathname" + pathname);
 			}
 
+			await this.getUser()
+
 			await Promise.all([]);
 
 		},
 
 		async getUser() {
-			let res = await useApi('me.get')
+			let res;
+
+			let config = useRuntimeConfig().public;
+
+			console.log('config', config);
+
+			if (config.EDITION_TYPE == 'enterprise') {
+				res = await useApi('me.get');
+			} else if (config.EDITION_TYPE == 'community') {
+				const memberProm = await useApi('member.get', { params: { id: 0 } });
+				res = memberProm.user
+			}
 
 			if (res._$error) {
 				throw res._$error;
@@ -76,13 +89,14 @@ export default defineStore({
 				this.user.data.autosave_layouts = true
 			}
 
-			document.body.classList.toggle('dark', this.user.data.dark_mode);
+			document.body.classList.toggle('dark', JSON.parse(localStorage.getItem("isDarkMode")) || false);
 
 		},
 	},
 	getters: {
 		darkModeActive(state) {
-			return state.user.data?.dark_mode
+			// return state.user.data?.dark_mode
+			return JSON.parse(localStorage.getItem("isDarkMode")) || false;
 		},
 	},
 })

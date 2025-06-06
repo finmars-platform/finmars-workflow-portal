@@ -229,17 +229,10 @@ onMounted(async () => {
 }
 
 .workflow-table th {
-	background-color: #f5f5f5;
+	//background-color: #f5f5f5;
 	font-weight: bold;
 }
 
-.workflow-table tr:nth-child(even) {
-	background-color: #f9f9f9;
-}
-
-.workflow-table tr:hover {
-	background-color: #f1f1f1;
-}
 
 /* Status column styling */
 .status-active {

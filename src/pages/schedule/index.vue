@@ -120,18 +120,6 @@ onMounted(async () => {
 	text-align: left;
 }
 
-.schedule-table th {
-	background-color: #f5f5f5;
-	font-weight: bold;
-}
-
-.schedule-table tr:nth-child(even) {
-	background-color: #f9f9f9;
-}
-
-.schedule-table tr:hover {
-	background-color: #f1f1f1;
-}
 
 /* Links in table */
 .table-link {

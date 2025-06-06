@@ -1,6 +1,7 @@
 let host = useRuntimeConfig().public.apiURL
 let prefix = host + '/{client}/workflow/api/v1'
 
+let coreApiHost = useRuntimeConfig().public.coreApiURL
 
 export default {
 	definitionList: {
@@ -66,4 +67,14 @@ export default {
 		delete: prefix + '/workflow-template/{id}/',
 		post: prefix + '/workflow-template/',
 	},
+
+	memberList: {
+		get: coreApiHost + '/{client}/api/v1/users/member/'
+	},
+	member: {
+		get: coreApiHost + '/{client}/api/v1/users/member/{id}/',
+		post: coreApiHost + '/{client}/api/v1/users/member/',
+		delete: coreApiHost + '/{client}/api/v1/users/member/{id}/',
+		put: coreApiHost + '/{client}/api/v1/users/member/{id}/'
+	}
 };
