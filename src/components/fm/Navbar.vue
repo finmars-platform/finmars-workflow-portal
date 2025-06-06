@@ -85,12 +85,12 @@ ul {
 }
 
 li a {
-	color: #000;
+	//color: #000;
 	transition: color 0.2s ease;
 }
 
 li a:hover {
-	color: #000;
+	//color: #000;
 	opacity: .9;
 }
 </style>
