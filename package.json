@@ -10,6 +10,8 @@
 		"test": "vitest",
 		"coverage": "vitest run --coverage"
 	},
+	"author": "Finmars SCSA",
+	"license": "EUPL-1.2",
 	"devDependencies": {
 		"@nuxtjs/tailwindcss": "^6.12.0",
 		"eslint": "^8.24.0",
