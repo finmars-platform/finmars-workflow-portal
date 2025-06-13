@@ -9,7 +9,6 @@ export default defineNuxtConfig({
 		public: {
 			frontURL: process.env.FRONT_HOST || "==PROD_FRONT_HOST==",
 			apiURL: process.env.API_HOST || "==PROD_API_HOST==",
-			coreApiURL: process.env.CORE_API_HOST || "==PROD_CORE_API_HOST==",
 			// wsURL: (process.env.WS_HOST  || "==PROD_WS_HOST==") + '/ws',
 
 			authorizerURL: process.env.AUTH_HOST || "==PROD_API_HOST==" + "/authorizer",
