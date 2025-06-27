@@ -55,7 +55,7 @@
 	}
 	.main {
 		flex-grow: 1;
-		width: calc(100vw - 200px);
+		//width: calc(100vw - 200px);
 		background: var(--base-backgroundColor);
 	}
 	.content {
