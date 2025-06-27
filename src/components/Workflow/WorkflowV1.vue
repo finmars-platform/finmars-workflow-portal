@@ -399,6 +399,7 @@ code {
 	box-shadow: none;
 	font-weight: normal;
 	font-size: 90%;
+	max-width: 50vw;
 }
 
 td {
@@ -467,6 +468,7 @@ h3 {
 	border-right: 1px solid #f1f1f1;
 	padding-right: 24px;
 	flex: 3;    /* 3 parts out of 10 */
+	max-width: 35vw;
 }
 
 .workflow-task-side {
