@@ -3,7 +3,7 @@
 	"scripts": {
 		"build": "nuxt build ",
 		"dev": "nuxt --rootDir=./w/ dev",
-		"dev-local": "PORT=3004 NUXT_APP_BUILD_ASSETS_DIR=/realm00000/w/_nuxt/ CORE_API_HOST=http://0.0.0.0:8000 API_HOST=http://0.0.0.0:8084 AUTH_HOST=http://0.0.0.0:8083/authorizer nuxt --rootDir=./w/ dev --host=0.0.0.0",
+		"dev-local": "PORT=3004 NUXT_APP_BUILD_ASSETS_DIR=/realm00000/w/_nuxt/ API_HOST=http://0.0.0.0:8001 AUTH_HOST=http://0.0.0.0:8083/authorizer nuxt --rootDir=./w/ dev --host=0.0.0.0",
 		"start": "PORT=8080 node .output/server/index.mjs",
 		"generate": "nuxt generate",
 		"preview": "nuxt preview",

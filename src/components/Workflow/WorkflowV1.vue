@@ -1,85 +1,145 @@
 <template>
 	<div class="workflow-detail-page">
-		<!-- Left side: Rete.js Workflow Graph -->
-		<div class="workflow-graph-section">No data</div>
-
 		<!-- Right side: Workflow Details -->
 		<div class="workflow-detail-section">
-			<h2>Workflow Template Details</h2>
 
-			<div class="button-group">
-				<fm-btn @click="refresh">
-					<fm-icon icon="refresh" title="Refresh"/>
-				</fm-btn>
-				<fm-btn @click="confirmRelaunch">
-					<fm-icon icon="play_circle" title="Relaunch"/>
-				</fm-btn>
-				<fm-btn @click="cancelWorkflow">
-					<fm-icon icon="cancel" title="Terminate"/>
-				</fm-btn>
-				<fm-btn @click="payloadDialog = true">
-					<fm-icon icon="format_list_bulleted" title="Payload"/>
-				</fm-btn>
-				<fm-btn @click="goToWorkerLogs">
-					<fm-icon icon="receipt_long" :title="`Worker ${selectedTask?.worker_name} Logs`"/>
-				</fm-btn>
-			</div>
 
-			<div v-if="workflow" class="workflow">
-				<div class="overline mb-3">
-					{{ formatDate(workflow.created_at) }}
-				</div>
-				<div>
-					<div class="headline">
-						{{ workflow.fullname }}
-						<div v-if="workflow.periodic">periodic</div>
-						<div class="chip" :style="{ backgroundColor: getColor(selectedTask.status) }">
-							{{ workflow.status }}
-						</div>
-					</div>
-					<div>
-						<u>Tasks :</u> Total <strong>{{ workflow.tasks.length }}</strong> / Success
-						<strong>{{ workflow.tasks | countTasksByStatus('success') }}</strong>
-						/ Error
-						<strong>{{ workflow.tasks | countTasksByStatus('error') }}</strong>
-					</div>
-				</div>
-			</div>
-			<div v-if="selectedTask" class="pa-4">
-				<h2 class="text-center" style="margin-bottom: 8px">Task</h2>
+
+			<div class="pa-4" style="display: flex; flex-direction: row;">
 
 				<div class="v-data-table">
+
+					<h3>Workflow</h3>
+
 					<div class="v-data-table__wrapper">
 						<table>
 							<tbody>
 							<tr>
 								<td><strong>ID</strong></td>
-								<td>{{ selectedTask.id }}</td>
+								<td>{{ workflow.id }}</td>
 							</tr>
 							<tr>
-								<td><strong>Key</strong></td>
-								<td>{{ selectedTask.name }}</td>
+								<td><strong>User Code</strong></td>
+								<td>{{ workflow.user_code }}</td>
 							</tr>
 							<tr>
-								<td><strong>Task Status</strong></td>
+								<td><strong>Workflow Status</strong></td>
 								<td>
-									<div class="chip" :style="{ backgroundColor: getColor(selectedTask.status) }">
-										{{ selectedTask.status }}
+									<div class="chip" :style="{ backgroundColor: getColor(workflow.status) }">
+										{{ workflow.status }}
 									</div>
 								</td>
 							</tr>
 							<tr>
 								<td><strong>Created</strong></td>
-								<td>{{ selectedTask.created | formatDate }}</td>
+								<td v-bind:title="workflow.created_at">{{ formatDate(workflow.created_at)}}</td>
 							</tr>
 							<tr>
 								<td><strong>Updated</strong></td>
-								<td>{{ selectedTask.updated | formatDate }}</td>
+								<td v-bind:title="workflow.modified_at">{{ formatDate(workflow.modified_at) }}</td>
+							</tr>
+							<tr>
+								<td><strong>Finished</strong></td>
+								<td v-bind:title="workflow.finished_at">{{ formatDate(workflow.finished_at) }}</td>
 							</tr>
 							</tbody>
 						</table>
 					</div>
 				</div>
+
+				<div style="padding: 0 12px;">
+
+					<h3>Workflow Actions</h3>
+
+					<div class="button-group">
+						<fm-btn @click="refresh">
+							<fm-icon icon="refresh" title="Refresh"/> Refresh
+						</fm-btn>
+						<fm-btn @click="confirmRelaunch">
+							<fm-icon icon="play_circle" title="Relaunch"/> Relaunch
+						</fm-btn>
+						<fm-btn @click="cancelWorkflow" v-if="workflow.status === 'init' || workflow.status === 'progress'">
+							<fm-icon icon="cancel" title="Terminate"/> Cancel
+						</fm-btn>
+						<fm-btn @click="payloadDialog = true">
+							<fm-icon icon="format_list_bulleted" title="Payload"/> Payload
+						</fm-btn>
+
+					</div>
+
+				</div>
+
+			</div>
+
+
+			<h3>Workflow Tasks</h3>
+
+			<div v-for="task in workflow.tasks" :key="task.id">
+
+				<fm-btn @click="selectedTask = task" :class="{ active: selectedTask === task }" class="task-button">
+					[{{task.id}}] {{task.name}} &nbsp; <div class="chip" :style="{ backgroundColor: getColor(task.status) }">
+					{{ task.status }}
+				</div>
+				</fm-btn>
+			</div>
+
+
+			<div v-if="selectedTask" class="pa-4" style="padding-left: 80px;  box-sizing: border-box">
+
+				<h3>Task</h3>
+
+				<div class="v-data-table__wrapper">
+					<table>
+						<tbody>
+						<tr>
+							<td><strong>Celery Task ID</strong></td>
+							<td>{{ selectedTask.celery_task_id }}</td>
+						</tr>
+
+						<tr>
+							<td><strong>ID</strong></td>
+							<td>{{ selectedTask.id }}</td>
+						</tr>
+						<tr>
+							<td><strong>User Code</strong></td>
+							<td>{{ selectedTask.name }}</td>
+						</tr>
+						<tr>
+							<td><strong>Task Status</strong></td>
+							<td>
+								<div class="chip" :style="{ backgroundColor: getColor(selectedTask.status) }">
+									{{ selectedTask.status }}
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Created</strong></td>
+							<td v-bind:title="selectedTask.created_at">{{ formatDate(selectedTask.created_at)}}</td>
+						</tr>
+						<tr>
+							<td><strong>Updated</strong></td>
+							<td v-bind:title="selectedTask.modified_at">{{ formatDate(selectedTask.modified_at) }}</td>
+						</tr>
+						<tr>
+							<td><strong>Finished</strong></td>
+							<td v-bind:title="selectedTask.finished_at">{{ formatDate(selectedTask.finished_at) }}</td>
+						</tr>
+
+						<tr>
+							<td><strong>Workflow ID</strong></td>
+							<td>{{ selectedTask.workflow }}</td>
+						</tr>
+
+						<tr>
+							<td><strong>Worker</strong></td>
+							<td>{{ selectedTask.worker_name }}</td>
+						</tr>
+
+
+						</tbody>
+					</table>
+				</div>
+
 
 				<div v-if="selectedTask.log">
 					<h2 class="text-center" style="margin-bottom: 8px">Log</h2>
@@ -119,19 +179,19 @@
 					</div>
 				</div>
 			</div>
-			<div
-				class="footer"
-				v-if="
-          selectedTask && (workflow.status === 'success' || selectedTask.is_hook === false)
-        "
-			>
-				<a target="_blank" :href="getFlowerTaskUrl()" class="pa-6">
-					<fm-btn>
-						<fm-icon icon="launch"/>
-						View in Flower
-					</fm-btn>
-				</a>
-			</div>
+<!--			<div-->
+<!--				class="footer"-->
+<!--				v-if="-->
+<!--          selectedTask && (workflow.status === 'success' || selectedTask.is_hook === false)-->
+<!--        "-->
+<!--			>-->
+<!--				<a target="_blank" :href="getFlowerTaskUrl()" class="pa-6">-->
+<!--					<fm-btn>-->
+<!--						<fm-icon icon="launch"/>-->
+<!--						View in Flower-->
+<!--					</fm-btn>-->
+<!--				</a>-->
+<!--			</div>-->
 
 			<fm-base-modal v-model="payloadDialog" title="Workflow's Payload" width="500">
 				<div>
@@ -157,8 +217,8 @@ const props = defineProps({
 });
 const emit = defineEmits(['update'])
 
+const workflow = ref(props.workflow);
 const selectedTask = ref(props.workflow.tasks?.[0]);
-
 const payloadDialog = ref(false);
 
 function getColor(status) {
@@ -220,7 +280,7 @@ async function confirmRelaunch() {
 }
 
 function formatDate(dateString) {
-	const options = {year: 'numeric', month: 'short', day: 'numeric'};
+	const options = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'};
 	return new Date(dateString).toLocaleDateString(undefined, options);
 }
 </script>
@@ -240,7 +300,7 @@ function formatDate(dateString) {
 
 /* Right side for Workflow Details */
 .workflow-detail-section {
-	flex: 0.7;
+	flex: 1;
 	background-color: #fff;
 	padding: 20px;
 	border-left: 1px solid #ccc;
@@ -260,12 +320,14 @@ h3 {
 
 /* Button Group Styles */
 .button-group {
+	max-width: 600px;
 	display: flex;
 	justify-content: space-between;
 	margin-bottom: 15px;
 }
 
 .chip {
+	text-transform: Capitalize;
 	align-items: center;
 	cursor: default;
 	display: inline-flex;
@@ -273,7 +335,7 @@ h3 {
 	max-width: 100%;
 	outline: none;
 	overflow: hidden;
-	padding: 0 12px;
+	padding: 4px 12px 4px;
 	position: relative;
 	text-decoration: none;
 	transition-duration: 0.28s;
@@ -342,6 +404,22 @@ td {
 	border-radius: 4px;
 	background-color: rgba(000, 000, 000, 0.12);
 
+	margin-bottom: 16px;
+}
+
+.task-button.btn.text.active {
+	background-color: rgba(143, 76, 54, .6);
+	color: #fff;
+
+
+}
+
+.task-button.btn.text.active:hover {
+	background-color:  rgba(143, 76, 54, .6);
+	opacity: .9;
+}
+
+h3 {
 	margin-bottom: 16px;
 }
 </style>

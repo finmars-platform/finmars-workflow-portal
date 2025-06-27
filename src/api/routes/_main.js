@@ -2,6 +2,19 @@ let host = useRuntimeConfig().public.apiURL
 let prefix = host + '/{client}/workflow/api/v1'
 
 
+// SZ
+// only for local development, when finmars-core and finmars-workflow hosted on different ports, same machine
+function resolveHost() {
+
+	console.log('host', host);
+	if (host === 'http://0.0.0.0:8001') {
+		return 'http://0.0.0.0:8000';
+	}
+	return host
+
+}
+
+
 export default {
 	definitionList: {
 		get: prefix + '/definition/'
@@ -68,12 +81,12 @@ export default {
 	},
 
 	memberList: {
-		get: host + '/{client}/api/v1/users/member/'
+		get: resolveHost() + '/{client}/api/v1/users/member/'
 	},
 	member: {
-		get: host + '/{client}/api/v1/users/member/{id}/',
-		post: host + '/{client}/api/v1/users/member/',
-		delete: host + '/{client}/api/v1/users/member/{id}/',
-		put: host + '/{client}/api/v1/users/member/{id}/'
+		get: resolveHost() + '/{client}/api/v1/users/member/{id}/',
+		post: resolveHost() + '/{client}/api/v1/users/member/',
+		delete: resolveHost() + '/{client}/api/v1/users/member/{id}/',
+		put: resolveHost() + '/{client}/api/v1/users/member/{id}/'
 	}
 };
