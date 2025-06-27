@@ -38,6 +38,7 @@
 			<FmBtn
 				class="button"
 				:type="currentPage === 1 ? 'disabled' : 'text'"
+				v-if="totalPages !== 1"
 				@click="openPreviousPage"
 			>
 				Previous
@@ -114,6 +115,7 @@ async function getWorkflows() {
 	workflows.value = data['results'];
 	totalPages.value = Math.ceil(data.count / pageSize.value);
 	console.log('workflows', workflows);
+	console.log('totalPages', totalPages);
 }
 
 function formatDate(dateString) {
