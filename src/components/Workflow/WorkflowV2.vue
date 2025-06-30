@@ -17,31 +17,31 @@
 
 				<div style="display: flex">
 
-					<fm-btn @click="refresh()">
-						<fm-icon :icon="'refresh'" title="Refresh"/>
-					</fm-btn>
-					<fm-btn @click="openRelaunchDialog()" v-if="workflow?.status !== 'progress'">
-						<fm-icon :icon="'replay'" title="Relaunch"/>
-					</fm-btn>
-					<fm-btn @click="cancelWorkflow()"
+					<FmButton @click="refresh()">
+						<FmIcon :icon="'refresh'" title="Refresh"/>
+					</FmButton>
+					<FmButton @click="openRelaunchDialog()" v-if="workflow?.status !== 'progress'">
+						<FmIcon :icon="'replay'" title="Relaunch"/>
+					</FmButton>
+					<FmButton @click="cancelWorkflow()"
 							v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
-						<fm-icon :icon="'cancel'" title="Cancel"/>
-					</fm-btn>
+						<FmIcon :icon="'cancel'" title="Cancel"/>
+					</FmButton>
 
-					<fm-btn @click="activeTask = null" v-if="activeTask">
-						<fm-icon :icon="'home'" title="Show Workflow"/>
-					</fm-btn>
+					<FmButton @click="activeTask = null" v-if="activeTask">
+						<FmIcon :icon="'home'" title="Show Workflow"/>
+					</FmButton>
 
 
 				</div>
 
 				<div>
-					<fm-btn @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
-						<fm-icon :icon="'pause'" title="Pause"/>
-					</fm-btn>
-					<fm-btn @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
-						<fm-icon :icon="'play_circle'" title="Resume"/>
-					</fm-btn>
+					<FmButton @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
+						<FmIcon :icon="'pause'" title="Pause"/>
+					</FmButton>
+					<FmButton @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
+						<FmIcon :icon="'play_circle'" title="Resume"/>
+					</FmButton>
 				</div>
 
 				<div class="workflow-detail-content-section" v-if="!activeTask">
@@ -135,7 +135,7 @@
 						<div>Celery Task ID: <strong>{{ activeTask.celery_task_id }}</strong></div>
 						<div>Worker: <strong>{{ activeTask.worker_name }}</strong></div>
 						<div>
-							<fm-btn @click="seeWorkerLogs()">See Worker Logs</fm-btn>
+							<FmButton @click="seeWorkerLogs()">See Worker Logs</FmButton>
 						</div>
 						<div :title="'Server Time: ' + activeTask.created_at">Created At:
 							<strong>{{ $formatDate(activeTask.created_at) }}</strong></div>
@@ -153,7 +153,7 @@
 
 					<div class="task-section collapsible">
 						<h4>Payload
-							<fm-icon :icon="payloadVisible ? 'arrow_upward' : 'arrow_downward'"
+							<FmIcon :icon="payloadVisible ? 'arrow_upward' : 'arrow_downward'"
 									 @click="payloadVisible = !payloadVisible"/>
 						</h4>
 						<v-ace-editor
@@ -168,7 +168,7 @@
 
 					<div class="task-section collapsible">
 						<h4>Result
-							<fm-icon :icon="resultVisible ? 'arrow_upward' : 'arrow_downward'"
+							<FmIcon :icon="resultVisible ? 'arrow_upward' : 'arrow_downward'"
 									 @click="resultVisible = !resultVisible"/>
 						</h4>
 						<v-ace-editor
@@ -182,7 +182,7 @@
 					</div>
 
 					<div class="task-actions">
-						<fm-btn @click="viewInFlower">View in Flower</fm-btn>
+						<FmButton @click="viewInFlower">View in Flower</FmButton>
 					</div>
 				</div>
 
@@ -196,7 +196,7 @@
 			Loading...
 		</div>
 
-		<fm-base-modal
+		<BaseModal
 			title="Relaunch Workflow"
 			v-model="isRelaunchDialogOpen"
 		>
@@ -218,14 +218,14 @@
 
 			<template #footer>
 				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</fm-btn>
+					<FmButton type="text" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</FmButton>
 
-					<fm-btn type="filled" @click="relaunch($event)">Relaunch</fm-btn>
+					<FmButton type="filled" @click="relaunch($event)">Relaunch</FmButton>
 				</div>
 			</template>
-		</fm-base-modal>
+		</BaseModal>
 
-		<fm-base-modal
+		<BaseModal
 			title="Resume Workflow"
 			v-model="isResumeDialogOpen"
 		>
@@ -240,12 +240,12 @@
 
 			<template #footer>
 				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</fm-btn>
+					<FmButton type="text" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</FmButton>
 
-					<fm-btn type="filled" @click="resumeWorkflow($event)">Relaunch</fm-btn>
+					<FmButton type="filled" @click="resumeWorkflow($event)">Relaunch</FmButton>
 				</div>
 			</template>
-		</fm-base-modal>
+		</BaseModal>
 
 	</div>
 
@@ -787,8 +787,8 @@ li {
 	margin-bottom: 20px; /* Ensure buttons are separated from other content */
 }
 
-.action-buttons fm-btn,
-.pause-resume-buttons fm-btn {
+.action-buttons FmButton,
+.pause-resume-buttons FmButton {
 	padding: 10px 15px;
 	background-color: #007bff; /* Primary button color */
 	color: white;
@@ -796,8 +796,8 @@ li {
 	transition: background-color 0.3s;
 }
 
-.action-buttons fm-btn:hover,
-.pause-resume-buttons fm-btn:hover {
+.action-buttons FmButton:hover,
+.pause-resume-buttons FmButton:hover {
 	background-color: #0056b3; /* Darken button on hover */
 }
 
@@ -974,7 +974,7 @@ li {
 	justify-content: flex-start;
 }
 
-.task-actions fm-btn {
+.task-actions FmButton {
 	margin-right: 8px;
 }
 

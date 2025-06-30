@@ -1,5 +1,5 @@
 <template>
-	<fm-base-modal
+	<BaseModal
 		:title="title"
 		:modelValue="true">
 		{{ formState.nodeUserCode }}
@@ -65,12 +65,12 @@
 		</div>
 		<template #footer>
 			<div class="flex flex-row justify-between">
-				<fm-btn type="text" @click="closeModal">CANCEL</fm-btn>
+				<FmButton type="text" @click="closeModal">CANCEL</FmButton>
 
-				<fm-btn type="filled" @click="save">Save</fm-btn>
+				<FmButton type="filled" @click="save">Save</FmButton>
 			</div>
 		</template>
-	</fm-base-modal>
+	</BaseModal>
 </template>
 
 <script setup>

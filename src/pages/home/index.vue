@@ -18,14 +18,14 @@
 				<td>{{ item.user_code }}</td>
 				<td>{{ item.is_manager ? 'Yes' : 'No' }}</td>
 				<td>
-					<fm-btn class="run-btn" @click="openRunWorkflowDialog($event, item)">Run</fm-btn>
+					<FmButton class="run-btn" @click="openRunWorkflowDialog($event, item)">Run</FmButton>
 				</td>
 			</tr>
 			</tbody>
 		</table>
 
 		<!-- Run Workflow Modal -->
-		<fm-base-modal
+		<BaseModal
 			title="Run Workflow"
 			v-model="isRunWorkflowDialog"
 			class="run-workflow-modal"
@@ -45,11 +45,11 @@
 
 			<template #footer>
 				<div class="modal-footer">
-					<fm-btn type="text" @click="isRunWorkflowDialog = !isRunWorkflowDialog">Cancel</fm-btn>
-					<fm-btn type="filled" @click="runWorkflow($event, activeWorkflowItem)">Run</fm-btn>
+					<FmButton type="text" @click="isRunWorkflowDialog = !isRunWorkflowDialog">Cancel</FmButton>
+					<FmButton type="filled" @click="runWorkflow($event, activeWorkflowItem)">Run</FmButton>
 				</div>
 			</template>
-		</fm-base-modal>
+		</BaseModal>
 
 	</div>
 
@@ -172,7 +172,7 @@ console.log('definitions', definitions);
 	margin-top: 1rem;
 }
 
-.modal-footer fm-btn {
+.modal-footer FmButton {
 	padding: 10px 20px;
 }
 

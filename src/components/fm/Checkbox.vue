@@ -8,7 +8,7 @@
 		/>
 
 		<span class="check inline-block relative align-middle rounded mr-2.5 cursor-pointer bg-white" :class="{ disabled: disabled }">
-			<fm-icon
+			<FmIcon
 				icon="check"
 				:size="1"
 				class="mark block absolute top-px left-px opacity-0 text-base"

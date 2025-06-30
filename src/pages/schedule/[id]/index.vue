@@ -95,19 +95,19 @@
 
 			<!-- Actions -->
 			<div class="action-buttons">
-				<fm-btn type="submit" class="save-btn">Save</fm-btn>
+				<FmButton type="submit" class="save-btn">Save</FmButton>
 			</div>
 
 		</form>
 
 
 		<div style="margin-top: 8px;">
-			<fm-btn  @click="deleteSchedule" class="delete-btn">Delete</fm-btn>
+			<FmButton  @click="deleteSchedule" class="delete-btn">Delete</FmButton>
 		</div>
 
 		<hr style="margin: 24px 0">
 
-		<fm-btn @click="runManual"  class="save-btn">Run Manually</fm-btn>
+		<FmButton @click="runManual"  class="save-btn">Run Manually</FmButton>
 	</div>
 </template>
 

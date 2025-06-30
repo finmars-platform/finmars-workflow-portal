@@ -1,78 +1,74 @@
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
+import commonjs from 'vite-plugin-commonjs';
 
 export default defineNuxtConfig({
-	build: {
-		publicPath: process.env.NUXT_APP_BUILD_ASSETS_DIR || '/_nuxt/'
-	},
-
+	compatibilityDate: '2024-09-04',
+	devtools: { enabled: true },
 	runtimeConfig: {
 		public: {
-			frontURL: process.env.FRONT_HOST || "==PROD_FRONT_HOST==",
-			apiURL: process.env.API_HOST || "==PROD_API_HOST==",
+			frontURL: process.env.FRONT_HOST || '==PROD_FRONT_HOST==',
+			apiURL: process.env.API_HOST || '==PROD_API_HOST==',
 			// wsURL: (process.env.WS_HOST  || "==PROD_WS_HOST==") + '/ws',
 
-			authorizerURL: process.env.AUTH_HOST || "==PROD_API_HOST==" + "/authorizer",
+			authorizerURL:
+				process.env.AUTH_HOST || '==PROD_API_HOST==' + '/authorizer',
 
-			KEYCLOAK_URL: process.env.KEYCLOAK_URL || "==PROD_KEYCLOAK_URL==",
-			KEYCLOAK_REALM: process.env.KEYCLOAK_REALM || "==PROD_KEYCLOAK_REALM==",
-			KEYCLOAK_CLIENT_ID: process.env.KEYCLOAK_CLIENT_ID || "==PROD_KEYCLOAK_CLIENT_ID==",
+			KEYCLOAK_URL: process.env.KEYCLOAK_URL || '==PROD_KEYCLOAK_URL==',
+			KEYCLOAK_REALM:
+				process.env.KEYCLOAK_REALM || '==PROD_KEYCLOAK_REALM==',
+			KEYCLOAK_CLIENT_ID:
+				process.env.KEYCLOAK_CLIENT_ID || '==PROD_KEYCLOAK_CLIENT_ID==',
 
 			buildDATE: dayjs().format('HH:mm DD/MM/YYYY'),
-			EDITION_TYPE: process.env.EDITION_TYPE || '==PROD_EDITION_TYPE=='
+			EDITION_TYPE: process.env.EDITION_TYPE || '==PROD_EDITION_TYPE==',
 		}
 	},
-
 	ssr: false,
-
 	imports: {
-		dirs: [
-			'stores',
-			'composables/evRv/*.js',
-
-		]
+		dirs: ['stores', 'composables/evRv/*.js']
 	},
-
 	app: {
 		head: {
-			title: 'Finmars',
+			title: 'Finmars | Financial Management Revolution System',
 			viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
 			charset: 'utf-8',
-			link: [{rel: 'icon', type: 'image/png', href: 'img/favicon.png'}]
+			link: [{ rel: 'icon', type: 'image/png', href: '/img/favicon/favicon-new-64x64.png' }]
 		},
-		pageTransition: {name: 'page', mode: 'out-in'}
+		pageTransition: { name: 'page', mode: 'out-in' }
 	},
-
 	modules: [
 		'@pinia/nuxt',
-		"@nuxtjs/tailwindcss",
+		'@nuxtjs/tailwindcss',
+		'@nuxt/test-utils/module',
 		'floating-vue/nuxt'
 	],
-
 	pinia: {
 		/* Options for @pinia/nuxt */
 	},
-
 	css: [
-		"~/assets/css/material-icons.css",
 		'@finmars/ui/dist/finmars-ui.css',
-		"~/assets/css/main.css",
+		// '@finmars/ui/dist/themes.css'
+		'~/assets/scss/variables.scss',
 	],
-
 	postcss: {
 		plugins: {
-			'postcss-mixins': {},
+			'postcss-mixins': {}
 		}
 	},
-
 	vite: {
-		define: {
-			"process.env.DEBUG": false,
+		css: {
+			preprocessorOptions: {
+				scss: {
+					api: 'modern-compiler'
+				}
+			}
 		},
-		plugins: []
+		define: {
+			'process.env.DEBUG': false
+		},
+		plugins: [commonjs()]
 	},
-
-	srcDir: "src",
-
+	srcDir: 'src',
 	hooks: {
 		'pages:extend': (pages) => {
 
@@ -104,6 +100,4 @@ export default defineNuxtConfig({
 
 		},
 	},
-
-	compatibilityDate: '2024-10-05'
 });

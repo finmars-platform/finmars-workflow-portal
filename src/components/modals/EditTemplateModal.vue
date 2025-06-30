@@ -1,5 +1,5 @@
 <template>
-	<fm-base-modal
+	<BaseModal
 		title="Copy workflow template"
 		:modelValue="true">
 		<form @submit.prevent class="workflow-form">
@@ -17,12 +17,12 @@
 		</form>
 		<template #footer>
 			<div class="flex flex-row justify-between">
-				<fm-btn type="text" @click="closeModal">CANCEL</fm-btn>
+				<FmButton type="text" @click="closeModal">CANCEL</FmButton>
 
-				<fm-btn type="filled" @click="createWorkflow">Save</fm-btn>
+				<FmButton type="filled" @click="createWorkflow">Save</FmButton>
 			</div>
 		</template>
-	</fm-base-modal>
+	</BaseModal>
 </template>
 
 <script setup>

@@ -31,10 +31,10 @@
 					<td>{{ formatDate(item.created_at) }}</td>
 					<td>
 						<div class="action">
-							<fm-btn
+							<FmButton
 								@click.stop="openCopyModal({data: item.data, notes: item.notes, name: item.name})"
 								:icon="'content_copy'"/>
-							<fm-btn :size="12" @click.stop="deleteWorkflowTemplate(item.id)" :icon="'delete'"/>
+							<FmButton :size="12" @click.stop="deleteWorkflowTemplate(item.id)" :icon="'delete'"/>
 						</div>
 					</td>
 				</tr>
@@ -43,37 +43,37 @@
 		</div>
 
 		<div class="flex mb-4">
-			<FmBtn
+			<FmButton
 				class="button"
 				:type="currentPage === 1 ? 'disabled' : 'text'"
 				@click="openPreviousPage"
 			>
 				Previous
-			</FmBtn>
+			</FmButton>
 
 			<div class="flex">
 				<div v-for="page in totalPages" :key="page">
-					<FmBtn
+					<FmButton
 						v-if="totalPages > currentPage"
 						:type="currentPage === page && 'filled'"
 						class="button"
 						@click="openPage(page)"
 					>
 						{{ page }}
-					</FmBtn>
+					</FmButton>
 				</div>
 			</div>
-			<FmBtn
+			<FmButton
 				v-if="currentPage < totalPages"
 				type="text"
 				class="button"
 				@click="openNextPage"
 			>
 				Next
-			</FmBtn>
+			</FmButton>
 		</div>
 
-		<fm-btn @click="goToNewWorkflowPage">Create New</fm-btn>
+		<FmButton @click="goToNewWorkflowPage">Create New</FmButton>
 
 		<EditTemplateModal
 			v-if="editTemplate"

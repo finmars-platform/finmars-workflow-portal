@@ -38,7 +38,7 @@
 			</table>
 		</div>
 
-		<fm-btn @click="goToNewSchedulePage">Create New</fm-btn>
+		<FmButton @click="goToNewSchedulePage">Create New</FmButton>
 
 	</div>
 </template>

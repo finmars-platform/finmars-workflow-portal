@@ -10,9 +10,9 @@
 			class="action"
 
 		>
-			<fm-btn @click.stop="onCopy" :icon="'content_copy'"/>
-			<fm-btn @click.stop="onEdit" :icon="'edit'"/>
-			<fm-btn @click.stop="onDelete" :icon="'delete'"/>
+			<FmButton @click.stop="onCopy" :icon="'content_copy'"/>
+			<FmButton @click.stop="onEdit" :icon="'edit'"/>
+			<FmButton @click.stop="onDelete" :icon="'delete'"/>
 		</div>
 		<div class="title" data-testid="title" @pointerdown.stop=""><span>{{ data.data.node.name }}</span></div>
 		<div class="sub-title" data-testid="sub-title" @pointerdown.stop="">{{ data.data.node.user_code }}</div>
@@ -135,7 +135,7 @@
 		</div>
 
 
-		<fm-base-modal
+		<BaseModal
 			title="Source code"
 			style="width: 80vw;"
 			v-model="isSourceCodeDialogOpen"
@@ -153,10 +153,10 @@
 
 			<template #footer>
 				<div class="flex flex-row justify-between">
-					<fm-btn type="filled" @click="isSourceCodeDialogOpen = !isSourceCodeDialogOpen">Save</fm-btn>
+					<FmButton type="filled" @click="isSourceCodeDialogOpen = !isSourceCodeDialogOpen">Save</FmButton>
 				</div>
 			</template>
-		</fm-base-modal>
+		</BaseModal>
 
 		<div class="resize-handle" @pointerdown.stop="" @mousedown="initResize"></div>
 
@@ -171,7 +171,7 @@ import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/theme-monokai';
 
-import {BaseModal as FmBaseModal, FmBtn as FmBtn} from "@finmars/ui"
+// import {BaseModal as BaseModal, FmButton as FmButton} from "@finmars/ui"
 
 function sortByIndex(entries) {
 	entries.sort((a, b) => {
@@ -299,8 +299,8 @@ export default defineComponent({
 	},
 	components: {
 		VAceEditor,
-		FmBaseModal,
-		FmBtn,
+		BaseModal,
+		FmButton,
 		Ref
 	}
 })
