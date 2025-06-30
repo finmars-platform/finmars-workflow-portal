@@ -1,4 +1,4 @@
-FROM node:18.20.2
+FROM node:22-alpine
 
 RUN mkdir -p /var/www/finmars
 WORKDIR /var/www/finmars
@@ -17,10 +17,19 @@ COPY tsconfig.json .
 
 RUN npm run build
 
-EXPOSE 8080
 
 # CMD [ "npm", "start" ]
 RUN chmod +x /var/www/finmars/docker/substitute_environment_variables.sh
+
+# Node and npm use a non-root user provided by the base Node image
+# Creating a new user "finmars" for running the application
+RUN adduser -D finmars
+
+# Change to non-root privilege
+USER finmars
+
+EXPOSE 8080
+
 ENTRYPOINT ["/var/www/finmars/docker/substitute_environment_variables.sh"]
 
 # RUN npm run test
