@@ -50,12 +50,12 @@
 
 					<div v-for="task in workflow.tasks" :key="task.id">
 
-						<fm-btn @click="selectedTask = task" :class="{ active: selectedTask === task }" class="task-button">
+						<FmButton @click="selectedTask = task" :class="{ active: selectedTask === task }" class="task-button">
 							[{{ task.id }}] {{ task.name }} &nbsp;
 							<div class="chip" :style="{ backgroundColor: getColor(task.status) }">
 								{{ task.status }}
 							</div>
-						</fm-btn>
+						</FmButton>
 					</div>
 
 				</div>
@@ -63,28 +63,28 @@
 				<div style="padding: 0 12px;" class="workflow-task-side">
 
 					<div class="button-group">
-						<fm-btn @click="refresh">
-							<fm-icon icon="refresh" title="Refresh"/>
+						<FmButton @click="refresh">
+							<FmIcon icon="refresh" title="Refresh"/>
 							Refresh
-						</fm-btn>
-						<fm-btn @click="confirmRelaunch">
-							<fm-icon icon="play_circle" title="Relaunch"/>
+						</FmButton>
+						<FmButton @click="confirmRelaunch">
+							<FmIcon icon="play_circle" title="Relaunch"/>
 							Relaunch
-						</fm-btn>
-						<fm-btn @click="cancelWorkflow"
+						</FmButton>
+						<FmButton @click="cancelWorkflow"
 								v-if="workflow.status === 'init' || workflow.status === 'progress'">
-							<fm-icon icon="cancel" title="Terminate"/>
+							<FmIcon icon="cancel" title="Terminate"/>
 							Cancel
-						</fm-btn>
-						<fm-btn @click="payloadDialog = true">
-							<fm-icon icon="format_list_bulleted" title="Payload"/>
+						</FmButton>
+						<FmButton @click="payloadDialog = true">
+							<FmIcon icon="format_list_bulleted" title="Payload"/>
 							Payload
-						</fm-btn>
+						</FmButton>
 
-						<fm-btn @click="jsonDialog = true">
-							<fm-icon icon="format_list_bulleted" title="Json"/>
+						<FmButton @click="jsonDialog = true">
+							<FmIcon icon="format_list_bulleted" title="Json"/>
 							JSON
-						</fm-btn>
+						</FmButton>
 
 
 					</div>
@@ -107,10 +107,10 @@
 									<td>
 
 										<a target="_blank" :href="getFlowerTaskUrl()" class="pa-6">
-											<fm-btn>
-												<fm-icon icon="launch"/>
+											<FmButton>
+												<FmIcon icon="launch"/>
 												View in Flower
-											</fm-btn>
+											</FmButton>
 										</a>
 
 									</td>
@@ -183,7 +183,7 @@
 						<div class="row mt-4" v-if="!selectedTask.result">
 							<div class="col">
 								<div class="notice">
-									<fm-icon icon="info"/>
+									<FmIcon icon="info"/>
 									No task result
 								</div>
 							</div>
@@ -198,7 +198,7 @@
 								<div class="row">
 									<div class="col">
 										<div class="alert">
-											<fm-icon icon="info"/>
+											<FmIcon icon="info"/>
 
 											{{ selectedTask.result.exception }}
 										</div>
@@ -215,33 +215,38 @@
 			</div>
 
 
-			<fm-base-modal v-model="payloadDialog" title="Workflow's Payload" width="500">
+			<BaseModal v-model="payloadDialog" title="Workflow's Payload" width="500">
 				<div>
 					<pre>{{ workflow.payload }}</pre>
 				</div>
-				<template #footer>
+				<template #controls="{ cancel }">
 					<div class="flex flex-row justify-between">
-						<fm-btn type="text" @click="payloadDialog = false">Cancel</fm-btn>
+						<FmButton type="text" @click="payloadDialog = false">Cancel</FmButton>
 					</div>
 				</template>
-			</fm-base-modal>
+			</BaseModal>
 
 
-			<fm-base-modal v-model="jsonDialog" title="Workflow's Payload" width="500">
+			<BaseModal v-model="jsonDialog" title="Workflow's Payload" width="500">
 				<div>
 					<pre>{{ workflow }}</pre>
 				</div>
-				<template #footer>
+
+
+
+				<template #controls="{ cancel }">
 					<div class="flex flex-row justify-between">
-						<fm-btn type="text" @click="jsonDialog = false">Cancel</fm-btn>
+						<FmButton type="text" @click="jsonDialog = false">Cancel</FmButton>
 					</div>
 				</template>
-			</fm-base-modal>
+			</BaseModal>
 
 		</div>
 	</div>
 </template>
 <script setup>
+
+import {FmIcon, FmButton} from "@finmars/ui"
 
 const route = useRoute();
 const store = useStore();

@@ -33,7 +33,7 @@
 	--error-color: #BA1A1A; /* NEW */
 
 
-	/* region Temporary variables. Will be deleted or changed after conversation about variables ends.*/
+	 /* region Temporary variables. Will be deleted or changed after conversation about variables ends.*/
 	--card-border-color: #85736E;
 	--card-background-color: #FFF1ED;
 
@@ -117,5 +117,4 @@ body.dark-mode {
 
 	--sidebar-backgroundColor-hover: rgba(230, 224, 233, 0.08);
 	--sidebar-backgroundColor-focus: rgba(230, 224, 233, 0.12);
-
 }

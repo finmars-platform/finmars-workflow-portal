@@ -13,7 +13,7 @@
 			</NuxtLink>
 			<div v-else>{{ item.text }}</div>
 
-			<fm-icon v-if="last != index" class="py-0 px-3 cursor-default text-lg" icon="east" />
+			<FmIcon v-if="last != index" class="py-0 px-3 cursor-default text-lg" icon="east" />
 		</template>
 	</div>
 </template>

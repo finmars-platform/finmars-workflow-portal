@@ -1,8 +1,8 @@
 <template>
 	<div>
-		<fm-btn @click.stop="refreshStorage()" class="header__btn-depressed">
-			<fm-icon icon="cloud_sync" title="Refresh Storage"/>
-		</fm-btn>
+		<FmButton @click.stop="refreshStorage()" class="header__btn-depressed">
+			<FmIcon icon="cloud_sync" title="Refresh Storage"/>
+		</FmButton>
 	</div>
 </template>
 

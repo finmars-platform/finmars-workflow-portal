@@ -8,13 +8,13 @@
 
 			<template #rightActions>
 				<fm-loader v-if="loader" class="w-8"/>
-				<fm-btn
-					class="text-capitalize fm-btn"
+				<FmButton
+					class="text-capitalize FmButton"
 					@click="$emit('refresh')"
 				>
-					<fm-icon icon="refresh" />
+					<FmIcon icon="refresh" />
 					<span>refresh</span>
-				</fm-btn>
+				</FmButton>
 			</template>
 		</fm-horizontal-panel>
 	</div>
@@ -31,7 +31,7 @@ defineProps({
 	.panel_wrap {
 		height: 65px;
 	}
-	.fm-btn {
+	.FmButton {
 		background: var(--base-backgroundColor);
 		color: var(--primary-color) !important;
 	}

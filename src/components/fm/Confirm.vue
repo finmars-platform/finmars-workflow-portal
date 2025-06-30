@@ -1,9 +1,9 @@
 <template>
-	<fm-base-modal :title="settings.title" v-model="settings.isOpen">
+	<BaseModal :title="settings.title" v-model="settings.isOpen">
 		<div class="content">
 			<div class="pb-4">{{ settings.text }}</div>
 
-			<fm-input-text
+			<FmTextField
 				v-if="settings.check"
 				v-model="checkedValue"
 				label="Value"
@@ -13,15 +13,17 @@
 
 		<template #footer>
 			<div class="flex flex-row justify-between">
-				<fm-btn type="text" @click="cancel()">CANCEL</fm-btn>
+				<FmButton type="text" @click="cancel()">CANCEL</FmButton>
 
-				<fm-btn type="filled" @click="ok()">OK</fm-btn>
+				<FmButton type="filled" @click="ok()">OK</FmButton>
 			</div>
 		</template>
-	</fm-base-modal>
+	</BaseModal>
 </template>
 
 <script setup>
+
+	import {FmTextField} from "@finmars/ui"
 
 	defineProps({
 		title: String,

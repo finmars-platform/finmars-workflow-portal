@@ -12,24 +12,24 @@
 			<h2>Workflow Template Details</h2>
 
 			<div class="button-group">
-				<!--				<fm-btn @click="refresh()" class="action-btn">-->
-				<!--					<fm-icon :icon="'refresh'" title="Refresh" />-->
-				<!--				</fm-btn>-->
-				<fm-btn @click="openLaunchDialog()" class="action-btn">
-					<fm-icon :icon="'play_arrow'" title="Launch"/>
-				</fm-btn>
-				<fm-btn @click="save()" class="action-btn">
-					<fm-icon :icon="'save'" title="Save"/>
-				</fm-btn>
-				<fm-btn @click="openTemplateFile()" class="action-btn">
-					<fm-icon :icon="'file_open'" title="Open template"/>
-				</fm-btn>
-				<fm-btn @click="arrangeNodes()" class="action-btn">
-					<fm-icon :icon="'layers'" title="Arrange Nodes"/>
-				</fm-btn>
-				<fm-btn @click="showEditAsJsonDialog()" class="action-btn">
-					<fm-icon :icon="'code'" title="Edit as JSON"/>
-				</fm-btn>
+				<!--				<FmButton @click="refresh()" class="action-btn">-->
+				<!--					<FmIcon :icon="'refresh'" title="Refresh" />-->
+				<!--				</FmButton>-->
+				<FmButton @click="openLaunchDialog()" class="action-btn">
+					<FmIcon :icon="'play_arrow'" title="Launch"/>
+				</FmButton>
+				<FmButton @click="save()" class="action-btn">
+					<FmIcon :icon="'save'" title="Save"/>
+				</FmButton>
+				<FmButton @click="openTemplateFile()" class="action-btn">
+					<FmIcon :icon="'file_open'" title="Open template"/>
+				</FmButton>
+				<FmButton @click="arrangeNodes()" class="action-btn">
+					<FmIcon :icon="'layers'" title="Arrange Nodes"/>
+				</FmButton>
+				<FmButton @click="showEditAsJsonDialog()" class="action-btn">
+					<FmIcon :icon="'code'" title="Edit as JSON"/>
+				</FmButton>
 			</div>
 
 			<!-- Workflow Information Table -->
@@ -156,13 +156,13 @@
 						style="height: 150px; width: 100%;"/>
 				</div>
 
-				<fm-btn @click="addBlock()" class="action-btn">Add Block</fm-btn>
+				<FmButton @click="addBlock()" class="action-btn">Add Block</FmButton>
 
 				<!-- Display Existing Blocks -->
 				<ul class="block-list">
 					<div v-for="block in blocks" :key="block.id" class="block-item">
 						{{ block.node.user_code }} - {{ block.name }}
-						<fm-btn @click="removeBlock(block.id)">Remove</fm-btn>
+						<FmButton @click="removeBlock(block.id)">Remove</FmButton>
 					</div>
 				</ul>
 
@@ -178,19 +178,19 @@
 						   class="input-field"/>
 				</div>
 
-				<fm-btn @click="addComment()" class="action-btn">Add Comment</fm-btn>
+				<FmButton @click="addComment()" class="action-btn">Add Comment</FmButton>
 
 			</div>
 
 
 			<div style="margin-top: 8px;">
-				<fm-btn @click="deleteWorkflowTemplate" class="delete-btn">Delete Workflow Template</fm-btn>
+				<FmButton @click="deleteWorkflowTemplate" class="delete-btn">Delete Workflow Template</FmButton>
 			</div>
 
 		</div>
 
 
-		<fm-base-modal
+		<BaseModal
 			title="Launch Workflow"
 			v-model="isLaunchDialogOpen"
 		>
@@ -212,15 +212,15 @@
 
 			<template #footer>
 				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isLaunchDialogOpen = !isLaunchDialogOpen">Cancel</fm-btn>
+					<FmButton type="text" @click="isLaunchDialogOpen = !isLaunchDialogOpen">Cancel</FmButton>
 
-					<fm-btn type="filled" @click="relaunch($event)">Launch</fm-btn>
+					<FmButton type="filled" @click="relaunch($event)">Launch</FmButton>
 				</div>
 			</template>
-		</fm-base-modal>
+		</BaseModal>
 
 
-		<fm-base-modal
+		<BaseModal
 			style="width: 80vw; height: 80vh;"
 			title="Edit as JSON"
 			v-model="isEditAsJsonDialogOpen"
@@ -235,12 +235,12 @@
 
 			<template #footer>
 				<div class="flex flex-row justify-between">
-					<fm-btn type="text" @click="isEditAsJsonDialogOpen = !isEditAsJsonDialogOpen">Cancel</fm-btn>
+					<FmButton type="text" @click="isEditAsJsonDialogOpen = !isEditAsJsonDialogOpen">Cancel</FmButton>
 
-					<fm-btn type="filled" @click="saveAsJson($event)">Save</fm-btn>
+					<FmButton type="filled" @click="saveAsJson($event)">Save</FmButton>
 				</div>
 			</template>
-		</fm-base-modal>
+		</BaseModal>
 
 		<EditBlockModal
 			v-if="editBlock"

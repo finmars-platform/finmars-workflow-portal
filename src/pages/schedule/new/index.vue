@@ -69,7 +69,7 @@
 
 			<!-- Actions -->
 			<div class="action-buttons">
-				<fm-btn type="submit" class="save-btn">Create</fm-btn>
+				<FmButton type="submit" class="save-btn">Create</FmButton>
 			</div>
 		</form>
 	</div>

@@ -14,7 +14,7 @@
 				<input id="user_code" v-model="userCode" type="text" required class="form-control" placeholder="com.finmars.local:daily" />
 			</div>
 
-			<fm-btn type="submit" class="submit-btn">Create</fm-btn>
+			<FmButton type="submit" class="submit-btn">Create</FmButton>
 		</form>
 	</div>
 </template>

@@ -86,7 +86,7 @@
     }
 </script>
 
-<style scoped>
+<style>
 .toast-error-notifications {
     padding-top: 10px !important;
     padding-right: 10px !important;
@@ -159,4 +159,8 @@
 .toast-container.warning {
     border-left-color: #f7c33d;
 }
+span.text-secondary {
+	color: #000 !important;
+}
+
 </style>

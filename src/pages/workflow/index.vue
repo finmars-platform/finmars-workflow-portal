@@ -35,35 +35,35 @@
 		</div>
 
 		<div class="flex mb-4">
-			<FmBtn
+			<FmButton
 				class="button"
 				:type="currentPage === 1 ? 'disabled' : 'text'"
 				v-if="totalPages !== 1"
 				@click="openPreviousPage"
 			>
 				Previous
-			</FmBtn>
+			</FmButton>
 
 			<div class="flex">
 				<div v-for="page in totalPages" :key="page">
-					<FmBtn
+					<FmButton
 						v-if="totalPages > currentPage"
 						:type="currentPage === page && 'filled'"
 						class="button"
 						@click="openPage(page)"
 					>
 						{{ page }}
-					</FmBtn>
+					</FmButton>
 				</div>
 			</div>
-			<FmBtn
+			<FmButton
 				v-if="currentPage < totalPages"
 				type="text"
 				class="button"
 				@click="openNextPage"
 			>
 				Next
-			</FmBtn>
+			</FmButton>
 		</div>
 	</div>
 </template>
