@@ -2,6 +2,8 @@
 
 	<div class="workflow-table-container">
 
+		<FmButton type="primary" v-on:click="refreshStorage()">Refresh Storage</FmButton>
+
 		<!-- Workflow Definitions Table -->
 		<table class="workflow-table">
 			<thead>
@@ -67,6 +69,20 @@ definePageMeta({
 	middleware: "auth",
 });
 
+let definitions = ref([])
+
+async function refreshStorage() {
+	await useApi('refreshStorage.get');
+
+	useNotify({
+		type: 'success',
+		title: 'Success',
+		text: 'Storage refreshed'
+	});
+
+	definitions = await useApi('definitionList.get');
+}
+
 let isRunWorkflowDialog = ref(false);
 let activeWorkflowItem = ref(null);
 let activeWorkflowPayload = ref('');
@@ -110,7 +126,7 @@ function editorInit(editor) {
 	editor.navigateFileStart();
 }
 
-const definitions = await useApi('definitionList.get');
+definitions = await useApi('definitionList.get');
 console.log('definitions', definitions);
 
 </script>
@@ -169,7 +185,7 @@ console.log('definitions', definitions);
 .modal-footer {
 	display: flex;
 	justify-content: space-between;
-	margin-top: 1rem;
+	//margin-top: 1rem;
 }
 
 .modal-footer FmButton {
