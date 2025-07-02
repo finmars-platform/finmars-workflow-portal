@@ -13,6 +13,7 @@
 					<th>Name</th>
 					<th>User Code</th>
 					<th>Crontab</th>
+					<th>Owner</th>
 					<th>Is Enabled</th>
 					<th>Notes</th>
 					<th>Next Run At</th>
@@ -29,6 +30,7 @@
 					<td>{{ item.name }}</td>
 					<td>{{ item.user_code }}</td>
 					<td>{{ formatCrontab(item.crontab_line) }}</td>
+					<td>{{ item.owner_username }}</td>
 					<td><span v-if="item.enabled">Yes</span> <span v-if="!item.enabled">No</span></td>
 					<td>{{ item.notes }}</td>
 					<td><span :title="'Server Time: ' + item.next_run_at"> {{formatDate(item.next_run_at)}} </span></td>

@@ -1,5 +1,5 @@
 /* Default to light mode */
-:root {
+body.light-theme {
 	/* Light mode variables */
 	--primary-color: #8F4C36;
 	--onPrimary-color: #FFFFFF;
@@ -53,7 +53,7 @@
 }
 
 /* Switch to dark mode when .dark-mode class is present on body */
-body.dark-mode {
+body.dark-theme {
 	/* General usage variables*/
 	/* --[?special]-[?state]-[styleProperty] */
 	/* always kebab-case */

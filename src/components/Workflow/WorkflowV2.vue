@@ -18,18 +18,18 @@
 				<div style="display: flex">
 
 					<FmButton @click="refresh()">
-						<FmIcon :icon="'refresh'" title="Refresh"/>
+						<FmIcon icon="refresh" title="Refresh"/>
 					</FmButton>
 					<FmButton @click="openRelaunchDialog()" v-if="workflow?.status !== 'progress'">
-						<FmIcon :icon="'replay'" title="Relaunch"/>
+						<FmIcon icon="replay" title="Relaunch"/>
 					</FmButton>
 					<FmButton @click="cancelWorkflow()"
 							v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
-						<FmIcon :icon="'cancel'" title="Cancel"/>
+						<FmIcon icon="cancel" title="Cancel"/>
 					</FmButton>
 
 					<FmButton @click="activeTask = null" v-if="activeTask">
-						<FmIcon :icon="'home'" title="Show Workflow"/>
+						<FmIcon icon="home" title="Show Workflow"/>
 					</FmButton>
 
 
@@ -37,10 +37,10 @@
 
 				<div>
 					<FmButton @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
-						<FmIcon :icon="'pause'" title="Pause"/>
+						<FmIcon icon="pause" title="Pause"/>
 					</FmButton>
 					<FmButton @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
-						<FmIcon :icon="'play_circle'" title="Resume"/>
+						<FmIcon icon="play_circle" title="Resume"/>
 					</FmButton>
 				</div>
 
@@ -218,9 +218,9 @@
 
 			<template #controls="{ cancel }">
 				<div class="flex flex-row justify-between">
-					<FmButton type="text" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</FmButton>
+					<FmButton type="secondary" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</FmButton>
 
-					<FmButton type="filled" @click="relaunch($event)">Relaunch</FmButton>
+					<FmButton type="primary" @click="relaunch($event)">Relaunch</FmButton>
 				</div>
 			</template>
 		</BaseModal>
@@ -240,9 +240,9 @@
 
 			<template #controls="{ cancel }">
 				<div class="flex flex-row justify-between">
-					<FmButton type="text" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</FmButton>
+					<FmButton type="secondary" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</FmButton>
 
-					<FmButton type="filled" @click="resumeWorkflow($event)">Relaunch</FmButton>
+					<FmButton type="primary" @click="resumeWorkflow($event)">Relaunch</FmButton>
 				</div>
 			</template>
 		</BaseModal>

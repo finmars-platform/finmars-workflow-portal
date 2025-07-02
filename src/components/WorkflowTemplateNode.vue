@@ -153,7 +153,7 @@
 
 			<template #controls="{ cancel }">
 				<div class="flex flex-row justify-between">
-					<FmButton type="filled" @click="isSourceCodeDialogOpen = !isSourceCodeDialogOpen">Save</FmButton>
+					<FmButton type="primary" @click="isSourceCodeDialogOpen = !isSourceCodeDialogOpen">Save</FmButton>
 				</div>
 			</template>
 		</BaseModal>
@@ -299,8 +299,6 @@ export default defineComponent({
 	},
 	components: {
 		VAceEditor,
-		BaseModal,
-		FmButton,
 		Ref
 	}
 })
