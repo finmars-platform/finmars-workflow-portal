@@ -63,7 +63,7 @@
 				theme="monokai"
 				style="height: 150px; width: 100%;"/>
 		</div>
-		<template #footer>
+		<template #controls="{ cancel }">
 			<div class="flex flex-row justify-between">
 				<FmButton type="text" @click="closeModal">CANCEL</FmButton>
 

@@ -43,7 +43,7 @@
 				/>
 			</div>
 
-			<template #footer>
+			<template #controls="{ cancel }">
 				<div class="modal-footer">
 					<FmButton type="text" @click="isRunWorkflowDialog = !isRunWorkflowDialog">Cancel</FmButton>
 					<FmButton type="filled" @click="runWorkflow($event, activeWorkflowItem)">Run</FmButton>

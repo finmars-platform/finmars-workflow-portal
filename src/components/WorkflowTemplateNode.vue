@@ -151,7 +151,7 @@
 				@pointerdown.stop=""
 			/>
 
-			<template #footer>
+			<template #controls="{ cancel }">
 				<div class="flex flex-row justify-between">
 					<FmButton type="filled" @click="isSourceCodeDialogOpen = !isSourceCodeDialogOpen">Save</FmButton>
 				</div>
