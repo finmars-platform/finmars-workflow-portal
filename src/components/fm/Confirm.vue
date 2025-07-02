@@ -11,7 +11,7 @@
 			/>
 		</div>
 
-		<template #footer>
+		<template #controls="{ cancel }">
 			<div class="flex flex-row justify-between">
 				<FmButton type="text" @click="cancel()">CANCEL</FmButton>
 

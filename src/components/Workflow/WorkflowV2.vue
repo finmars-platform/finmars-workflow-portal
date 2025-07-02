@@ -216,7 +216,7 @@
 				theme="monokai"
 				style="height: 300px;width: 100%;"/>
 
-			<template #footer>
+			<template #controls="{ cancel }">
 				<div class="flex flex-row justify-between">
 					<FmButton type="text" @click="isRelaunchDialogOpen = !isRelaunchDialogOpen">Cancel</FmButton>
 
@@ -238,7 +238,7 @@
 				theme="monokai"
 				style="height: 300px;width: 100%;"/>
 
-			<template #footer>
+			<template #controls="{ cancel }">
 				<div class="flex flex-row justify-between">
 					<FmButton type="text" @click="isResumeDialogOpen = !isResumeDialogOpen">Cancel</FmButton>
 
