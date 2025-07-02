@@ -2,6 +2,8 @@
 
 	<div class="workflow-table-container">
 
+		<FmButton type="primary" v-on:click="refreshStorage()">Refresh Storage</FmButton>
+
 		<!-- Workflow Definitions Table -->
 		<table class="workflow-table">
 			<thead>
@@ -66,6 +68,16 @@ store.init();
 definePageMeta({
 	middleware: "auth",
 });
+
+async function refreshStorage() {
+	await useApi('refreshStorage.get');
+
+	useNotify({
+		type: 'success',
+		title: 'Success',
+		text: 'Storage refreshed'
+	});
+}
 
 let isRunWorkflowDialog = ref(false);
 let activeWorkflowItem = ref(null);
@@ -169,7 +181,7 @@ console.log('definitions', definitions);
 .modal-footer {
 	display: flex;
 	justify-content: space-between;
-	margin-top: 1rem;
+	//margin-top: 1rem;
 }
 
 .modal-footer FmButton {
