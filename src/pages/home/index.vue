@@ -69,6 +69,8 @@ definePageMeta({
 	middleware: "auth",
 });
 
+let definitions = ref([])
+
 async function refreshStorage() {
 	await useApi('refreshStorage.get');
 
@@ -77,6 +79,8 @@ async function refreshStorage() {
 		title: 'Success',
 		text: 'Storage refreshed'
 	});
+
+	definitions = await useApi('definitionList.get');
 }
 
 let isRunWorkflowDialog = ref(false);
@@ -122,7 +126,7 @@ function editorInit(editor) {
 	editor.navigateFileStart();
 }
 
-const definitions = await useApi('definitionList.get');
+definitions = await useApi('definitionList.get');
 console.log('definitions', definitions);
 
 </script>
