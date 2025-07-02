@@ -88,5 +88,14 @@ export default {
 		post: resolveHost() + '/{client}/api/v1/users/member/',
 		delete: resolveHost() + '/{client}/api/v1/users/member/{id}/',
 		put: resolveHost() + '/{client}/api/v1/users/member/{id}/'
-	}
+	},
+
+	memberLayout: {
+		get: resolveHost() + '/{client}/api/v1/ui/member-layout/',
+		put: resolveHost() + '/{client}/api/v1/ui/member-layout/{id}/'
+	},
+
+	systemMessages: {
+		get: resolveHost() + '/{client}/api/v1/system-messages/message/'
+	},
 };

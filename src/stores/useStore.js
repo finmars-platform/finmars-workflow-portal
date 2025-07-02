@@ -148,7 +148,15 @@ export default defineStore({
 				this.user.data.autosave_layouts = true
 			}
 
-			document.body.classList.toggle('dark', JSON.parse(localStorage.getItem("isDarkMode")) || false);
+			document.body.classList.toggle('dark', this.user.data.dark_mode);
+
+			if (this.user.data.dark_mode) {
+				document.body.classList.add('dark-theme');
+				document.body.classList.remove('light-theme');
+			} else {
+				document.body.classList.add('light-theme');
+				document.body.classList.remove('dark-theme');
+			}
 
 		},
 	},
@@ -156,6 +164,9 @@ export default defineStore({
 		darkModeActive(state) {
 			// return state.user.data?.dark_mode
 			return JSON.parse(localStorage.getItem("isDarkMode")) || false;
+		},
+		isUrlValid(state) {
+			return state.realm_code && state.space_code;
 		},
 	},
 })

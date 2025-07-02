@@ -1,10 +1,15 @@
 <template>
-	<div v-if="notLoadingMember && store.user" class="wrap">
-		<fm-navbar v-if="!$route.meta.isHideSidebar"/>
-
+	<div v-if="store.user && allowedItems" class="default">
+		<TheHeader />
 		<div class="main">
-			<the-header />
-
+			<FmNavigationPortal
+				v-if="!$route?.meta?.isHideSidebar"
+				alternativeLink="RouterLink"
+				:base="config?.public?.apiURL"
+				:route="$route"
+				:isVue="true"
+				:items="allowedItems"
+			/>
 			<div class="content scrollable">
 				<slot />
 			</div>
@@ -13,6 +18,9 @@
 </template>
 
 <script setup>
+
+	import { useNavigationRoutes } from '~/composables/useNavigationRoutes';
+
 	import useStore from "~/stores/useStore";
 	import FmNavbar from "~/components/fm/Navbar.vue";
 	import TheHeader from "~/components/TheHeader.vue";
@@ -20,11 +28,14 @@
 
 	const store = useStore();
   	// const evAttrsStore = useEvAttributesStore();
-	// const config = useRuntimeConfig();
+	const config = useRuntimeConfig();
+
+	const { init } = useNavigationRoutes();
 
 	await store.init();
 
 	let notLoadingMember = ref(true)
+	const allowedItems = ref(null);
 
 	watch(
 		() => store.user?.data.dark_mode,
@@ -41,25 +52,38 @@
 
 			await Promise.all([
 				store.getMe(),
-				store.fetchEcosystemDefaults(),
+				// store.fetchEcosystemDefaults(),
 				// evAttrsStore.fetchSystemAttributes(),
 			]);
 
 			notLoadingMember.value = true
 		}
 	})
+
+
+	watch(
+		() => store.member,
+		async () => {
+
+			console.log("here??")
+
+			const result = await init();
+			if (result) {
+				allowedItems.value = result;
+			}
+		}
+	);
+
 </script>
 <style lang="postcss" scoped>
-	.wrap {
-		display: flex;
-	}
-	.main {
-		flex-grow: 1;
-		//width: calc(100vw - 200px);
-		background: var(--base-backgroundColor);
-	}
-	.content {
-		//height: calc(100vh - 52px);
-		overflow: auto;
-	}
+.main {
+	display: flex;
+	background: var(--base-backgroundColor);
+}
+
+.content {
+	flex-grow: 1;
+	height: calc(100vh - 80px);
+	overflow: auto;
+}
 </style>
