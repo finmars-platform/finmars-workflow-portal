@@ -3,7 +3,7 @@
 		<h1>Edit Schedule</h1>
 
 		<!-- Schedule Form -->
-		<form @submit.prevent="createSchedule" class="schedule-form">
+		<form  class="schedule-form">
 			<table class="schedule-info-table">
 
 				<tr>
@@ -68,8 +68,13 @@
 			</table>
 
 			<!-- Actions -->
-			<div class="action-buttons">
-				<FmButton type="submit" class="save-btn">Create</FmButton>
+			<div class="action-buttons" style="justify-content: space-between; display: flex">
+
+				<NuxtLink :to="useGetNuxtLink(`/schedule`, $route.params)">
+					<FmIcon icon="mdi-view-list" title="Back"/> Back
+				</NuxtLink>
+
+				<FmButton type="primary" class="save-btn" v-on:click="createSchedule()">Create</FmButton>
 			</div>
 		</form>
 	</div>
@@ -82,6 +87,7 @@ import 'ace-builds/src-noconflict/theme-monokai';
 
 import {ref, onMounted} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
+import {useGetNuxtLink} from "~/composables/useMeta";
 
 
 let store = useStore();
@@ -89,7 +95,7 @@ store.init();
 const route = useRoute();
 const router = useRouter();
 
-let schedulePayload = ref('')
+let schedulePayload = ref('{}')
 
 definePageMeta({
 	middleware: "auth",

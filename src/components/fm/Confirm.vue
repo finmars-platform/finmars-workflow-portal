@@ -13,9 +13,9 @@
 
 		<template #controls="{ cancel }">
 			<div class="flex flex-row justify-between">
-				<FmButton type="text" @click="cancel()">CANCEL</FmButton>
+				<FmButton type="secondary" @click="cancel()">CANCEL</FmButton>
 
-				<FmButton type="filled" @click="ok()">OK</FmButton>
+				<FmButton type="primary" @click="ok()">OK</FmButton>
 			</div>
 		</template>
 	</BaseModal>
@@ -62,6 +62,9 @@
 </script>
 
 <style lang="postcss" scoped>
+	.modal {
+		background: #fff;
+	}
 	.content {
 		max-width: 400px;
 	}

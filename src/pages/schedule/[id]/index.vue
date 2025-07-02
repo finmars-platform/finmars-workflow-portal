@@ -1,9 +1,15 @@
 <template>
 	<div class="schedule-edit-page">
+
+		<NuxtLink :to="useGetNuxtLink(`/schedule`, $route.params)">
+			<FmIcon icon="mdi-view-list" title="Back"/> Back
+		</NuxtLink>
+
+
 		<h1>Edit Schedule</h1>
 
 		<!-- Schedule Form -->
-		<form @submit.prevent="saveSchedule" class="schedule-form">
+		<form  class="schedule-form">
 			<table class="schedule-info-table">
 				<tr>
 					<th>ID</th>
@@ -94,20 +100,21 @@
 			</table>
 
 			<!-- Actions -->
-			<div class="action-buttons">
-				<FmButton type="submit" class="save-btn">Save</FmButton>
+			<div class="action-buttons" style="display: flex; justify-content: space-between">
+				<FmButton  @click="deleteSchedule" class="delete-btn" type="secondary">Delete</FmButton>
+				<FmButton type="primary" v-on:click="saveSchedule()" class="save-btn">Save</FmButton>
 			</div>
 
 		</form>
 
 
 		<div style="margin-top: 8px;">
-			<FmButton  @click="deleteSchedule" class="delete-btn">Delete</FmButton>
+
 		</div>
 
 		<hr style="margin: 24px 0">
 
-		<FmButton @click="runManual"  class="save-btn">Run Manually</FmButton>
+		<FmButton @click="runManual"  type="secondary">Run Manually</FmButton>
 	</div>
 </template>
 
@@ -119,6 +126,7 @@ import 'ace-builds/src-noconflict/theme-monokai';
 
 import {onMounted, ref} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
+import {useGetNuxtLink} from "~/composables/useMeta";
 
 let schedulePayload = ref('')
 

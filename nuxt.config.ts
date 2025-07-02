@@ -46,9 +46,11 @@ export default defineNuxtConfig({
 		/* Options for @pinia/nuxt */
 	},
 	css: [
+		"~/assets/css/material-icons.css",
 		'@finmars/ui/dist/finmars-ui.css',
-		// '@finmars/ui/dist/themes.css'
+		'@finmars/ui/dist/themes.css',
 		'~/assets/scss/variables.scss',
+		'~/assets/css/main.css',
 	],
 	postcss: {
 		plugins: {

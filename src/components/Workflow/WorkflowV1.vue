@@ -8,6 +8,10 @@
 
 				<div class="v-data-table workflow-side">
 
+					<NuxtLink :to="useGetNuxtLink(`/workflow`, $route.params)">
+						<FmIcon icon="mdi-view-list" title="Launch"/> Back
+					</NuxtLink>
+
 					<h3>Workflow</h3>
 
 					<div class="v-data-table__wrapper">
@@ -50,12 +54,12 @@
 
 					<div v-for="task in workflow.tasks" :key="task.id">
 
-						<FmButton @click="selectedTask = task" :class="{ active: selectedTask === task }" class="task-button">
+						<div @click="selectedTask = task" :class="{ active: selectedTask === task }" class="task-button" type="secondary">
 							[{{ task.id }}] {{ task.name }} &nbsp;
 							<div class="chip" :style="{ backgroundColor: getColor(task.status) }">
 								{{ task.status }}
 							</div>
-						</FmButton>
+						</div>
 					</div>
 
 				</div>
@@ -63,26 +67,26 @@
 				<div style="padding: 0 12px;" class="workflow-task-side">
 
 					<div class="button-group">
-						<FmButton @click="refresh">
-							<FmIcon icon="refresh" title="Refresh"/>
+						<FmButton @click="refresh" type="secondary">
+							<FmIcon icon="mdi-refresh" title="Refresh"/>
 							Refresh
 						</FmButton>
-						<FmButton @click="confirmRelaunch">
-							<FmIcon icon="play_circle" title="Relaunch"/>
+						<FmButton @click="confirmRelaunch" type="secondary">
+							<FmIcon icon="mdi-play" title="Relaunch"/>
 							Relaunch
 						</FmButton>
 						<FmButton @click="cancelWorkflow"
-								v-if="workflow.status === 'init' || workflow.status === 'progress'">
-							<FmIcon icon="cancel" title="Terminate"/>
+								v-if="workflow.status === 'init' || workflow.status === 'progress'" type="secondary">
+							<FmIcon icon="mdi-cancel" title="Terminate"/>
 							Cancel
 						</FmButton>
-						<FmButton @click="payloadDialog = true">
-							<FmIcon icon="format_list_bulleted" title="Payload"/>
+						<FmButton @click="payloadDialog = true" type="secondary">
+							<FmIcon icon="mdi-list-box-outline" title="Payload"/>
 							Payload
 						</FmButton>
 
-						<FmButton @click="jsonDialog = true">
-							<FmIcon icon="format_list_bulleted" title="Json"/>
+						<FmButton @click="jsonDialog = true" type="secondary">
+							<FmIcon icon="mdi-code-json" title="Json"/>
 							JSON
 						</FmButton>
 
@@ -107,8 +111,8 @@
 									<td>
 
 										<a target="_blank" :href="getFlowerTaskUrl()" class="pa-6">
-											<FmButton>
-												<FmIcon icon="launch"/>
+											<FmButton type="secondary">
+												<FmIcon icon="mdi-flower"/>
 												View in Flower
 											</FmButton>
 										</a>
@@ -221,7 +225,7 @@
 				</div>
 				<template #controls="{ cancel }">
 					<div class="flex flex-row justify-between">
-						<FmButton type="text" @click="payloadDialog = false">Cancel</FmButton>
+						<FmButton type="secondary" @click="payloadDialog = false">Cancel</FmButton>
 					</div>
 				</template>
 			</BaseModal>
@@ -236,7 +240,7 @@
 
 				<template #controls="{ cancel }">
 					<div class="flex flex-row justify-between">
-						<FmButton type="text" @click="jsonDialog = false">Cancel</FmButton>
+						<FmButton type="secondary" @click="jsonDialog = false">Cancel</FmButton>
 					</div>
 				</template>
 			</BaseModal>
@@ -247,6 +251,7 @@
 <script setup>
 
 import {FmIcon, FmButton} from "@finmars/ui"
+import {useGetNuxtLink} from "~/composables/useMeta";
 
 const route = useRoute();
 const store = useStore();
@@ -335,7 +340,6 @@ function formatDate(dateString) {
 <style scoped>
 .workflow-detail-page {
 	display: flex;
-	height: 100vh;
 }
 
 /* Left side for Rete.js Editor */
@@ -404,7 +408,7 @@ code {
 	box-shadow: none;
 	font-weight: normal;
 	font-size: 90%;
-	max-width: 50vw;
+	max-width: 40vw;
 }
 
 td {
@@ -453,6 +457,13 @@ td {
 	margin-bottom: 16px;
 }
 
+.task-button {
+	cursor: pointer;
+	&:hover {
+		opacity: .8;
+	}
+}
+
 .task-button.btn.text.active {
 	background-color: rgba(143, 76, 54, .6);
 	color: #fff;
@@ -478,13 +489,10 @@ h3 {
 
 .workflow-task-side {
 	flex: 7;    /* 7 parts out of 10 */
-	overflow-y: auto;
 	position: relative; /* establish a new positioning context */
 }
 
 .button-group {
-	//position: fixed;
-	//top: 0;               /* stick to top of its container */
 	background-color: white;  /* cover what’s behind it */
 	z-index: 10;          /* stay on top of other stuff */
 }

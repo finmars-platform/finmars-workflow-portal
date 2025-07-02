@@ -1,9 +1,13 @@
 <template>
 	<div class="new-workflow-page">
+
+
+
+
 		<h1>Create New Workflow</h1>
 
 		<!-- Workflow Creation Form -->
-		<form @submit.prevent="createWorkflow" class="workflow-form">
+		<div  class="workflow-form">
 			<div class="form-group">
 				<label for="name">Workflow Name</label>
 				<input id="name" v-model="name" type="text" required class="form-control" placeholder="Daily" />
@@ -14,14 +18,25 @@
 				<input id="user_code" v-model="userCode" type="text" required class="form-control" placeholder="com.finmars.local:daily" />
 			</div>
 
-			<FmButton type="submit" class="submit-btn">Create</FmButton>
-		</form>
+			<div style="display: flex; justify-content: space-between">
+
+				<NuxtLink :to="useGetNuxtLink(`/workflow-template`, $route.params)">
+					<FmIcon icon="mdi-view-list" title="Launch"/> Back
+				</NuxtLink>
+
+				<FmButton type="primary" v-on:click="createWorkflow()"  class="submit-btn">Create</FmButton>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script setup>
+
+import {FmIcon, FmButton} from "@finmars/ui"
+
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import {useGetNuxtLink} from "~/composables/useMeta";
 
 const router = useRouter();
 let store = useStore();
@@ -111,25 +126,4 @@ label {
 	outline: none;
 }
 
-.submit-btn {
-	padding: 12px 20px;
-	background-color: #007bff;
-	color: white;
-	font-size: 1rem;
-	font-weight: bold;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-	transition: background-color 0.3s ease;
-	text-align: center;
-}
-
-.submit-btn:hover {
-	background-color: #0056b3;
-}
-
-.submit-btn:focus {
-	outline: none;
-	box-shadow: 0 0 8px rgba(0, 123, 255, 0.4); /* Focus shadow effect on button */
-}
 </style>

@@ -32,7 +32,7 @@
 						<slot name="controls" :cancel="cancel">
 							<div class="flex sb" v-if="controls">
 								<FmButton
-									type="text"
+									type="secondary"
 									@click="
 										cancel(), controls.cancel.cb ? controls.cancel.cb() : ''
 									"
@@ -140,7 +140,9 @@ $modal-footer-height: 57px;
 .modal_content {
 	overflow: auto;
 	max-height: calc(90vh - $modal-header-height - $modal-footer-height);
-	height: calc(100% - $modal-header-height - $modal-footer-height);
+	//height: calc(100% - $modal-header-height - $modal-footer-height);
+	min-height: 400px;
+  max-height: calc(100% - $modal-header-height - $modal-footer-height);
 	padding: 15px 20px 0;
 	min-width: 400px; // so that FmInputEntityNames could fit in
 	background: var(--base-backgroundColor);
@@ -162,6 +164,7 @@ $modal-footer-height: 57px;
 	max-width: 90%;
 	border-radius: 4px;
 	z-index: 51;
+  max-height: max-content;
 
   margin: 10vh auto;
 
@@ -180,6 +183,7 @@ $modal-footer-height: 57px;
 	&_head {
 		font-weight: 500;
 		font-size: 20px;
+    padding-top: 8px;
 	}
 }
 

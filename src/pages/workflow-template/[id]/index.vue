@@ -2,9 +2,17 @@
 
 	<div class="workflow-detail-page">
 
+
+
 		<!-- Left side: Rete.js Workflow Graph -->
 		<div class="workflow-graph-section">
-			<div id="editor" class="editor"></div>
+
+			<NuxtLink :to="useGetNuxtLink(`/workflow-template`, $route.params)">
+				<FmIcon icon="mdi-view-list" title="Launch"/> Back
+			</NuxtLink>
+
+
+			<div id="editor" class="editor" style="margin-top: 16px"></div>
 		</div>
 
 		<!-- Right side: Workflow Details -->
@@ -15,20 +23,20 @@
 				<!--				<FmButton @click="refresh()" class="action-btn">-->
 				<!--					<FmIcon :icon="'refresh'" title="Refresh" />-->
 				<!--				</FmButton>-->
-				<FmButton @click="openLaunchDialog()" class="action-btn">
-					<FmIcon :icon="'play_arrow'" title="Launch"/>
+				<FmButton @click="openLaunchDialog()" class="action-btn" type="secondary">
+					<FmIcon icon="mdi-play" title="Launch"/>
 				</FmButton>
-				<FmButton @click="save()" class="action-btn">
-					<FmIcon :icon="'save'" title="Save"/>
+				<FmButton @click="save()" class="action-btn" type="secondary">
+					<FmIcon icon="mdi-content-save" title="Save"/>
 				</FmButton>
-				<FmButton @click="openTemplateFile()" class="action-btn">
-					<FmIcon :icon="'file_open'" title="Open template"/>
+				<FmButton @click="openTemplateFile()" class="action-btn" type="secondary">
+					<FmIcon icon="mdi-file-account" title="Open template"/>
 				</FmButton>
-				<FmButton @click="arrangeNodes()" class="action-btn">
-					<FmIcon :icon="'layers'" title="Arrange Nodes"/>
+				<FmButton @click="arrangeNodes()" class="action-btn" type="secondary">
+					<FmIcon icon="mdi-layers" title="Arrange Nodes"/>
 				</FmButton>
-				<FmButton @click="showEditAsJsonDialog()" class="action-btn">
-					<FmIcon :icon="'code'" title="Edit as JSON"/>
+				<FmButton @click="showEditAsJsonDialog()" class="action-btn" type="secondary">
+					<FmIcon icon="mdi-code-json" title="Edit as JSON"/>
 				</FmButton>
 			</div>
 
@@ -156,7 +164,7 @@
 						style="height: 150px; width: 100%;"/>
 				</div>
 
-				<FmButton @click="addBlock()" class="action-btn">Add Block</FmButton>
+				<FmButton @click="addBlock()" class="action-btn" type="secondary">Add Block</FmButton>
 
 				<!-- Display Existing Blocks -->
 				<ul class="block-list">
@@ -212,9 +220,9 @@
 
 			<template #footer>
 				<div class="flex flex-row justify-between">
-					<FmButton type="text" @click="isLaunchDialogOpen = !isLaunchDialogOpen">Cancel</FmButton>
+					<FmButton type="secondary" @click="isLaunchDialogOpen = !isLaunchDialogOpen">Cancel</FmButton>
 
-					<FmButton type="filled" @click="relaunch($event)">Launch</FmButton>
+					<FmButton type="primary" @click="relaunch($event)">Launch</FmButton>
 				</div>
 			</template>
 		</BaseModal>
@@ -233,11 +241,11 @@
 				theme="monokai"
 				style="height: 100%;width: 100%;"/>
 
-			<template #footer>
+			<template #controls="{ cancel }">
 				<div class="flex flex-row justify-between">
-					<FmButton type="text" @click="isEditAsJsonDialogOpen = !isEditAsJsonDialogOpen">Cancel</FmButton>
+					<FmButton type="secondary" @click="isEditAsJsonDialogOpen = !isEditAsJsonDialogOpen">Cancel</FmButton>
 
-					<FmButton type="filled" @click="saveAsJson($event)">Save</FmButton>
+					<FmButton type="primary" @click="saveAsJson($event)">Save</FmButton>
 				</div>
 			</template>
 		</BaseModal>
@@ -279,6 +287,7 @@ import {CommentPlugin} from "rete-comment-plugin";
 import WorkflowNode from "~/components/WorkflowNode.vue";
 import WorkflowTemplateNode from "~/components/WorkflowTemplateNode.vue";
 import EditBlockModal from "~/components/modals/EditBlockModal.vue";
+import {useGetNuxtLink} from "~/composables/useMeta";
 
 const router = useRouter();
 const route = useRoute();
@@ -897,7 +906,7 @@ onMounted(async () => {
 <style scoped>
 .workflow-detail-page {
 	display: flex;
-	height: 100vh;
+	//height: 100vh;
 }
 
 /* Left side for Rete.js Editor */
@@ -909,7 +918,7 @@ onMounted(async () => {
 
 #editor {
 	width: 100%;
-	height: 100%;
+	height: calc(100% - 48px);
 	border: 2px solid #ccc;
 	border-radius: 5px;
 }
@@ -939,20 +948,6 @@ h3 {
 	display: flex;
 	justify-content: space-between;
 	margin-bottom: 15px;
-}
-
-.action-btn {
-	padding: 10px 15px;
-	margin-right: 10px;
-	background-color: #007bff;
-	color: #fff;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-}
-
-.action-btn:hover {
-	background-color: #0056b3;
 }
 
 /* Workflow Information Table */
