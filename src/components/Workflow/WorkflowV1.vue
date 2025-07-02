@@ -483,8 +483,6 @@ h3 {
 }
 
 .button-group {
-	//position: fixed;
-	//top: 0;               /* stick to top of its container */
 	background-color: white;  /* cover what’s behind it */
 	z-index: 10;          /* stay on top of other stuff */
 }
