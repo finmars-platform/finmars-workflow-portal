@@ -16,7 +16,7 @@
 							<slot name="modalTop" />
 						</div>
 
-						<FmBtn
+						<FmButton
 							:disabled="closingDisabled"
 							type="icon"
 							icon="close"
@@ -31,16 +31,16 @@
 					<div class="modal_bottom">
 						<slot name="controls" :cancel="cancel">
 							<div class="flex sb" v-if="controls">
-								<FmBtn
+								<FmButton
 									type="text"
 									@click="
 										cancel(), controls.cancel.cb ? controls.cancel.cb() : ''
 									"
-								>{{ controls.cancel.name }}</FmBtn
+								>{{ controls.cancel.name }}</FmButton
 								>
-								<FmBtn @click="cancel(), controls.action.cb()">{{
+								<FmButton @click="cancel(), controls.action.cb()">{{
 										controls.action.name
-									}}</FmBtn>
+									}}</FmButton>
 							</div>
 						</slot>
 					</div>
@@ -162,6 +162,8 @@ $modal-footer-height: 57px;
 	max-width: 90%;
 	border-radius: 4px;
 	z-index: 51;
+
+  margin: 10vh auto;
 
 	.close {
 		cursor: pointer;

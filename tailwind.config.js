@@ -1,5 +1,3 @@
-import { default as tailwindCssVariables } from "./tailwind/cssVariablesPlugin.tw";
-
 export default {
 	content: [
 		'./src/**/*.{vue,js}',
@@ -9,5 +7,5 @@ export default {
 	theme: {
 		extend: {}
 	},
-	plugins: [tailwindCssVariables]
+	plugins: []
 }

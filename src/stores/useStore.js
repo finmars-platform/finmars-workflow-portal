@@ -45,6 +45,65 @@ export default defineStore({
 
 		},
 
+		async getMe() {
+			const memberProm = useApi('member.get', { params: { id: 0 } });
+			const memberLayoutProm = useApi('memberLayout.get', {
+				filters: { is_default: true }
+			});
+
+			const res = await Promise.all([memberProm, memberLayoutProm]);
+
+			if (res[0]._$error || res[1]._$error) {
+				console.error(
+					'Error while fetching data of member:',
+					res[0]._$error || res[1]._$error
+				);
+			} else {
+				let member = res[0];
+
+				if (!member.data) {
+					member.data = {};
+				}
+
+				let memberLayout = res[1].results[0];
+
+				if (!memberLayout.data) {
+					memberLayout.data = {};
+				}
+
+				if (typeof memberLayout.data.autosave_layouts !== 'boolean') {
+					memberLayout.data.autosave_layouts = true;
+				}
+
+				if (!memberLayout.data.favorites) {
+					memberLayout.data.favorites = {};
+				}
+
+				if (!memberLayout.data.favorites.transaction_type) {
+					memberLayout.data.favorites.transaction_type = [];
+				}
+
+				if (!memberLayout.data.favorites.attributes) {
+					memberLayout.data.favorites.attributes = {};
+				}
+
+				/*if (!res.data.favorites) {
+					res.data.favorites = {}
+				}
+
+				if (!res.data.favorites.transaction_type) {
+					res.data.favorites.transaction_type = []
+				}
+
+				if (!res.data.favorites.attributes) {
+					res.data.favorites.attributes = {}
+				}*/
+
+				this.member = member;
+				this.memberLayout = memberLayout;
+			}
+		},
+
 		async getUser() {
 			let res;
 
