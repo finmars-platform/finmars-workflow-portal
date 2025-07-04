@@ -5,6 +5,11 @@
 
 			<!-- Left side: Rete.js Workflow Graph -->
 			<div class="workflow-graph-section">
+
+				<NuxtLink :to="useGetNuxtLink(`/workflow`, $route.params)">
+					<FmIcon icon="mdi-view-list" title="Launch"/> Back
+				</NuxtLink>
+
 				<div id="editor" class="editor"></div>
 			</div>
 
@@ -17,19 +22,19 @@
 
 				<div style="display: flex">
 
-					<FmButton @click="refresh()">
-						<FmIcon icon="refresh" title="Refresh"/>
+					<FmButton @click="refresh()" type="secondary">
+						<FmIcon icon="mdi-refresh" title="Refresh"/>
 					</FmButton>
-					<FmButton @click="openRelaunchDialog()" v-if="workflow?.status !== 'progress'">
-						<FmIcon icon="replay" title="Relaunch"/>
+					<FmButton @click="openRelaunchDialog()" v-if="workflow?.status !== 'progress'" type="secondary">
+						<FmIcon icon="mdi-play" title="Relaunch"/>
 					</FmButton>
-					<FmButton @click="cancelWorkflow()"
+					<FmButton @click="cancelWorkflow()" type="secondary"
 							v-if="workflow?.status === 'progress' || workflow?.status === 'init'">
-						<FmIcon icon="cancel" title="Cancel"/>
+						<FmIcon icon="mdi-cancel" title="Cancel"/>
 					</FmButton>
 
-					<FmButton @click="activeTask = null" v-if="activeTask">
-						<FmIcon icon="home" title="Show Workflow"/>
+					<FmButton @click="activeTask = null" v-if="activeTask" type="secondary">
+						<FmIcon icon="mdi-home" title="Show Workflow"/>
 					</FmButton>
 
 
@@ -153,7 +158,7 @@
 
 					<div class="task-section collapsible">
 						<h4>Payload
-							<FmIcon :icon="payloadVisible ? 'arrow_upward' : 'arrow_downward'"
+							<FmIcon :icon="payloadVisible ? 'mdi-arrow-up' : 'mdi-arrow-down'"
 									 @click="payloadVisible = !payloadVisible"/>
 						</h4>
 						<v-ace-editor
@@ -168,7 +173,7 @@
 
 					<div class="task-section collapsible">
 						<h4>Result
-							<FmIcon :icon="resultVisible ? 'arrow_upward' : 'arrow_downward'"
+							<FmIcon :icon="resultVisible ? 'mdi-arrow-up' : 'mdi-arrow-down'"
 									 @click="resultVisible = !resultVisible"/>
 						</h4>
 						<v-ace-editor
@@ -265,6 +270,8 @@ import {Presets, VuePlugin} from 'rete-vue-plugin';
 
 import WorkflowNode from "~/components/WorkflowNode.vue";
 import StatusBadge from "~/components/StatusBadge.vue";
+import {FmIcon} from "@finmars/ui";
+import {useGetNuxtLink} from "~/composables/useMeta";
 
 
 const router = useRouter();
