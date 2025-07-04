@@ -41,11 +41,11 @@
 				</div>
 
 				<div>
-					<FmButton @click="pauseWorkflow()" v-if="workflow?.status === 'progress'">
-						<FmIcon icon="pause" title="Pause"/>
+					<FmButton @click="pauseWorkflow()" v-if="workflow?.status === 'progress'" type="secondary">
+						<FmIcon icon="mdi-pause" title="Pause"/>
 					</FmButton>
-					<FmButton @click="openResumeDialog()" v-if="workflow?.status === 'wait'">
-						<FmIcon icon="play_circle" title="Resume"/>
+					<FmButton @click="openResumeDialog()" v-if="workflow?.status === 'wait'" type="secondary">
+						<FmIcon icon="mdi-play" title="Resume"/>
 					</FmButton>
 				</div>
 
