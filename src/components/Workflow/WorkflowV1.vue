@@ -187,7 +187,7 @@
 						<div class="row mt-4" v-if="!selectedTask.result">
 							<div class="col">
 								<div class="notice">
-									<FmIcon icon="info"/>
+									<FmIcon icon="mdi-information"/>
 									No task result
 								</div>
 							</div>
@@ -202,7 +202,7 @@
 								<div class="row">
 									<div class="col">
 										<div class="alert">
-											<FmIcon icon="info"/>
+											<FmIcon icon="mdi-information"/>
 
 											{{ selectedTask.result.exception }}
 										</div>

@@ -16,10 +16,10 @@
 							<slot name="modalTop" />
 						</div>
 
-						<FmButton
+						<FmIcon
 							:disabled="closingDisabled"
 							type="icon"
-							icon="close"
+							icon="mdi-close"
 							@click="cancel"
 						/>
 					</div>

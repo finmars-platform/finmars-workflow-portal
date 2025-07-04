@@ -19,7 +19,7 @@
                         <div class="toast_copy" @click="copy(props.item.text)">Click to copy</div>
                     </div>
 
-                    <FmIcon class="toast-close-button" @click="props.close" icon="close" />
+                    <FmIcon class="toast-close-button" @click="props.close" icon="mdi-close-box" />
                 </div>
 
                 <div class="toast-error">
