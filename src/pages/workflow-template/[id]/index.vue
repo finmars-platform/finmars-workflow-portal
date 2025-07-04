@@ -218,7 +218,7 @@
 				theme="monokai"
 				style="height: 300px;width: 100%;"/>
 
-			<template #footer>
+			<template #controls="{ cancel }">
 				<div class="flex flex-row justify-between">
 					<FmButton type="secondary" @click="isLaunchDialogOpen = !isLaunchDialogOpen">Cancel</FmButton>
 
