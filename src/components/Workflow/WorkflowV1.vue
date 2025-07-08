@@ -408,7 +408,7 @@ code {
 	box-shadow: none;
 	font-weight: normal;
 	font-size: 90%;
-	max-width: 40vw;
+	max-width: 50vw;
 }
 
 td {
