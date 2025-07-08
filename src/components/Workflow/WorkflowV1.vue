@@ -9,7 +9,8 @@
 				<div class="v-data-table workflow-side">
 
 					<NuxtLink :to="useGetNuxtLink(`/workflow`, $route.params)">
-						<FmIcon icon="mdi-view-list" title="Launch"/> Back
+						<FmIcon icon="mdi-view-list" title="Launch"/>
+						Back
 					</NuxtLink>
 
 					<h3>Workflow</h3>
@@ -54,7 +55,8 @@
 
 					<div v-for="task in workflow.tasks" :key="task.id">
 
-						<div @click="selectedTask = task" :class="{ active: selectedTask === task }" class="task-button" type="secondary">
+						<div @click="selectedTask = task" :class="{ active: selectedTask === task }" class="task-button"
+							 type="secondary">
 							[{{ task.id }}] {{ task.name }} &nbsp;
 							<div class="chip" :style="{ backgroundColor: getColor(task.status) }">
 								{{ task.status }}
@@ -76,7 +78,7 @@
 							Relaunch
 						</FmButton>
 						<FmButton @click="cancelWorkflow"
-								v-if="workflow.status === 'init' || workflow.status === 'progress'" type="secondary">
+								  v-if="workflow.status === 'init' || workflow.status === 'progress'" type="secondary">
 							<FmIcon icon="mdi-cancel" title="Terminate"/>
 							Cancel
 						</FmButton>
@@ -237,7 +239,6 @@
 				</div>
 
 
-
 				<template #controls="{ cancel }">
 					<div class="flex flex-row justify-between">
 						<FmButton type="secondary" @click="jsonDialog = false">Cancel</FmButton>
@@ -250,7 +251,7 @@
 </template>
 <script setup>
 
-import {FmIcon, FmButton} from "@finmars/ui"
+import {FmButton, FmIcon} from "@finmars/ui"
 import {useGetNuxtLink} from "~/composables/useMeta";
 
 const route = useRoute();
@@ -459,6 +460,7 @@ td {
 
 .task-button {
 	cursor: pointer;
+
 	&:hover {
 		opacity: .8;
 	}
@@ -483,18 +485,18 @@ h3 {
 .workflow-side {
 	border-right: 1px solid #f1f1f1;
 	padding-right: 24px;
-	flex: 3;    /* 3 parts out of 10 */
+	flex: 3; /* 3 parts out of 10 */
 	max-width: 35vw;
 }
 
 .workflow-task-side {
-	flex: 7;    /* 7 parts out of 10 */
+	flex: 7; /* 7 parts out of 10 */
 	position: relative; /* establish a new positioning context */
 }
 
 .button-group {
-	background-color: white;  /* cover what’s behind it */
-	z-index: 10;          /* stay on top of other stuff */
+	background-color: white; /* cover what’s behind it */
+	z-index: 10; /* stay on top of other stuff */
 }
 
 .workflow-content-holder {
