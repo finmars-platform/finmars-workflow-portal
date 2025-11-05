@@ -14,6 +14,7 @@ echo PROD_KEYCLOAK_URL $PROD_KEYCLOAK_URL
 echo PROD_KEYCLOAK_REALM $PROD_KEYCLOAK_REALM
 echo PROD_KEYCLOAK_CLIENT_ID $PROD_KEYCLOAK_CLIENT_ID
 echo PROD_EDITION_TYPE $PROD_EDITION_TYPE
+echo SENTRY_DSN $SENTRY_DSN
 
 # Replace env vars in .mjs files served by server
 # Exclude /node_modules folder from the search and replacement
@@ -27,7 +28,7 @@ do
   sed -i 's|==PROD_KEYCLOAK_REALM==|'${PROD_KEYCLOAK_REALM}'|g' $file
   sed -i 's|==PROD_KEYCLOAK_CLIENT_ID==|'${PROD_KEYCLOAK_CLIENT_ID}'|g' $file
   sed -i 's|==PROD_EDITION_TYPE==|'${PROD_EDITION_TYPE}'|g' $file
-
+  sed -i 's|==SENTRY_DSN==|'${SENTRY_DSN}'|g' $file
 done
 
 echo "DONE REPLACE"
