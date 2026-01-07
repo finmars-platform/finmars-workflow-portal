@@ -65,9 +65,9 @@
 		</div>
 		<template #controls="{ cancel }">
 			<div class="flex flex-row justify-between">
-				<FmButton type="text" @click="closeModal">CANCEL</FmButton>
+				<FmButton type="secondary" class="action-btn" @click="closeModal">CANCEL</FmButton>
 
-				<FmButton type="filled" @click="save">Save</FmButton>
+				<FmButton type="secondary" class="action-btn" @click="save">Save</FmButton>
 			</div>
 		</template>
 	</BaseModal>
