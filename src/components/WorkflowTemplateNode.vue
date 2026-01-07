@@ -10,9 +10,12 @@
 			class="action"
 
 		>
-			<FmButton @click.stop="onCopy" :icon="'content_copy'"/>
-			<FmButton @click.stop="onEdit" :icon="'edit'"/>
-			<FmButton @click.stop="onDelete" :icon="'delete'"/>
+			<!--			<FmButton @click.stop="onCopy" :icon="'content_copy'"/>-->
+			<button @click.stop="onCopy">Copy</button>
+			<button @click.stop="onEdit">Edit</button>
+			<button @click.stop="onDelete">Delete</button>
+			<!--			<FmButton @click.stop="onEdit" :icon="'edit'"/>-->
+			<!--			<FmButton @click.stop="onDelete" :icon="'delete'"/>-->
 		</div>
 		<div class="title" data-testid="title" @pointerdown.stop=""><span>{{ data.data.node.name }}</span></div>
 		<div class="sub-title" data-testid="sub-title" @pointerdown.stop="">{{ data.data.node.user_code }}</div>
@@ -153,7 +156,7 @@
 
 			<template #controls="{ cancel }">
 				<div class="flex flex-row justify-between">
-					<FmButton type="primary" @click="isSourceCodeDialogOpen = !isSourceCodeDialogOpen">Save</FmButton>
+					<FmButton type="secondary" class="action-btn" @click="isSourceCodeDialogOpen = !isSourceCodeDialogOpen">Save</FmButton>
 				</div>
 			</template>
 		</BaseModal>
@@ -191,6 +194,7 @@ export default defineComponent({
 		const nodeElement = ref(null)
 
 		const node = props.data
+
 
 		let startX, startY, startWidth, startHeight
 		let requestId = null
