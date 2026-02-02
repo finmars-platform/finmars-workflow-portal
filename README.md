@@ -27,6 +27,7 @@ KEYCLOAK_CLIENT_ID='finmars'
 APP_HOST='http://localhost:3000/v'
 API_HOST='https://stage.finmars.com'
 AUTH_HOST='https://stage.finmars.com/authorizer'
+EDITION_TYPE='community'
 
 OLD_APP_URL='http://0.0.0.0:8080/#!/'
 NUXT_HOST='localhost'
