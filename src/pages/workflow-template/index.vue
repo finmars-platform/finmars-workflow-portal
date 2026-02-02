@@ -45,7 +45,7 @@
 		<div class="flex mb-4">
 			<FmButton
 				class="button"
-				:type="currentPage === 1 ? 'disabled' : 'text'"
+				:type="currentPage === 1 ? 'disabled' : 'secondary'"
 				@click="openPreviousPage"
 			>
 				Previous
@@ -54,8 +54,7 @@
 			<div class="flex">
 				<div v-for="page in totalPages" :key="page">
 					<FmButton
-						v-if="totalPages > currentPage"
-						:type="currentPage === page && 'filled'"
+						:type="currentPage === page ? 'primary' : 'secondary'"
 						class="button"
 						@click="openPage(page)"
 					>
@@ -65,7 +64,7 @@
 			</div>
 			<FmButton
 				v-if="currentPage < totalPages"
-				type="text"
+				type="secondary"
 				class="button"
 				@click="openNextPage"
 			>
