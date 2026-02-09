@@ -94,37 +94,13 @@
 			</table>
 		</div>
 
-		<div class="flex mb-4">
-			<FmButton
-				class="button"
-				type="secondary"
-				v-if="totalPages !== 1"
-				@click="openPreviousPage"
-			>
-				Previous
-			</FmButton>
-
-			<div class="flex">
-				<div v-for="page in totalPages" :key="page">
-					<FmButton
-						v-if="totalPages >= currentPage"
-						:type="currentPage === page ? 'primary' : 'secondary'"
-						class="button"
-						@click="openPage(page)"
-					>
-						{{ page }}
-					</FmButton>
-				</div>
-			</div>
-			<FmButton
-				v-if="currentPage < totalPages"
-				type="secondary"
-				class="button"
-				@click="openNextPage"
-			>
-				Next
-			</FmButton>
-		</div>
+		<FmPagination
+			v-model="currentPage"
+			:with-info="true"
+			:items-per-page="pageSize"
+			:total-items="totalItems"
+			:locals="{ of: 'of', entities: 'workflows', page: 'Page' }"
+		/>
 	</div>
 </template>
 
@@ -133,7 +109,7 @@
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
 import StatusBadge from '~/components/StatusBadge.vue';
-import usePagination from "~/composables/usePagination"; // Import the component
+import { FmPagination } from "@finmars/ui";
 
 import { useRoute, useRouter } from 'vue-router'
 
@@ -152,7 +128,9 @@ definePageMeta({
 });
 
 let workflows = ref([]);
-const {currentPage, totalPages, pageSize} = usePagination();
+const pageSize = ref(8);
+const currentPage = ref(1);
+const totalItems = ref(0);
 
 function onFilterChange() {
 	// **Always** set the ref’s .value, not the ref itself
@@ -172,34 +150,10 @@ function updateUrl() {
 	})
 }
 
-function openNextPage() {
-	if (currentPage.value >= totalPages.value) return
-
-	currentPage.value += 1
-	// update URL
-	updateUrl()
-
-	getWorkflows()
-}
-
-function openPreviousPage() {
-	if (currentPage.value <= 1) return
-
-	currentPage.value -= 1
-	// update URL
-	updateUrl()
-
-	getWorkflows()
-}
-
-function openPage(value) {
-	if (currentPage.value === value) return
-	currentPage.value = value
-	// change the URL ?page=VALUE but stay on the same route
-	updateUrl()
-
-	getWorkflows()
-}
+watch(currentPage, () => {
+	updateUrl();
+	getWorkflows();
+})
 
 async function getWorkflows() {
 	const data = await useApi('workflowListLight.get', {
@@ -217,9 +171,8 @@ async function getWorkflows() {
 	});
 
 	workflows.value = data['results'];
-	totalPages.value = Math.ceil(data.count / pageSize.value);
+	totalItems.value = data.count;
 	console.log('workflows', workflows);
-	console.log('totalPages', totalPages);
 }
 
 function formatDate(dateString) {

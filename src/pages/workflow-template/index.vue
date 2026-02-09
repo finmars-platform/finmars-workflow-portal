@@ -42,35 +42,12 @@
 			</table>
 		</div>
 
-		<div class="flex mb-4">
-			<FmButton
-				class="button"
-				:type="currentPage === 1 ? 'disabled' : 'secondary'"
-				@click="openPreviousPage"
-			>
-				Previous
-			</FmButton>
-
-			<div class="flex">
-				<div v-for="page in totalPages" :key="page">
-					<FmButton
-						:type="currentPage === page ? 'primary' : 'secondary'"
-						class="button"
-						@click="openPage(page)"
-					>
-						{{ page }}
-					</FmButton>
-				</div>
-			</div>
-			<FmButton
-				v-if="currentPage < totalPages"
-				type="secondary"
-				class="button"
-				@click="openNextPage"
-			>
-				Next
-			</FmButton>
-		</div>
+		<FmPagination
+			v-model="currentPage"
+			:total-items="totalItems"
+			:items-per-page="pageSize"
+			:locals="{ of: 'of', entities: 'workflow templates', page: 'Page' }"
+		/>
 
 		<FmButton @click="goToNewWorkflowPage">Create New</FmButton>
 
@@ -90,8 +67,9 @@
 import {useGetNuxtLink} from "~/composables/useMeta";
 import {onMounted, ref} from "vue";
 import EditTemplateModal from "~/components/modals/EditTemplateModal.vue";
-import usePagination from "~/composables/usePagination";
+import { FmPagination } from "@finmars/ui";
 
+const route = useRoute();
 const router = useRouter();
 let store = useStore();
 store.init();
@@ -100,38 +78,30 @@ definePageMeta({
 });
 
 let workflowTemplates = ref([]);
-const editTemplate = ref(null)
-const {currentPage, totalPages, pageSize} = usePagination();
+const editTemplate = ref(null);
+const currentPage = ref(0);
+const pageSize = ref(8);
+const totalItems = ref(0);
 
-function openNextPage() {
-	if (currentPage.value >= totalPages.value) return
+watch(currentPage, () => {
+	updateUrl();
+	getWorkflowTemplates();
+});
 
-	currentPage.value += 1
-
-	getWorkflowTemplates()
-}
-
-function openPreviousPage() {
-	if (currentPage.value <= 1) return
-
-	currentPage.value -= 1
-
-	getWorkflowTemplates()
-}
-
-function openPage(value) {
-	if (currentPage.value === value) return
-	currentPage.value = value
-
-	getWorkflowTemplates()
+function updateUrl() {
+	router.replace({
+		query: {
+			page: currentPage.value,
+		},
+	});
 }
 
 async function getWorkflowTemplates() {
-	const data = await useApi('workflowTemplateList.get', {
-		filters: {page_size: pageSize.value, page: currentPage.value}
+	const data = await useApi("workflowTemplateList.get", {
+		filters: { page_size: pageSize.value, page: currentPage.value },
 	});
 	workflowTemplates.value = data['results'];
-	totalPages.value = Math.ceil(data.count / pageSize.value);
+	totalItems.value = data.count;
 	console.log('workflowTemplates', workflowTemplates);
 }
 
@@ -187,7 +157,12 @@ async function deleteWorkflowTemplate(templateId) {
 
 
 onMounted(async () => {
-	await getWorkflowTemplates();
+	const p = parseInt(route.query.page || "");
+	if (!isNaN(p) && p > 0) {
+		currentPage.value = p;
+	} else {
+		await getWorkflowTemplates();
+	}
 });
 
 </script>
