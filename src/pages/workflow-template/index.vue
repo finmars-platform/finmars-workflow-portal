@@ -65,7 +65,7 @@
 
 <script setup>
 import {useGetNuxtLink} from "~/composables/useMeta";
-import {onMounted, ref} from "vue";
+import {ref, computed} from "vue";
 import EditTemplateModal from "~/components/modals/EditTemplateModal.vue";
 import { FmPagination } from "@finmars/ui";
 
@@ -77,16 +77,23 @@ definePageMeta({
 	middleware: "auth",
 });
 
-let workflowTemplates = ref([]);
 const editTemplate = ref(null);
-const currentPage = ref(0);
+const currentPage = ref(parseInt(route.query.page) || 1);
 const pageSize = ref(8);
-const totalItems = ref(0);
 
-watch(currentPage, () => {
-	updateUrl();
-	getWorkflowTemplates();
-});
+const { data: apiResult } = await useAsyncData(
+	() =>
+		useApi("workflowTemplateList.get", {
+			filters: { page_size: pageSize.value, page: currentPage.value },
+		}),
+	{
+		watch: [currentPage, pageSize],
+	},
+);
+const workflowTemplates = computed(() => apiResult.value?.results || []);
+const totalItems = computed(() => apiResult.value?.count ?? 0);
+
+watch(currentPage, () => updateUrl());
 
 function updateUrl() {
 	router.replace({
@@ -94,15 +101,6 @@ function updateUrl() {
 			page: currentPage.value,
 		},
 	});
-}
-
-async function getWorkflowTemplates() {
-	const data = await useApi("workflowTemplateList.get", {
-		filters: { page_size: pageSize.value, page: currentPage.value },
-	});
-	workflowTemplates.value = data['results'];
-	totalItems.value = data.count;
-	console.log('workflowTemplates', workflowTemplates);
 }
 
 function formatDate(dateString) {
@@ -154,17 +152,6 @@ async function deleteWorkflowTemplate(templateId) {
 
 	getWorkflowTemplates();
 }
-
-
-onMounted(async () => {
-	const p = parseInt(route.query.page || "");
-	if (!isNaN(p) && p > 0) {
-		currentPage.value = p;
-	} else {
-		await getWorkflowTemplates();
-	}
-});
-
 </script>
 
 <style scoped lang="postcss">

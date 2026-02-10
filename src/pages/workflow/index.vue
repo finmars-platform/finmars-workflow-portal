@@ -107,15 +107,16 @@
 <script setup>
 
 import {useGetNuxtLink} from "~/composables/useMeta";
-import {onMounted, ref} from "vue";
+import { ref, computed } from "vue";
 import StatusBadge from '~/components/StatusBadge.vue';
 import { FmPagination } from "@finmars/ui";
 
-import { useRoute, useRouter } from 'vue-router'
-
 const route = useRoute()
+const routeQuery = computed(() => route.query)
 const router = useRouter()
 
+const currentPage = ref(parseInt(route.query.page) || 1)
+const pageSize = ref(8)
 const filterStatus = ref(route.query.status || '')
 const filterUserCode = ref(route.query.user_code || '')
 const filterDateAfter = ref(route.query.created_at_after  || '')
@@ -127,16 +128,38 @@ definePageMeta({
 	middleware: "auth",
 });
 
-let workflows = ref([]);
-const pageSize = ref(8);
-const currentPage = ref(1);
-const totalItems = ref(0);
+const { data: apiResult } = await useAsyncData(
+	`workflow-${route.query}`,
+	() =>
+		useApi("workflowListLight.get", {
+			filters: {
+				page_size: pageSize.value,
+				page: currentPage.value,
+
+				// only send if non-empty
+				...(filterStatus.value && { status: filterStatus.value }),
+				...(filterUserCode.value && {
+					user_code: filterUserCode.value,
+				}),
+				...(filterDateAfter.value && {
+					created_at_after: filterDateAfter.value,
+				}),
+				...(filterDateBefore.value && {
+					created_at_before: filterDateBefore.value,
+				}),
+			},
+		}),
+	{
+		watch: [ routeQuery ],
+	}
+)
+const workflows = computed(() => apiResult.value?.results || [])
+const totalItems = computed(() => apiResult.value?.count || 0)
 
 function onFilterChange() {
 	// **Always** set the ref’s .value, not the ref itself
 	currentPage.value = 1
 	updateUrl()
-	getWorkflows()
 }
 
 function updateUrl() {
@@ -152,28 +175,7 @@ function updateUrl() {
 
 watch(currentPage, () => {
 	updateUrl();
-	getWorkflows();
 })
-
-async function getWorkflows() {
-	const data = await useApi('workflowListLight.get', {
-		filters: {
-			page_size: pageSize.value,
-			page: currentPage.value,
-
-			// only send if non-empty
-			...(filterStatus.value && { status: filterStatus.value }),
-			...(filterUserCode.value && { user_code: filterUserCode.value }),
-			...(filterDateAfter.value  && { created_at_after:  filterDateAfter.value  }),
-			...(filterDateBefore.value && { created_at_before: filterDateBefore.value })
-
-		}
-	});
-
-	workflows.value = data['results'];
-	totalItems.value = data.count;
-	console.log('workflows', workflows);
-}
 
 function formatDate(dateString) {
 	// Format date in a more readable way
@@ -189,20 +191,6 @@ function getStatusClass(status) {
 		default: return 'status-default';
 	}
 }
-
-onMounted(async () => {
-
-	const p = parseInt(route.query.page || '')
-	if (!isNaN(p) && p > 0) {
-		currentPage.value = p
-	}
-
-	filterStatus.value = route.query.status || ''
-
-
-	await getWorkflows();
-});
-
 </script>
 
 <style scoped lang="postcss">
