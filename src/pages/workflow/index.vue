@@ -94,52 +94,29 @@
 			</table>
 		</div>
 
-		<div class="flex mb-4">
-			<FmButton
-				class="button"
-				type="secondary"
-				v-if="totalPages !== 1"
-				@click="openPreviousPage"
-			>
-				Previous
-			</FmButton>
-
-			<div class="flex">
-				<div v-for="page in totalPages" :key="page">
-					<FmButton
-						v-if="totalPages >= currentPage"
-						:type="currentPage === page ? 'primary' : 'secondary'"
-						class="button"
-						@click="openPage(page)"
-					>
-						{{ page }}
-					</FmButton>
-				</div>
-			</div>
-			<FmButton
-				v-if="currentPage < totalPages"
-				type="secondary"
-				class="button"
-				@click="openNextPage"
-			>
-				Next
-			</FmButton>
-		</div>
+		<FmPagination
+			v-model="currentPage"
+			:with-info="true"
+			:items-per-page="pageSize"
+			:total-items="totalItems"
+			:locals="{ of: 'of', entities: 'workflows', page: 'Page' }"
+		/>
 	</div>
 </template>
 
 <script setup>
 
 import {useGetNuxtLink} from "~/composables/useMeta";
-import {onMounted, ref} from "vue";
+import { ref, computed } from "vue";
 import StatusBadge from '~/components/StatusBadge.vue';
-import usePagination from "~/composables/usePagination"; // Import the component
-
-import { useRoute, useRouter } from 'vue-router'
+import { FmPagination } from "@finmars/ui";
 
 const route = useRoute()
+const routeQuery = computed(() => route.query)
 const router = useRouter()
 
+const currentPage = ref(parseInt(route.query.page) || 1)
+const pageSize = ref(8)
 const filterStatus = ref(route.query.status || '')
 const filterUserCode = ref(route.query.user_code || '')
 const filterDateAfter = ref(route.query.created_at_after  || '')
@@ -151,14 +128,38 @@ definePageMeta({
 	middleware: "auth",
 });
 
-let workflows = ref([]);
-const {currentPage, totalPages, pageSize} = usePagination();
+const { data: apiResult } = await useAsyncData(
+	`workflow-${route.query}`,
+	() =>
+		useApi("workflowListLight.get", {
+			filters: {
+				page_size: pageSize.value,
+				page: currentPage.value,
+
+				// only send if non-empty
+				...(filterStatus.value && { status: filterStatus.value }),
+				...(filterUserCode.value && {
+					user_code: filterUserCode.value,
+				}),
+				...(filterDateAfter.value && {
+					created_at_after: filterDateAfter.value,
+				}),
+				...(filterDateBefore.value && {
+					created_at_before: filterDateBefore.value,
+				}),
+			},
+		}),
+	{
+		watch: [ routeQuery ],
+	}
+)
+const workflows = computed(() => apiResult.value?.results || [])
+const totalItems = computed(() => apiResult.value?.count || 0)
 
 function onFilterChange() {
 	// **Always** set the ref’s .value, not the ref itself
 	currentPage.value = 1
 	updateUrl()
-	getWorkflows()
 }
 
 function updateUrl() {
@@ -172,55 +173,9 @@ function updateUrl() {
 	})
 }
 
-function openNextPage() {
-	if (currentPage.value >= totalPages.value) return
-
-	currentPage.value += 1
-	// update URL
-	updateUrl()
-
-	getWorkflows()
-}
-
-function openPreviousPage() {
-	if (currentPage.value <= 1) return
-
-	currentPage.value -= 1
-	// update URL
-	updateUrl()
-
-	getWorkflows()
-}
-
-function openPage(value) {
-	if (currentPage.value === value) return
-	currentPage.value = value
-	// change the URL ?page=VALUE but stay on the same route
-	updateUrl()
-
-	getWorkflows()
-}
-
-async function getWorkflows() {
-	const data = await useApi('workflowListLight.get', {
-		filters: {
-			page_size: pageSize.value,
-			page: currentPage.value,
-
-			// only send if non-empty
-			...(filterStatus.value && { status: filterStatus.value }),
-			...(filterUserCode.value && { user_code: filterUserCode.value }),
-			...(filterDateAfter.value  && { created_at_after:  filterDateAfter.value  }),
-			...(filterDateBefore.value && { created_at_before: filterDateBefore.value })
-
-		}
-	});
-
-	workflows.value = data['results'];
-	totalPages.value = Math.ceil(data.count / pageSize.value);
-	console.log('workflows', workflows);
-	console.log('totalPages', totalPages);
-}
+watch(currentPage, () => {
+	updateUrl();
+})
 
 function formatDate(dateString) {
 	// Format date in a more readable way
@@ -236,20 +191,6 @@ function getStatusClass(status) {
 		default: return 'status-default';
 	}
 }
-
-onMounted(async () => {
-
-	const p = parseInt(route.query.page || '')
-	if (!isNaN(p) && p > 0) {
-		currentPage.value = p
-	}
-
-	filterStatus.value = route.query.status || ''
-
-
-	await getWorkflows();
-});
-
 </script>
 
 <style scoped lang="postcss">
